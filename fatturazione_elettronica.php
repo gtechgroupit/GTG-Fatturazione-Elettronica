@@ -22,21 +22,27 @@ define('FATTURAZIONE_ELETTRONICA_MODULE_PATH', __DIR__);
 /**
  * Registra il modulo in Perfex CRM
  */
-register_module([
-    'module_name'          => FATTURAZIONE_ELETTRONICA_MODULE_NAME,
-    'description'          => 'Modulo per la fatturazione elettronica italiana tramite SDI (Sistema di Interscambio) dell\'Agenzia delle Entrate. Supporta invio e ricezione fatture B2B/B2C/PA.',
-    'author'               => 'GTech Group IT',
-    'author_uri'           => 'https://gtechgroup.it',
-    'version'              => FATTURAZIONE_ELETTRONICA_MODULE_VERSION,
-    'requires_at_least'    => '3.2',
-    'tested_up_to'         => '3.4',
-    'requires_php'         => '8.3',
-    'url_documentation'    => '',
-    'url_changelog'        => '',
-]);
+if (function_exists('register_module')) {
+    register_module([
+        'module_name'          => FATTURAZIONE_ELETTRONICA_MODULE_NAME,
+        'description'          => 'Modulo per la fatturazione elettronica italiana tramite SDI (Sistema di Interscambio) dell\'Agenzia delle Entrate. Supporta invio e ricezione fatture B2B/B2C/PA.',
+        'author'               => 'GTech Group IT',
+        'author_uri'           => 'https://gtechgroup.it',
+        'version'              => FATTURAZIONE_ELETTRONICA_MODULE_VERSION,
+        'requires_at_least'    => '3.2',
+        'tested_up_to'         => '3.4',
+        'requires_php'         => '8.3',
+        'url_documentation'    => '',
+        'url_changelog'        => '',
+    ]);
+}
 
 // Percorsi del modulo
-define('FE_ASSETS_PATH', module_dir_url(FATTURAZIONE_ELETTRONICA_MODULE_NAME, 'assets/'));
+if (function_exists('module_dir_url')) {
+    define('FE_ASSETS_PATH', module_dir_url(FATTURAZIONE_ELETTRONICA_MODULE_NAME, 'assets/'));
+} else {
+    define('FE_ASSETS_PATH', '');
+}
 define('FE_VIEWS_PATH', FATTURAZIONE_ELETTRONICA_MODULE_PATH . '/views/');
 define('FE_LIBRARIES_PATH', FATTURAZIONE_ELETTRONICA_MODULE_PATH . '/libraries/');
 
@@ -96,28 +102,30 @@ define('FE_RF19', 'RF19'); // Forfettario
 /**
  * Registra il modulo al caricamento
  */
-hooks()->add_action('app_init', 'fatturazione_elettronica_init_module');
-hooks()->add_action('admin_init', 'fatturazione_elettronica_admin_init');
-hooks()->add_action('app_admin_head', 'fatturazione_elettronica_add_head_css');
-hooks()->add_action('app_admin_footer', 'fatturazione_elettronica_add_footer_js');
+if (function_exists('hooks')) {
+    hooks()->add_action('app_init', 'fatturazione_elettronica_init_module');
+    hooks()->add_action('admin_init', 'fatturazione_elettronica_admin_init');
+    hooks()->add_action('app_admin_head', 'fatturazione_elettronica_add_head_css');
+    hooks()->add_action('app_admin_footer', 'fatturazione_elettronica_add_footer_js');
 
-// Hook per le fatture
-hooks()->add_action('after_invoice_added', 'fatturazione_elettronica_after_invoice_added');
-hooks()->add_action('after_invoice_updated', 'fatturazione_elettronica_after_invoice_updated');
-hooks()->add_action('invoice_html_pdf_data', 'fatturazione_elettronica_invoice_pdf_data');
+    // Hook per le fatture
+    hooks()->add_action('after_invoice_added', 'fatturazione_elettronica_after_invoice_added');
+    hooks()->add_action('after_invoice_updated', 'fatturazione_elettronica_after_invoice_updated');
+    hooks()->add_action('invoice_html_pdf_data', 'fatturazione_elettronica_invoice_pdf_data');
 
-// Hook per le note di credito
-hooks()->add_action('after_credit_note_added', 'fatturazione_elettronica_after_credit_note_added');
-hooks()->add_action('after_credit_note_updated', 'fatturazione_elettronica_after_credit_note_updated');
+    // Hook per le note di credito
+    hooks()->add_action('after_credit_note_added', 'fatturazione_elettronica_after_credit_note_added');
+    hooks()->add_action('after_credit_note_updated', 'fatturazione_elettronica_after_credit_note_updated');
 
-// Menu administration
-hooks()->add_action('admin_init', 'fatturazione_elettronica_register_menu');
+    // Menu administration
+    hooks()->add_action('admin_init', 'fatturazione_elettronica_register_menu');
 
-// Permessi
-hooks()->add_action('admin_init', 'fatturazione_elettronica_register_permissions');
+    // Permessi
+    hooks()->add_action('admin_init', 'fatturazione_elettronica_register_permissions');
 
-// Cron job per controllo notifiche SDI
-hooks()->add_action('cron_job', 'fatturazione_elettronica_cron');
+    // Cron job per controllo notifiche SDI
+    hooks()->add_action('cron_job', 'fatturazione_elettronica_cron');
+}
 
 /**
  * Inizializzazione del modulo
@@ -474,11 +482,17 @@ function fatturazione_elettronica_deactivate()
 /**
  * Info sul modulo
  */
-register_activation_hook(FATTURAZIONE_ELETTRONICA_MODULE_NAME, 'fatturazione_elettronica_activate');
-register_deactivation_hook(FATTURAZIONE_ELETTRONICA_MODULE_NAME, 'fatturazione_elettronica_deactivate');
+if (function_exists('register_activation_hook')) {
+    register_activation_hook(FATTURAZIONE_ELETTRONICA_MODULE_NAME, 'fatturazione_elettronica_activate');
+}
+if (function_exists('register_deactivation_hook')) {
+    register_deactivation_hook(FATTURAZIONE_ELETTRONICA_MODULE_NAME, 'fatturazione_elettronica_deactivate');
+}
 
 // Registra il modulo per gli aggiornamenti automatici
-hooks()->add_filter('module_' . FATTURAZIONE_ELETTRONICA_MODULE_NAME . '_action_links', function ($actions) {
-    $actions[] = '<a href="' . admin_url('fatturazione_elettronica/impostazioni') . '">' . _l('settings') . '</a>';
-    return $actions;
-});
+if (function_exists('hooks')) {
+    hooks()->add_filter('module_' . FATTURAZIONE_ELETTRONICA_MODULE_NAME . '_action_links', function ($actions) {
+        $actions[] = '<a href="' . admin_url('fatturazione_elettronica/impostazioni') . '">' . _l('settings') . '</a>';
+        return $actions;
+    });
+}
