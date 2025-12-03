@@ -430,7 +430,6 @@
 
 <?php init_tail(); ?>
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
 $(function() {
     // Test connessione
@@ -450,47 +449,49 @@ $(function() {
         });
     });
 
-    // Grafico andamento mensile
+    // Grafico andamento mensile - usa Chart.js incluso in Perfex (v2.x)
     var ctx = document.getElementById('chartAndamento');
-    if (ctx) {
-        new Chart(ctx.getContext('2d'), {
-            type: 'line',
-            data: {
-                labels: <?php echo json_encode($chart_labels ?? ['Gen', 'Feb', 'Mar', 'Apr', 'Mag', 'Giu', 'Lug', 'Ago', 'Set', 'Ott', 'Nov', 'Dic']); ?>,
-                datasets: [{
-                    label: '<?php echo _l("fe_fatture_inviate"); ?>',
-                    data: <?php echo json_encode($chart_data['inviate'] ?? [0,0,0,0,0,0,0,0,0,0,0,0]); ?>,
-                    borderColor: 'rgb(132, 197, 41)',
-                    backgroundColor: 'rgba(132, 197, 41, 0.1)',
-                    tension: 0.3,
-                    fill: true
-                }, {
-                    label: '<?php echo _l("fe_fatture_ricevute"); ?>',
-                    data: <?php echo json_encode($chart_data['ricevute'] ?? [0,0,0,0,0,0,0,0,0,0,0,0]); ?>,
-                    borderColor: 'rgb(23, 162, 184)',
-                    backgroundColor: 'rgba(23, 162, 184, 0.1)',
-                    tension: 0.3,
-                    fill: true
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
+    if (ctx && typeof Chart !== 'undefined') {
+        try {
+            new Chart(ctx.getContext('2d'), {
+                type: 'line',
+                data: {
+                    labels: <?php echo json_encode($chart_labels ?? ['Gen', 'Feb', 'Mar', 'Apr', 'Mag', 'Giu', 'Lug', 'Ago', 'Set', 'Ott', 'Nov', 'Dic']); ?>,
+                    datasets: [{
+                        label: '<?php echo _l("fe_fatture_inviate"); ?>',
+                        data: <?php echo json_encode($chart_data['inviate'] ?? [0,0,0,0,0,0,0,0,0,0,0,0]); ?>,
+                        borderColor: 'rgb(132, 197, 41)',
+                        backgroundColor: 'rgba(132, 197, 41, 0.1)',
+                        lineTension: 0.3,
+                        fill: true
+                    }, {
+                        label: '<?php echo _l("fe_fatture_ricevute"); ?>',
+                        data: <?php echo json_encode($chart_data['ricevute'] ?? [0,0,0,0,0,0,0,0,0,0,0,0]); ?>,
+                        borderColor: 'rgb(23, 162, 184)',
+                        backgroundColor: 'rgba(23, 162, 184, 0.1)',
+                        lineTension: 0.3,
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
                     legend: {
                         position: 'bottom'
-                    }
-                },
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        ticks: {
-                            stepSize: 1
-                        }
+                    },
+                    scales: {
+                        yAxes: [{
+                            ticks: {
+                                beginAtZero: true,
+                                stepSize: 1
+                            }
+                        }]
                     }
                 }
-            }
-        });
+            });
+        } catch(e) {
+            console.log('Chart error:', e);
+        }
     }
 });
 </script>
