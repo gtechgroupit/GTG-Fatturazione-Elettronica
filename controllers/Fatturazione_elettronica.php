@@ -20,9 +20,40 @@ class Fatturazione_elettronica extends AdminController
         $this->load->model('fatturazione_elettronica/Fatturazione_elettronica_model');
         $this->load->helper('fatturazione_elettronica/fatturazione_elettronica');
 
+        // Carica la lingua del modulo
+        $this->_load_language();
+
         // Verifica permessi
         if (!has_permission('fatturazione_elettronica', '', 'view') && !is_admin()) {
             access_denied('fatturazione_elettronica');
+        }
+    }
+
+    /**
+     * Carica i file di lingua del modulo
+     */
+    private function _load_language()
+    {
+        // Determina la lingua attiva
+        $language = get_option('active_language') ?: 'italian';
+
+        // Percorso del file di lingua
+        $module_path = FCPATH . 'modules/fatturazione_elettronica/';
+        $lang_path = $module_path . 'language/' . $language . '/fatturazione_elettronica_lang.php';
+
+        // Se la lingua richiesta non esiste, usa italiano
+        if (!file_exists($lang_path)) {
+            $lang_path = $module_path . 'language/italian/fatturazione_elettronica_lang.php';
+        }
+
+        // Carica il file di lingua direttamente
+        if (file_exists($lang_path)) {
+            include($lang_path);
+            if (isset($lang) && is_array($lang)) {
+                foreach ($lang as $key => $val) {
+                    $this->lang->language[$key] = $val;
+                }
+            }
         }
     }
 

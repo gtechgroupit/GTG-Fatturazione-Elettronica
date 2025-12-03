@@ -124,10 +124,8 @@ function fatturazione_elettronica_init_hook()
     // Carica l'helper
     $CI->load->helper(FATTURAZIONE_ELETTRONICA_MODULE_NAME . '/fatturazione_elettronica');
 
-    // Carica il file della lingua
-    if (function_exists('load_module_language')) {
-        load_module_language(FATTURAZIONE_ELETTRONICA_MODULE_NAME);
-    }
+    // Carica il file della lingua - prima prova con load_module_language, poi direttamente
+    fatturazione_elettronica_load_language();
 
     // Registra le autoload per le librerie
     spl_autoload_register(function ($class) {
@@ -146,6 +144,41 @@ function fatturazione_elettronica_init_hook()
             require $file;
         }
     });
+}
+
+/**
+ * Carica i file di lingua del modulo
+ */
+function fatturazione_elettronica_load_language()
+{
+    $CI = &get_instance();
+
+    // Determina la lingua attiva
+    $language = 'italian'; // Default
+    if (function_exists('get_option')) {
+        $active_lang = get_option('active_language');
+        if ($active_lang) {
+            $language = $active_lang;
+        }
+    }
+
+    // Percorso del file di lingua
+    $lang_path = FATTURAZIONE_ELETTRONICA_MODULE_PATH . '/language/' . $language . '/fatturazione_elettronica_lang.php';
+
+    // Se la lingua richiesta non esiste, usa italiano
+    if (!file_exists($lang_path)) {
+        $lang_path = FATTURAZIONE_ELETTRONICA_MODULE_PATH . '/language/italian/fatturazione_elettronica_lang.php';
+    }
+
+    // Carica il file di lingua direttamente
+    if (file_exists($lang_path)) {
+        include($lang_path);
+        if (isset($lang) && is_array($lang)) {
+            foreach ($lang as $key => $val) {
+                $CI->lang->language[$key] = $val;
+            }
+        }
+    }
 }
 
 /**
@@ -199,7 +232,8 @@ if (function_exists('register_deactivation_hook')) {
  */
 function fatturazione_elettronica_app_init()
 {
-    // Placeholder per future inizializzazioni globali
+    // Carica la lingua se non ancora caricata
+    fatturazione_elettronica_load_language();
 }
 
 /**
@@ -207,6 +241,9 @@ function fatturazione_elettronica_app_init()
  */
 function fatturazione_elettronica_admin_init()
 {
+    // Carica la lingua
+    fatturazione_elettronica_load_language();
+
     // Aggiungi i campi personalizzati per i clienti (Codice Destinatario, PEC)
     if (function_exists('is_admin') && is_admin() && function_exists('hooks')) {
         hooks()->add_action('after_customer_billing_and_shipping_fields', 'fatturazione_elettronica_customer_fields');
@@ -245,6 +282,9 @@ function fatturazione_elettronica_register_menu()
     if (!function_exists('has_permission') || !function_exists('is_admin')) {
         return;
     }
+
+    // Carica la lingua prima di usare i label
+    fatturazione_elettronica_load_language();
 
     $CI = &get_instance();
 
