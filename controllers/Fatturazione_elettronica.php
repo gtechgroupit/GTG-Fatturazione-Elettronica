@@ -64,29 +64,37 @@ class Fatturazione_elettronica extends AdminController
      */
     protected function get_invoices_to_import()
     {
-        // Ottieni gli ID fatture già importate
-        $this->db->select('invoice_id');
-        $this->db->from(db_prefix() . 'fe_fatture_attive');
-        $this->db->where('invoice_id IS NOT NULL');
-        $existing = $this->db->get()->result();
+        try {
+            $existing_ids = [];
 
-        $existing_ids = array_map(function ($f) {
-            return $f->invoice_id;
-        }, $existing);
+            // Ottieni gli ID fatture già importate (se la tabella esiste)
+            if ($this->db->table_exists(db_prefix() . 'fe_fatture_attive')) {
+                $this->db->select('invoice_id');
+                $this->db->from(db_prefix() . 'fe_fatture_attive');
+                $this->db->where('invoice_id IS NOT NULL');
+                $existing = $this->db->get()->result();
 
-        // Ottieni fatture non ancora importate
-        $this->db->select('id, number, clientid, total, status, date');
-        $this->db->from(db_prefix() . 'invoices');
-        $this->db->where_in('status', [2, 3]); // Solo fatture inviate o pagate
+                $existing_ids = array_map(function ($f) {
+                    return $f->invoice_id;
+                }, $existing);
+            }
 
-        if (!empty($existing_ids)) {
-            $this->db->where_not_in('id', $existing_ids);
+            // Ottieni fatture non ancora importate
+            $this->db->select('id, number, clientid, total, status, date');
+            $this->db->from(db_prefix() . 'invoices');
+            $this->db->where_in('status', [2, 3]); // Solo fatture inviate o pagate
+
+            if (!empty($existing_ids)) {
+                $this->db->where_not_in('id', $existing_ids);
+            }
+
+            $this->db->order_by('date', 'DESC');
+            $this->db->limit(50);
+
+            return $this->db->get()->result();
+        } catch (Exception $e) {
+            return [];
         }
-
-        $this->db->order_by('date', 'DESC');
-        $this->db->limit(50);
-
-        return $this->db->get()->result();
     }
 
     /**

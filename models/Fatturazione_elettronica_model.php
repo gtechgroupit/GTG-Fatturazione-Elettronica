@@ -55,20 +55,32 @@ class Fatturazione_elettronica_model extends App_Model
      */
     public function get_fatture_attive($filters = [])
     {
-        if (!empty($filters['stato'])) {
-            $this->db->where('stato', $filters['stato']);
-        }
+        try {
+            if (!$this->db->table_exists(db_prefix() . 'fe_fatture_attive')) {
+                return [];
+            }
 
-        if (!empty($filters['from_date'])) {
-            $this->db->where('created_at >=', $filters['from_date']);
-        }
+            if (!empty($filters['stato'])) {
+                $this->db->where('stato', $filters['stato']);
+            }
 
-        if (!empty($filters['to_date'])) {
-            $this->db->where('created_at <=', $filters['to_date']);
-        }
+            if (!empty($filters['from_date'])) {
+                $this->db->where('created_at >=', $filters['from_date']);
+            }
 
-        $this->db->order_by('created_at', 'DESC');
-        return $this->db->get(db_prefix() . 'fe_fatture_attive')->result();
+            if (!empty($filters['to_date'])) {
+                $this->db->where('created_at <=', $filters['to_date']);
+            }
+
+            if (!empty($filters['limit'])) {
+                $this->db->limit($filters['limit']);
+            }
+
+            $this->db->order_by('created_at', 'DESC');
+            return $this->db->get(db_prefix() . 'fe_fatture_attive')->result();
+        } catch (Exception $e) {
+            return [];
+        }
     }
 
     /**
@@ -427,28 +439,40 @@ class Fatturazione_elettronica_model extends App_Model
      */
     public function get_fatture_passive($filters = [])
     {
-        if (!empty($filters['stato'])) {
-            $this->db->where('stato', $filters['stato']);
-        }
+        try {
+            if (!$this->db->table_exists(db_prefix() . 'fe_fatture_passive')) {
+                return [];
+            }
 
-        if (!empty($filters['from_date'])) {
-            $this->db->where('data_documento >=', $filters['from_date']);
-        }
+            if (!empty($filters['stato'])) {
+                $this->db->where('stato', $filters['stato']);
+            }
 
-        if (!empty($filters['to_date'])) {
-            $this->db->where('data_documento <=', $filters['to_date']);
-        }
+            if (!empty($filters['from_date'])) {
+                $this->db->where('data_documento >=', $filters['from_date']);
+            }
 
-        if (isset($filters['letto'])) {
-            $this->db->where('letto', $filters['letto']);
-        }
+            if (!empty($filters['to_date'])) {
+                $this->db->where('data_documento <=', $filters['to_date']);
+            }
 
-        if (isset($filters['archiviato'])) {
-            $this->db->where('archiviato', $filters['archiviato']);
-        }
+            if (isset($filters['letto'])) {
+                $this->db->where('letto', $filters['letto']);
+            }
 
-        $this->db->order_by('data_ricezione', 'DESC');
-        return $this->db->get(db_prefix() . 'fe_fatture_passive')->result();
+            if (isset($filters['archiviato'])) {
+                $this->db->where('archiviato', $filters['archiviato']);
+            }
+
+            if (!empty($filters['limit'])) {
+                $this->db->limit($filters['limit']);
+            }
+
+            $this->db->order_by('data_ricezione', 'DESC');
+            return $this->db->get(db_prefix() . 'fe_fatture_passive')->result();
+        } catch (Exception $e) {
+            return [];
+        }
     }
 
     /**
@@ -721,43 +745,54 @@ class Fatturazione_elettronica_model extends App_Model
             ],
         ];
 
-        // Statistiche fatture attive
-        $this->db->select('stato, COUNT(*) as count');
-        $this->db->group_by('stato');
-        $result = $this->db->get(db_prefix() . 'fe_fatture_attive')->result();
-
-        foreach ($result as $row) {
-            $stats['attive']['totale'] += $row->count;
-
-            switch ($row->stato) {
-                case FE_STATO_BOZZA:
-                    $stats['attive']['bozza'] = $row->count;
-                    break;
-                case FE_STATO_GENERATA:
-                    $stats['attive']['generate'] = $row->count;
-                    break;
-                case FE_STATO_INVIATA:
-                    $stats['attive']['inviate'] = $row->count;
-                    break;
-                case FE_STATO_CONSEGNATA:
-                case FE_STATO_ACCETTATA:
-                    $stats['attive']['consegnate'] += $row->count;
-                    break;
-                case FE_STATO_SCARTATA:
-                case FE_STATO_RIFIUTATA:
-                    $stats['attive']['errori'] += $row->count;
-                    break;
+        try {
+            // Verifica se le tabelle esistono
+            if (!$this->db->table_exists(db_prefix() . 'fe_fatture_attive')) {
+                return $stats;
             }
-        }
 
-        // Statistiche fatture passive
-        $this->db->select('COUNT(*) as totale, SUM(CASE WHEN letto = 0 THEN 1 ELSE 0 END) as non_lette, SUM(CASE WHEN expense_id IS NULL AND archiviato = 0 THEN 1 ELSE 0 END) as da_processare');
-        $result = $this->db->get(db_prefix() . 'fe_fatture_passive')->row();
+            // Statistiche fatture attive
+            $this->db->select('stato, COUNT(*) as count');
+            $this->db->group_by('stato');
+            $result = $this->db->get(db_prefix() . 'fe_fatture_attive')->result();
 
-        if ($result) {
-            $stats['passive']['totale'] = (int)$result->totale;
-            $stats['passive']['non_lette'] = (int)$result->non_lette;
-            $stats['passive']['da_processare'] = (int)$result->da_processare;
+            foreach ($result as $row) {
+                $stats['attive']['totale'] += $row->count;
+
+                switch ($row->stato) {
+                    case FE_STATO_BOZZA:
+                        $stats['attive']['bozza'] = $row->count;
+                        break;
+                    case FE_STATO_GENERATA:
+                        $stats['attive']['generate'] = $row->count;
+                        break;
+                    case FE_STATO_INVIATA:
+                        $stats['attive']['inviate'] = $row->count;
+                        break;
+                    case FE_STATO_CONSEGNATA:
+                    case FE_STATO_ACCETTATA:
+                        $stats['attive']['consegnate'] += $row->count;
+                        break;
+                    case FE_STATO_SCARTATA:
+                    case FE_STATO_RIFIUTATA:
+                        $stats['attive']['errori'] += $row->count;
+                        break;
+                }
+            }
+
+            // Statistiche fatture passive
+            if ($this->db->table_exists(db_prefix() . 'fe_fatture_passive')) {
+                $this->db->select('COUNT(*) as totale, SUM(CASE WHEN letto = 0 THEN 1 ELSE 0 END) as non_lette, SUM(CASE WHEN expense_id IS NULL AND archiviato = 0 THEN 1 ELSE 0 END) as da_processare');
+                $result = $this->db->get(db_prefix() . 'fe_fatture_passive')->row();
+
+                if ($result) {
+                    $stats['passive']['totale'] = (int)$result->totale;
+                    $stats['passive']['non_lette'] = (int)$result->non_lette;
+                    $stats['passive']['da_processare'] = (int)$result->da_processare;
+                }
+            }
+        } catch (Exception $e) {
+            log_activity('Fatturazione Elettronica - Errore get_statistics: ' . $e->getMessage());
         }
 
         return $stats;
@@ -772,9 +807,17 @@ class Fatturazione_elettronica_model extends App_Model
      */
     public function get_logs($limit = 50, $offset = 0)
     {
-        $this->db->order_by('created_at', 'DESC');
-        $this->db->limit($limit, $offset);
-        return $this->db->get(db_prefix() . 'fe_log')->result();
+        try {
+            if (!$this->db->table_exists(db_prefix() . 'fe_log')) {
+                return [];
+            }
+
+            $this->db->order_by('created_at', 'DESC');
+            $this->db->limit($limit, $offset);
+            return $this->db->get(db_prefix() . 'fe_log')->result();
+        } catch (Exception $e) {
+            return [];
+        }
     }
 
     /**
@@ -790,26 +833,39 @@ class Fatturazione_elettronica_model extends App_Model
             'ricevute' => array_fill(0, 12, 0),
         ];
 
-        // Fatture inviate (attive)
-        $this->db->select('MONTH(data_invio) as mese, COUNT(*) as count');
-        $this->db->where('YEAR(data_invio)', $anno);
-        $this->db->where('data_invio IS NOT NULL');
-        $this->db->group_by('MONTH(data_invio)');
-        $result = $this->db->get(db_prefix() . 'fe_fatture_attive')->result();
+        try {
+            // Verifica se la tabella esiste
+            if (!$this->db->table_exists(db_prefix() . 'fe_fatture_attive')) {
+                return $stats;
+            }
 
-        foreach ($result as $row) {
-            $stats['inviate'][$row->mese - 1] = (int)$row->count;
-        }
+            // Fatture inviate (attive)
+            $this->db->select('MONTH(data_invio) as mese, COUNT(*) as count');
+            $this->db->where('YEAR(data_invio)', $anno);
+            $this->db->where('data_invio IS NOT NULL');
+            $this->db->group_by('MONTH(data_invio)');
+            $result = $this->db->get(db_prefix() . 'fe_fatture_attive')->result();
 
-        // Fatture ricevute (passive)
-        $this->db->select('MONTH(data_ricezione) as mese, COUNT(*) as count');
-        $this->db->where('YEAR(data_ricezione)', $anno);
-        $this->db->where('data_ricezione IS NOT NULL');
-        $this->db->group_by('MONTH(data_ricezione)');
-        $result = $this->db->get(db_prefix() . 'fe_fatture_passive')->result();
+            foreach ($result as $row) {
+                $stats['inviate'][$row->mese - 1] = (int)$row->count;
+            }
 
-        foreach ($result as $row) {
-            $stats['ricevute'][$row->mese - 1] = (int)$row->count;
+            // Verifica se la tabella passive esiste
+            if ($this->db->table_exists(db_prefix() . 'fe_fatture_passive')) {
+                // Fatture ricevute (passive)
+                $this->db->select('MONTH(data_ricezione) as mese, COUNT(*) as count');
+                $this->db->where('YEAR(data_ricezione)', $anno);
+                $this->db->where('data_ricezione IS NOT NULL');
+                $this->db->group_by('MONTH(data_ricezione)');
+                $result = $this->db->get(db_prefix() . 'fe_fatture_passive')->result();
+
+                foreach ($result as $row) {
+                    $stats['ricevute'][$row->mese - 1] = (int)$row->count;
+                }
+            }
+        } catch (Exception $e) {
+            // In caso di errore, ritorna statistiche vuote
+            log_activity('Fatturazione Elettronica - Errore get_monthly_stats: ' . $e->getMessage());
         }
 
         return $stats;

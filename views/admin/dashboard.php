@@ -401,7 +401,7 @@
                                 <?php foreach ($invoices_to_import as $inv): ?>
                                 <option value="<?php echo $inv->id; ?>">
                                     #<?php echo $inv->number; ?> - <?php echo get_company_name($inv->clientid); ?>
-                                    (<?php echo app_format_money($inv->total, $inv->currency_name); ?>)
+                                    (&euro; <?php echo number_format($inv->total, 2, ',', '.'); ?>)
                                 </option>
                                 <?php endforeach; ?>
                             <?php endif; ?>
