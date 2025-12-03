@@ -15,87 +15,104 @@ defined('BASEPATH') or exit('No direct script access allowed');
  * Requires PHP: 8.3
  */
 
-define('FATTURAZIONE_ELETTRONICA_MODULE_NAME', 'fatturazione_elettronica');
-define('FATTURAZIONE_ELETTRONICA_MODULE_VERSION', '1.1.0');
-define('FATTURAZIONE_ELETTRONICA_MODULE_PATH', __DIR__);
+// Definisci le costanti base del modulo
+if (!defined('FATTURAZIONE_ELETTRONICA_MODULE_NAME')) {
+    define('FATTURAZIONE_ELETTRONICA_MODULE_NAME', 'fatturazione_elettronica');
+}
+if (!defined('FATTURAZIONE_ELETTRONICA_MODULE_VERSION')) {
+    define('FATTURAZIONE_ELETTRONICA_MODULE_VERSION', '1.1.0');
+}
+if (!defined('FATTURAZIONE_ELETTRONICA_MODULE_PATH')) {
+    define('FATTURAZIONE_ELETTRONICA_MODULE_PATH', __DIR__);
+}
 
 /**
  * Registra il modulo in Perfex CRM
- * Questa chiamata DEVE essere fatta senza condizioni per la compatibilità con Perfex
+ * Verifica che la funzione esista per compatibilità con diversi contesti di caricamento
  */
-register_module([
-    'module_name'          => FATTURAZIONE_ELETTRONICA_MODULE_NAME,
-    'description'          => 'Modulo per la fatturazione elettronica italiana tramite SDI (Sistema di Interscambio) dell\'Agenzia delle Entrate. Supporta invio e ricezione fatture B2B/B2C/PA.',
-    'init_hook'            => 'fatturazione_elettronica_init_hook',
-    'author'               => 'GTech Group IT',
-    'author_uri'           => 'https://gtechgroup.it',
-    'version'              => FATTURAZIONE_ELETTRONICA_MODULE_VERSION,
-    'requires_at_least'    => '3.2',
-    'tested_up_to'         => '3.4',
-    'requires_php'         => '8.3',
-]);
+if (function_exists('register_module')) {
+    register_module([
+        'module_name'          => FATTURAZIONE_ELETTRONICA_MODULE_NAME,
+        'description'          => 'Modulo per la fatturazione elettronica italiana tramite SDI (Sistema di Interscambio) dell\'Agenzia delle Entrate. Supporta invio e ricezione fatture B2B/B2C/PA.',
+        'init_hook'            => 'fatturazione_elettronica_init_hook',
+        'author'               => 'GTech Group IT',
+        'author_uri'           => 'https://gtechgroup.it',
+        'version'              => FATTURAZIONE_ELETTRONICA_MODULE_VERSION,
+        'requires_at_least'    => '3.2',
+        'tested_up_to'         => '3.4',
+        'requires_php'         => '8.3',
+    ]);
+}
 
-// Percorsi del modulo - definiti dopo register_module per sicurezza
-define('FE_VIEWS_PATH', FATTURAZIONE_ELETTRONICA_MODULE_PATH . '/views/');
-define('FE_LIBRARIES_PATH', FATTURAZIONE_ELETTRONICA_MODULE_PATH . '/libraries/');
-
-// FE_ASSETS_PATH viene definito nel hook init per garantire che module_dir_url sia disponibile
+// Percorsi del modulo
+if (!defined('FE_VIEWS_PATH')) {
+    define('FE_VIEWS_PATH', FATTURAZIONE_ELETTRONICA_MODULE_PATH . '/views/');
+}
+if (!defined('FE_LIBRARIES_PATH')) {
+    define('FE_LIBRARIES_PATH', FATTURAZIONE_ELETTRONICA_MODULE_PATH . '/libraries/');
+}
 if (!defined('FE_ASSETS_PATH')) {
     define('FE_ASSETS_PATH', '');
 }
 
 // Costanti per lo stato delle fatture SDI
-define('FE_STATO_BOZZA', 'bozza');
-define('FE_STATO_GENERATA', 'generata');
-define('FE_STATO_INVIATA', 'inviata');
-define('FE_STATO_CONSEGNATA', 'consegnata');
-define('FE_STATO_NON_CONSEGNATA', 'non_consegnata');
-define('FE_STATO_ACCETTATA', 'accettata');
-define('FE_STATO_RIFIUTATA', 'rifiutata');
-define('FE_STATO_DECORRENZA_TERMINI', 'decorrenza_termini');
-define('FE_STATO_IMPOSSIBILITA_RECAPITO', 'impossibilita_recapito');
-define('FE_STATO_SCARTATA', 'scartata');
-define('FE_STATO_MANCATA_CONSEGNA', 'mancata_consegna');
+if (!defined('FE_STATO_BOZZA')) {
+    define('FE_STATO_BOZZA', 'bozza');
+    define('FE_STATO_GENERATA', 'generata');
+    define('FE_STATO_INVIATA', 'inviata');
+    define('FE_STATO_CONSEGNATA', 'consegnata');
+    define('FE_STATO_NON_CONSEGNATA', 'non_consegnata');
+    define('FE_STATO_ACCETTATA', 'accettata');
+    define('FE_STATO_RIFIUTATA', 'rifiutata');
+    define('FE_STATO_DECORRENZA_TERMINI', 'decorrenza_termini');
+    define('FE_STATO_IMPOSSIBILITA_RECAPITO', 'impossibilita_recapito');
+    define('FE_STATO_SCARTATA', 'scartata');
+    define('FE_STATO_MANCATA_CONSEGNA', 'mancata_consegna');
+}
 
 // Costanti per il tipo di documento
-define('FE_TD01', 'TD01'); // Fattura
-define('FE_TD02', 'TD02'); // Acconto/Anticipo su fattura
-define('FE_TD03', 'TD03'); // Acconto/Anticipo su parcella
-define('FE_TD04', 'TD04'); // Nota di Credito
-define('FE_TD05', 'TD05'); // Nota di Debito
-define('FE_TD06', 'TD06'); // Parcella
-define('FE_TD16', 'TD16'); // Integrazione fattura reverse charge interno
-define('FE_TD17', 'TD17'); // Integrazione/autofattura per acquisto servizi dall'estero
-define('FE_TD18', 'TD18'); // Integrazione per acquisto di beni intracomunitari
-define('FE_TD19', 'TD19'); // Integrazione/autofattura per acquisto di beni ex art.17 c.2 DPR 633/72
-define('FE_TD20', 'TD20'); // Autofattura per regolarizzazione e integrazione delle fatture
-define('FE_TD21', 'TD21'); // Autofattura per splafonamento
-define('FE_TD22', 'TD22'); // Estrazione beni da Deposito IVA
-define('FE_TD23', 'TD23'); // Estrazione beni da Deposito IVA con versamento dell'IVA
-define('FE_TD24', 'TD24'); // Fattura differita di cui all'art. 21, comma 4, lett. a)
-define('FE_TD25', 'TD25'); // Fattura differita di cui all'art. 21, comma 4, terzo periodo lett. b)
-define('FE_TD26', 'TD26'); // Cessione di beni ammortizzabili e per passaggi interni
-define('FE_TD27', 'TD27'); // Fattura per autoconsumo o per cessioni gratuite senza rivalsa
+if (!defined('FE_TD01')) {
+    define('FE_TD01', 'TD01'); // Fattura
+    define('FE_TD02', 'TD02'); // Acconto/Anticipo su fattura
+    define('FE_TD03', 'TD03'); // Acconto/Anticipo su parcella
+    define('FE_TD04', 'TD04'); // Nota di Credito
+    define('FE_TD05', 'TD05'); // Nota di Debito
+    define('FE_TD06', 'TD06'); // Parcella
+    define('FE_TD16', 'TD16'); // Integrazione fattura reverse charge interno
+    define('FE_TD17', 'TD17'); // Integrazione/autofattura per acquisto servizi dall'estero
+    define('FE_TD18', 'TD18'); // Integrazione per acquisto di beni intracomunitari
+    define('FE_TD19', 'TD19'); // Integrazione/autofattura per acquisto di beni ex art.17 c.2 DPR 633/72
+    define('FE_TD20', 'TD20'); // Autofattura per regolarizzazione e integrazione delle fatture
+    define('FE_TD21', 'TD21'); // Autofattura per splafonamento
+    define('FE_TD22', 'TD22'); // Estrazione beni da Deposito IVA
+    define('FE_TD23', 'TD23'); // Estrazione beni da Deposito IVA con versamento dell'IVA
+    define('FE_TD24', 'TD24'); // Fattura differita di cui all'art. 21, comma 4, lett. a)
+    define('FE_TD25', 'TD25'); // Fattura differita di cui all'art. 21, comma 4, terzo periodo lett. b)
+    define('FE_TD26', 'TD26'); // Cessione di beni ammortizzabili e per passaggi interni
+    define('FE_TD27', 'TD27'); // Fattura per autoconsumo o per cessioni gratuite senza rivalsa
+}
 
 // Regime fiscale
-define('FE_RF01', 'RF01'); // Ordinario
-define('FE_RF02', 'RF02'); // Contribuenti minimi
-define('FE_RF04', 'RF04'); // Agricoltura e attività connesse e pesca
-define('FE_RF05', 'RF05'); // Vendita sali e tabacchi
-define('FE_RF06', 'RF06'); // Commercio dei fiammiferi
-define('FE_RF07', 'RF07'); // Editoria
-define('FE_RF08', 'RF08'); // Gestione di servizi di telefonia pubblica
-define('FE_RF09', 'RF09'); // Rivendita di documenti di trasporto pubblico e di sosta
-define('FE_RF10', 'RF10'); // Intrattenimenti, giochi e altre attività di cui alla tariffa allegata al DPR 640/72
-define('FE_RF11', 'RF11'); // Agenzie di viaggi e turismo
-define('FE_RF12', 'RF12'); // Agro-industria
-define('FE_RF13', 'RF13'); // Vendite a domicilio
-define('FE_RF14', 'RF14'); // Rivendita di beni usati, di oggetti d'arte, d'antiquariato o da collezione
-define('FE_RF15', 'RF15'); // Agenzie di vendite all'asta di oggetti d'arte, antiquariato o da collezione
-define('FE_RF16', 'RF16'); // IVA per cassa P.A.
-define('FE_RF17', 'RF17'); // IVA per cassa
-define('FE_RF18', 'RF18'); // Altro
-define('FE_RF19', 'RF19'); // Forfettario
+if (!defined('FE_RF01')) {
+    define('FE_RF01', 'RF01'); // Ordinario
+    define('FE_RF02', 'RF02'); // Contribuenti minimi
+    define('FE_RF04', 'RF04'); // Agricoltura e attività connesse e pesca
+    define('FE_RF05', 'RF05'); // Vendita sali e tabacchi
+    define('FE_RF06', 'RF06'); // Commercio dei fiammiferi
+    define('FE_RF07', 'RF07'); // Editoria
+    define('FE_RF08', 'RF08'); // Gestione di servizi di telefonia pubblica
+    define('FE_RF09', 'RF09'); // Rivendita di documenti di trasporto pubblico e di sosta
+    define('FE_RF10', 'RF10'); // Intrattenimenti, giochi e altre attività di cui alla tariffa allegata al DPR 640/72
+    define('FE_RF11', 'RF11'); // Agenzie di viaggi e turismo
+    define('FE_RF12', 'RF12'); // Agro-industria
+    define('FE_RF13', 'RF13'); // Vendite a domicilio
+    define('FE_RF14', 'RF14'); // Rivendita di beni usati, di oggetti d'arte, d'antiquariato o da collezione
+    define('FE_RF15', 'RF15'); // Agenzie di vendite all'asta di oggetti d'arte, antiquariato o da collezione
+    define('FE_RF16', 'RF16'); // IVA per cassa P.A.
+    define('FE_RF17', 'RF17'); // IVA per cassa
+    define('FE_RF18', 'RF18'); // Altro
+    define('FE_RF19', 'RF19'); // Forfettario
+}
 
 /**
  * Hook di inizializzazione del modulo - chiamato da Perfex tramite init_hook
@@ -108,7 +125,9 @@ function fatturazione_elettronica_init_hook()
     $CI->load->helper(FATTURAZIONE_ELETTRONICA_MODULE_NAME . '/fatturazione_elettronica');
 
     // Carica il file della lingua
-    load_module_language(FATTURAZIONE_ELETTRONICA_MODULE_NAME);
+    if (function_exists('load_module_language')) {
+        load_module_language(FATTURAZIONE_ELETTRONICA_MODULE_NAME);
+    }
 
     // Registra le autoload per le librerie
     spl_autoload_register(function ($class) {
@@ -130,36 +149,50 @@ function fatturazione_elettronica_init_hook()
 }
 
 /**
- * Registra gli hooks dopo che il modulo è stato inizializzato
+ * Registra gli hooks - solo se la funzione hooks() è disponibile
  */
-hooks()->add_action('app_init', 'fatturazione_elettronica_app_init');
-hooks()->add_action('admin_init', 'fatturazione_elettronica_admin_init');
-hooks()->add_action('app_admin_head', 'fatturazione_elettronica_add_head_css');
-hooks()->add_action('app_admin_footer', 'fatturazione_elettronica_add_footer_js');
+if (function_exists('hooks')) {
+    hooks()->add_action('app_init', 'fatturazione_elettronica_app_init');
+    hooks()->add_action('admin_init', 'fatturazione_elettronica_admin_init');
+    hooks()->add_action('app_admin_head', 'fatturazione_elettronica_add_head_css');
+    hooks()->add_action('app_admin_footer', 'fatturazione_elettronica_add_footer_js');
 
-// Hook per le fatture
-hooks()->add_action('after_invoice_added', 'fatturazione_elettronica_after_invoice_added');
-hooks()->add_action('after_invoice_updated', 'fatturazione_elettronica_after_invoice_updated');
-hooks()->add_filter('invoice_html_pdf_data', 'fatturazione_elettronica_invoice_pdf_data');
+    // Hook per le fatture
+    hooks()->add_action('after_invoice_added', 'fatturazione_elettronica_after_invoice_added');
+    hooks()->add_action('after_invoice_updated', 'fatturazione_elettronica_after_invoice_updated');
+    hooks()->add_filter('invoice_html_pdf_data', 'fatturazione_elettronica_invoice_pdf_data');
 
-// Hook per le note di credito
-hooks()->add_action('after_credit_note_added', 'fatturazione_elettronica_after_credit_note_added');
-hooks()->add_action('after_credit_note_updated', 'fatturazione_elettronica_after_credit_note_updated');
+    // Hook per le note di credito
+    hooks()->add_action('after_credit_note_added', 'fatturazione_elettronica_after_credit_note_added');
+    hooks()->add_action('after_credit_note_updated', 'fatturazione_elettronica_after_credit_note_updated');
 
-// Menu administration
-hooks()->add_action('admin_init', 'fatturazione_elettronica_register_menu');
+    // Menu administration
+    hooks()->add_action('admin_init', 'fatturazione_elettronica_register_menu');
 
-// Permessi
-hooks()->add_action('admin_init', 'fatturazione_elettronica_register_permissions');
+    // Permessi
+    hooks()->add_action('admin_init', 'fatturazione_elettronica_register_permissions');
 
-// Cron job per controllo notifiche SDI
-hooks()->add_action('cron_job', 'fatturazione_elettronica_cron');
+    // Cron job per controllo notifiche SDI
+    hooks()->add_action('cron_job', 'fatturazione_elettronica_cron');
 
-// Link azioni modulo
-hooks()->add_filter('module_' . FATTURAZIONE_ELETTRONICA_MODULE_NAME . '_action_links', function ($actions) {
-    $actions[] = '<a href="' . admin_url('fatturazione_elettronica/impostazioni') . '">' . _l('settings') . '</a>';
-    return $actions;
-});
+    // Link azioni modulo
+    hooks()->add_filter('module_' . FATTURAZIONE_ELETTRONICA_MODULE_NAME . '_action_links', function ($actions) {
+        if (function_exists('admin_url') && function_exists('_l')) {
+            $actions[] = '<a href="' . admin_url('fatturazione_elettronica/impostazioni') . '">' . _l('settings') . '</a>';
+        }
+        return $actions;
+    });
+}
+
+/**
+ * Registra hooks di attivazione/disattivazione
+ */
+if (function_exists('register_activation_hook')) {
+    register_activation_hook(FATTURAZIONE_ELETTRONICA_MODULE_NAME, 'fatturazione_elettronica_activation_hook');
+}
+if (function_exists('register_deactivation_hook')) {
+    register_deactivation_hook(FATTURAZIONE_ELETTRONICA_MODULE_NAME, 'fatturazione_elettronica_deactivation_hook');
+}
 
 /**
  * Inizializzazione app
@@ -174,10 +207,8 @@ function fatturazione_elettronica_app_init()
  */
 function fatturazione_elettronica_admin_init()
 {
-    $CI = &get_instance();
-
     // Aggiungi i campi personalizzati per i clienti (Codice Destinatario, PEC)
-    if (is_admin()) {
+    if (function_exists('is_admin') && is_admin() && function_exists('hooks')) {
         hooks()->add_action('after_customer_billing_and_shipping_fields', 'fatturazione_elettronica_customer_fields');
         hooks()->add_filter('before_client_added', 'fatturazione_elettronica_before_client_added');
         hooks()->add_filter('before_client_updated', 'fatturazione_elettronica_before_client_updated');
@@ -189,8 +220,10 @@ function fatturazione_elettronica_admin_init()
  */
 function fatturazione_elettronica_add_head_css()
 {
-    $assets_path = module_dir_url(FATTURAZIONE_ELETTRONICA_MODULE_NAME, 'assets/');
-    echo '<link rel="stylesheet" type="text/css" href="' . $assets_path . 'css/fatturazione_elettronica.css?v=' . FATTURAZIONE_ELETTRONICA_MODULE_VERSION . '">';
+    if (function_exists('module_dir_url')) {
+        $assets_path = module_dir_url(FATTURAZIONE_ELETTRONICA_MODULE_NAME, 'assets/');
+        echo '<link rel="stylesheet" type="text/css" href="' . $assets_path . 'css/fatturazione_elettronica.css?v=' . FATTURAZIONE_ELETTRONICA_MODULE_VERSION . '">';
+    }
 }
 
 /**
@@ -198,8 +231,10 @@ function fatturazione_elettronica_add_head_css()
  */
 function fatturazione_elettronica_add_footer_js()
 {
-    $assets_path = module_dir_url(FATTURAZIONE_ELETTRONICA_MODULE_NAME, 'assets/');
-    echo '<script src="' . $assets_path . 'js/fatturazione_elettronica.js?v=' . FATTURAZIONE_ELETTRONICA_MODULE_VERSION . '"></script>';
+    if (function_exists('module_dir_url')) {
+        $assets_path = module_dir_url(FATTURAZIONE_ELETTRONICA_MODULE_NAME, 'assets/');
+        echo '<script src="' . $assets_path . 'js/fatturazione_elettronica.js?v=' . FATTURAZIONE_ELETTRONICA_MODULE_VERSION . '"></script>';
+    }
 }
 
 /**
@@ -207,6 +242,10 @@ function fatturazione_elettronica_add_footer_js()
  */
 function fatturazione_elettronica_register_menu()
 {
+    if (!function_exists('has_permission') || !function_exists('is_admin')) {
+        return;
+    }
+
     $CI = &get_instance();
 
     // Menu principale Fatturazione Elettronica
@@ -258,6 +297,10 @@ function fatturazione_elettronica_register_menu()
  */
 function fatturazione_elettronica_register_permissions()
 {
+    if (!function_exists('register_staff_capabilities')) {
+        return;
+    }
+
     $capabilities = [];
     $capabilities['capabilities'] = [
         'view'   => _l('permission_view'),
@@ -418,7 +461,9 @@ function fatturazione_elettronica_after_credit_note_updated($credit_note_id)
  */
 function fatturazione_elettronica_invoice_pdf_data($data)
 {
-    $CI = &get_instance();
+    if (!function_exists('get_client_meta')) {
+        return $data;
+    }
 
     if (isset($data['invoice']->clientid)) {
         $codice_destinatario = get_client_meta($data['invoice']->clientid, 'fe_codice_destinatario');
@@ -487,7 +532,10 @@ function fatturazione_elettronica_activation_hook()
     $CI = &get_instance();
 
     // Esegui le migrazioni
-    require_once(FATTURAZIONE_ELETTRONICA_MODULE_PATH . '/install.php');
+    $install_file = FATTURAZIONE_ELETTRONICA_MODULE_PATH . '/install.php';
+    if (file_exists($install_file)) {
+        require_once($install_file);
+    }
 }
 
 /**
@@ -497,7 +545,3 @@ function fatturazione_elettronica_deactivation_hook()
 {
     // Non rimuoviamo i dati per sicurezza
 }
-
-// Registra hooks di attivazione/disattivazione
-register_activation_hook(FATTURAZIONE_ELETTRONICA_MODULE_NAME, 'fatturazione_elettronica_activation_hook');
-register_deactivation_hook(FATTURAZIONE_ELETTRONICA_MODULE_NAME, 'fatturazione_elettronica_deactivation_hook');
