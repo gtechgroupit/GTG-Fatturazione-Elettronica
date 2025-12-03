@@ -19,6 +19,22 @@ define('FATTURAZIONE_ELETTRONICA_MODULE_NAME', 'fatturazione_elettronica');
 define('FATTURAZIONE_ELETTRONICA_MODULE_VERSION', '1.1.0');
 define('FATTURAZIONE_ELETTRONICA_MODULE_PATH', __DIR__);
 
+/**
+ * Registra il modulo in Perfex CRM
+ */
+register_module([
+    'module_name'          => FATTURAZIONE_ELETTRONICA_MODULE_NAME,
+    'description'          => 'Modulo per la fatturazione elettronica italiana tramite SDI (Sistema di Interscambio) dell\'Agenzia delle Entrate. Supporta invio e ricezione fatture B2B/B2C/PA.',
+    'author'               => 'GTech Group IT',
+    'author_uri'           => 'https://gtechgroup.it',
+    'version'              => FATTURAZIONE_ELETTRONICA_MODULE_VERSION,
+    'requires_at_least'    => '3.2',
+    'tested_up_to'         => '3.4',
+    'requires_php'         => '8.3',
+    'url_documentation'    => '',
+    'url_changelog'        => '',
+]);
+
 // Percorsi del modulo
 define('FE_ASSETS_PATH', module_dir_url(FATTURAZIONE_ELETTRONICA_MODULE_NAME, 'assets/'));
 define('FE_VIEWS_PATH', FATTURAZIONE_ELETTRONICA_MODULE_PATH . '/views/');
