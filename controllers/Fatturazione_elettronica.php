@@ -75,10 +75,9 @@ class Fatturazione_elettronica extends AdminController
         }, $existing);
 
         // Ottieni fatture non ancora importate
-        $this->db->select('id, number, clientid, total, currency_name, status');
+        $this->db->select('id, number, clientid, total, status, date');
         $this->db->from(db_prefix() . 'invoices');
-        $this->db->where('status', 2); // Solo fatture pagate o inviate
-        $this->db->or_where('status', 3);
+        $this->db->where_in('status', [2, 3]); // Solo fatture inviate o pagate
 
         if (!empty($existing_ids)) {
             $this->db->where_not_in('id', $existing_ids);

@@ -137,6 +137,9 @@ function fatturazione_elettronica_init_module()
     // Carica l'helper
     $CI->load->helper(FATTURAZIONE_ELETTRONICA_MODULE_NAME . '/fatturazione_elettronica');
 
+    // Carica il file della lingua (default italiano, poi sovrascrive con lingua attiva)
+    load_module_language(FATTURAZIONE_ELETTRONICA_MODULE_NAME);
+
     // Registra le autoload per le librerie
     spl_autoload_register(function ($class) {
         $prefix = 'FatturazioneElettronica\\';
