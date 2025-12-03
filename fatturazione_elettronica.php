@@ -7,7 +7,7 @@ defined('BASEPATH') or exit('No direct script access allowed');
  * Plugin URI: https://github.com/gtechgroupit/GTG-Fatturazione-Elettronica
  * Description: Modulo per la fatturazione elettronica italiana tramite SDI (Sistema di Interscambio)
  *              dell'Agenzia delle Entrate. Supporta invio e ricezione fatture B2B/B2C/PA.
- * Version: 1.0.0
+ * Version: 1.1.0
  * Author: GTech Group IT
  * Author URI: https://gtechgroup.it
  * Requires at least: 3.2
@@ -16,7 +16,7 @@ defined('BASEPATH') or exit('No direct script access allowed');
  */
 
 define('FATTURAZIONE_ELETTRONICA_MODULE_NAME', 'fatturazione_elettronica');
-define('FATTURAZIONE_ELETTRONICA_MODULE_VERSION', '1.0.0');
+define('FATTURAZIONE_ELETTRONICA_MODULE_VERSION', '1.1.0');
 define('FATTURAZIONE_ELETTRONICA_MODULE_PATH', __DIR__);
 
 // Percorsi del modulo
@@ -401,16 +401,39 @@ function fatturazione_elettronica_cron()
 {
     $CI = &get_instance();
     $CI->load->model(FATTURAZIONE_ELETTRONICA_MODULE_NAME . '/Fatturazione_elettronica_model');
-    $CI->load->library(FATTURAZIONE_ELETTRONICA_MODULE_NAME . '/Sdi_client');
+    $CI->load->helper(FATTURAZIONE_ELETTRONICA_MODULE_NAME . '/fatturazione_elettronica');
 
-    // Controlla lo stato delle fatture inviate
-    $CI->Fatturazione_elettronica_model->check_fatture_status();
+    // Non eseguire se il provider è in modalità test
+    if (fe_is_test_mode()) {
+        return;
+    }
 
-    // Scarica le fatture passive
-    $CI->Fatturazione_elettronica_model->download_fatture_passive();
+    $stats = [
+        'stati_verificati' => 0,
+        'passive_scaricate' => 0,
+    ];
 
-    // Log dell'esecuzione
-    log_activity('Fatturazione Elettronica - Cron job eseguito');
+    try {
+        // Controlla lo stato delle fatture inviate
+        $stats['stati_verificati'] = $CI->Fatturazione_elettronica_model->cron_verifica_stati();
+
+        // Scarica le fatture passive
+        $stats['passive_scaricate'] = $CI->Fatturazione_elettronica_model->cron_sync_passive();
+
+        // Log dell'esecuzione
+        if ($stats['stati_verificati'] > 0 || $stats['passive_scaricate'] > 0) {
+            fe_log('cron', sprintf(
+                'Cron completato: %d stati aggiornati, %d fatture passive scaricate',
+                $stats['stati_verificati'],
+                $stats['passive_scaricate']
+            ));
+        }
+
+        log_activity('Fatturazione Elettronica - Cron: ' . json_encode($stats));
+    } catch (Exception $e) {
+        fe_log('errore', 'Errore cron: ' . $e->getMessage());
+        log_activity('Fatturazione Elettronica - Errore cron: ' . $e->getMessage());
+    }
 }
 
 /**

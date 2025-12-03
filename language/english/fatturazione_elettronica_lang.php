@@ -285,3 +285,47 @@ $lang['fe_oauth_disconnected'] = 'Account disconnected successfully';
 // Provider Settings
 $lang['fe_change_provider'] = 'Change Provider';
 $lang['fe_provider_credentials'] = 'Provider Credentials';
+
+// Enhanced Dashboard
+$lang['fe_last_update'] = 'Last update';
+$lang['fe_welcome_title'] = 'Welcome to Electronic Invoicing';
+$lang['fe_welcome_message'] = 'Complete the initial setup to start sending and receiving electronic invoices.';
+$lang['fe_start_setup'] = 'Start Setup';
+$lang['fe_provider_configured'] = 'Provider Configured';
+$lang['fe_provider_not_configured'] = 'Configuration Incomplete';
+$lang['fe_andamento_mensile'] = 'Monthly Trend';
+$lang['fe_fatture_inviate'] = 'Invoices Sent';
+$lang['fe_fatture_ricevute'] = 'Invoices Received';
+$lang['fe_invia_tutte'] = 'Send All';
+$lang['fe_verifica_stati'] = 'Check Status';
+$lang['fe_stati_aggiornati'] = 'Updated %d invoice statuses';
+$lang['fe_passive_non_lette'] = 'Unread Purchase Invoices';
+
+// Log labels
+$lang['fe_log_invio_fattura'] = 'Invoice Sent';
+$lang['fe_log_invio_test'] = 'Test Send';
+$lang['fe_log_consegnata'] = 'Invoice Delivered';
+$lang['fe_log_accettata'] = 'Invoice Accepted';
+$lang['fe_log_rifiutata'] = 'Invoice Rejected';
+$lang['fe_log_scartata'] = 'Invoice Discarded';
+$lang['fe_log_errore'] = 'Error';
+$lang['fe_log_errore_invio'] = 'Send Error';
+$lang['fe_log_generazione'] = 'XML Generated';
+$lang['fe_log_sync'] = 'Synchronization';
+$lang['fe_log_download'] = 'Download';
+$lang['fe_log_webhook'] = 'Webhook';
+$lang['fe_log_cron'] = 'Cron Job';
+$lang['fe_log_config'] = 'Configuration';
+
+// Validation
+$lang['fe_piva_non_valida'] = 'Invalid VAT Number';
+$lang['fe_cf_non_valido'] = 'Invalid Tax Code';
+$lang['fe_codice_dest_non_valido'] = 'Invalid Recipient Code';
+$lang['fe_iban_non_valido'] = 'Invalid IBAN';
+$lang['fe_pec_non_valida'] = 'Invalid PEC';
+$lang['fe_xml_non_valido'] = 'Invalid XML';
+$lang['fe_xml_errori'] = 'XML validation errors';
+
+// Cron
+$lang['fe_cron_eseguito'] = 'Cron job executed successfully';
+$lang['fe_cron_errore'] = 'Error during cron job execution';

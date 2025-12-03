@@ -285,3 +285,47 @@ $lang['fe_oauth_disconnected'] = 'Account scollegato con successo';
 // Provider Settings
 $lang['fe_change_provider'] = 'Cambia Provider';
 $lang['fe_provider_credentials'] = 'Credenziali Provider';
+
+// Dashboard migliorata
+$lang['fe_last_update'] = 'Ultimo aggiornamento';
+$lang['fe_welcome_title'] = 'Benvenuto in Fatturazione Elettronica';
+$lang['fe_welcome_message'] = 'Completa la configurazione iniziale per iniziare a inviare e ricevere fatture elettroniche.';
+$lang['fe_start_setup'] = 'Avvia Configurazione';
+$lang['fe_provider_configured'] = 'Provider Configurato';
+$lang['fe_provider_not_configured'] = 'Configurazione Incompleta';
+$lang['fe_andamento_mensile'] = 'Andamento Mensile';
+$lang['fe_fatture_inviate'] = 'Fatture Inviate';
+$lang['fe_fatture_ricevute'] = 'Fatture Ricevute';
+$lang['fe_invia_tutte'] = 'Invia Tutte';
+$lang['fe_verifica_stati'] = 'Verifica Stati';
+$lang['fe_stati_aggiornati'] = 'Aggiornati %d stati fatture';
+$lang['fe_passive_non_lette'] = 'Fatture Passive Non Lette';
+
+// Log labels
+$lang['fe_log_invio_fattura'] = 'Fattura Inviata';
+$lang['fe_log_invio_test'] = 'Invio Test';
+$lang['fe_log_consegnata'] = 'Fattura Consegnata';
+$lang['fe_log_accettata'] = 'Fattura Accettata';
+$lang['fe_log_rifiutata'] = 'Fattura Rifiutata';
+$lang['fe_log_scartata'] = 'Fattura Scartata';
+$lang['fe_log_errore'] = 'Errore';
+$lang['fe_log_errore_invio'] = 'Errore Invio';
+$lang['fe_log_generazione'] = 'XML Generato';
+$lang['fe_log_sync'] = 'Sincronizzazione';
+$lang['fe_log_download'] = 'Download';
+$lang['fe_log_webhook'] = 'Webhook';
+$lang['fe_log_cron'] = 'Cron Job';
+$lang['fe_log_config'] = 'Configurazione';
+
+// Validazione
+$lang['fe_piva_non_valida'] = 'Partita IVA non valida';
+$lang['fe_cf_non_valido'] = 'Codice Fiscale non valido';
+$lang['fe_codice_dest_non_valido'] = 'Codice Destinatario non valido';
+$lang['fe_iban_non_valido'] = 'IBAN non valido';
+$lang['fe_pec_non_valida'] = 'PEC non valida';
+$lang['fe_xml_non_valido'] = 'XML non valido';
+$lang['fe_xml_errori'] = 'Errori nella validazione XML';
+
+// Cron
+$lang['fe_cron_eseguito'] = 'Cron job eseguito con successo';
+$lang['fe_cron_errore'] = 'Errore durante l\'esecuzione del cron job';

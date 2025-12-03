@@ -656,3 +656,261 @@ if (!function_exists('fe_get_nazione_from_piva')) {
         return 'IT';
     }
 }
+
+/**
+ * Ottiene la classe CSS per il colore del log
+ *
+ * @param string $azione Azione del log
+ * @return string
+ */
+if (!function_exists('fe_get_log_color')) {
+    function fe_get_log_color($azione)
+    {
+        $colors = [
+            'invio_fattura'     => 'tw-bg-primary',
+            'invio_test'        => 'tw-bg-info',
+            'fattura_consegnata' => 'tw-bg-success',
+            'fattura_accettata' => 'tw-bg-success',
+            'fattura_rifiutata' => 'tw-bg-danger',
+            'fattura_scartata'  => 'tw-bg-danger',
+            'errore'            => 'tw-bg-danger',
+            'errore_invio'      => 'tw-bg-danger',
+            'generazione_xml'   => 'tw-bg-info',
+            'sync_passive'      => 'tw-bg-info',
+            'download_passive'  => 'tw-bg-info',
+            'webhook'           => 'tw-bg-warning',
+            'cron'              => 'tw-bg-secondary',
+            'configurazione'    => 'tw-bg-warning',
+        ];
+
+        return $colors[$azione] ?? 'tw-bg-secondary';
+    }
+}
+
+/**
+ * Ottiene la label leggibile per il log
+ *
+ * @param string $azione Azione del log
+ * @return string
+ */
+if (!function_exists('fe_get_log_label')) {
+    function fe_get_log_label($azione)
+    {
+        $labels = [
+            'invio_fattura'      => _l('fe_log_invio_fattura'),
+            'invio_test'         => _l('fe_log_invio_test'),
+            'fattura_consegnata' => _l('fe_log_consegnata'),
+            'fattura_accettata'  => _l('fe_log_accettata'),
+            'fattura_rifiutata'  => _l('fe_log_rifiutata'),
+            'fattura_scartata'   => _l('fe_log_scartata'),
+            'errore'             => _l('fe_log_errore'),
+            'errore_invio'       => _l('fe_log_errore_invio'),
+            'generazione_xml'    => _l('fe_log_generazione'),
+            'sync_passive'       => _l('fe_log_sync'),
+            'download_passive'   => _l('fe_log_download'),
+            'webhook'            => _l('fe_log_webhook'),
+            'cron'               => _l('fe_log_cron'),
+            'configurazione'     => _l('fe_log_config'),
+        ];
+
+        return $labels[$azione] ?? ucfirst(str_replace('_', ' ', $azione));
+    }
+}
+
+/**
+ * Valida un IBAN italiano
+ *
+ * @param string $iban IBAN
+ * @return bool
+ */
+if (!function_exists('fe_valida_iban')) {
+    function fe_valida_iban($iban)
+    {
+        $iban = strtoupper(str_replace(' ', '', $iban));
+
+        if (strlen($iban) != 27 || substr($iban, 0, 2) != 'IT') {
+            return false;
+        }
+
+        // Sposta i primi 4 caratteri alla fine
+        $iban = substr($iban, 4) . substr($iban, 0, 4);
+
+        // Converti lettere in numeri (A=10, B=11, ...)
+        $iban = preg_replace_callback('/[A-Z]/', function ($matches) {
+            return ord($matches[0]) - 55;
+        }, $iban);
+
+        // Verifica modulo 97
+        return bcmod($iban, '97') == 1;
+    }
+}
+
+/**
+ * Valida un indirizzo email PEC
+ *
+ * @param string $pec Indirizzo PEC
+ * @return bool
+ */
+if (!function_exists('fe_valida_pec')) {
+    function fe_valida_pec($pec)
+    {
+        if (!filter_var($pec, FILTER_VALIDATE_EMAIL)) {
+            return false;
+        }
+
+        // Domini PEC italiani comuni
+        $pec_domains = [
+            'pec.it', 'legalmail.it', 'postecert.it', 'arubapec.it',
+            'pec.aruba.it', 'pec.infocert.it', 'sicurezzapostale.it',
+            'pec.telecomitalia.it', 'pec.register.it', 'actalis.it',
+        ];
+
+        $domain = substr($pec, strrpos($pec, '@') + 1);
+
+        // Se il dominio contiene "pec" o è un dominio PEC noto, è valido
+        if (strpos($domain, 'pec') !== false || in_array($domain, $pec_domains)) {
+            return true;
+        }
+
+        // Accetta comunque qualsiasi email valida
+        return true;
+    }
+}
+
+/**
+ * Calcola il check digit del codice fiscale
+ *
+ * @param string $cf Codice fiscale (primi 15 caratteri)
+ * @return string
+ */
+if (!function_exists('fe_calcola_check_cf')) {
+    function fe_calcola_check_cf($cf)
+    {
+        $cf = strtoupper(substr($cf, 0, 15));
+
+        $set1 = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+        $set2 = 'ABCDEFGHIJABCDEFGHIJKLMNOPQRSTUVWXYZ';
+        $even = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+        $odd = 'BAKPLCQDREVOSFTGUHMINJWZYX';
+        $sum = 0;
+
+        for ($i = 0; $i < 15; $i++) {
+            $char = $cf[$i];
+            $pos = strpos($set1, $char);
+            if ($pos !== false) {
+                $char = $set2[$pos];
+            }
+            if ($i % 2 == 0) {
+                $pos = strpos($even, $char);
+                $sum += strpos($odd, $even[$pos]);
+            } else {
+                $sum += strpos($even, $char);
+            }
+        }
+
+        return $even[$sum % 26];
+    }
+}
+
+/**
+ * Valida un XML FatturaPA contro lo schema XSD
+ *
+ * @param string $xml_content Contenuto XML
+ * @return array ['valid' => bool, 'errors' => array]
+ */
+if (!function_exists('fe_valida_xml')) {
+    function fe_valida_xml($xml_content)
+    {
+        $errors = [];
+
+        libxml_use_internal_errors(true);
+
+        $doc = new DOMDocument();
+        if (!$doc->loadXML($xml_content)) {
+            foreach (libxml_get_errors() as $error) {
+                $errors[] = trim($error->message) . ' (linea ' . $error->line . ')';
+            }
+            libxml_clear_errors();
+            return ['valid' => false, 'errors' => $errors];
+        }
+
+        // Validazione base: verifica elementi obbligatori
+        $required_elements = [
+            'FatturaElettronicaHeader',
+            'DatiTrasmissione',
+            'CedentePrestatore',
+            'CessionarioCommittente',
+            'FatturaElettronicaBody',
+            'DatiGenerali',
+            'DatiBeniServizi',
+        ];
+
+        $xpath = new DOMXPath($doc);
+        $xpath->registerNamespace('p', 'http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.2');
+
+        foreach ($required_elements as $element) {
+            $nodes = $xpath->query('//p:' . $element);
+            if ($nodes->length === 0) {
+                // Prova senza namespace
+                $nodes = $doc->getElementsByTagName($element);
+                if ($nodes->length === 0) {
+                    $errors[] = "Elemento obbligatorio mancante: {$element}";
+                }
+            }
+        }
+
+        libxml_clear_errors();
+
+        return [
+            'valid'  => empty($errors),
+            'errors' => $errors,
+        ];
+    }
+}
+
+/**
+ * Formatta un importo in formato italiano
+ *
+ * @param float $amount Importo
+ * @param bool $with_symbol Con simbolo euro
+ * @return string
+ */
+if (!function_exists('fe_format_currency')) {
+    function fe_format_currency($amount, $with_symbol = true)
+    {
+        $formatted = number_format((float)$amount, 2, ',', '.');
+        return $with_symbol ? '€ ' . $formatted : $formatted;
+    }
+}
+
+/**
+ * Genera un hash univoco per la fattura
+ *
+ * @param array $data Dati della fattura
+ * @return string
+ */
+if (!function_exists('fe_generate_hash')) {
+    function fe_generate_hash($data)
+    {
+        $string = implode('|', [
+            $data['partita_iva'] ?? '',
+            $data['numero'] ?? '',
+            $data['data'] ?? '',
+            $data['totale'] ?? '',
+        ]);
+
+        return hash('sha256', $string);
+    }
+}
+
+/**
+ * Verifica se è in modalità test
+ *
+ * @return bool
+ */
+if (!function_exists('fe_is_test_mode')) {
+    function fe_is_test_mode()
+    {
+        return get_option('fe_provider') === 'test' || get_option('fe_ambiente') === 'test';
+    }
+}

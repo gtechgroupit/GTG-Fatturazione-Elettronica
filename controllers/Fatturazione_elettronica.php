@@ -36,10 +36,117 @@ class Fatturazione_elettronica extends AdminController
         $data['recent_logs'] = $this->Fatturazione_elettronica_model->get_logs(10);
 
         // Fatture recenti
-        $data['fatture_attive_recenti'] = $this->Fatturazione_elettronica_model->get_fatture_attive(['limit' => 5]);
-        $data['fatture_passive_recenti'] = $this->Fatturazione_elettronica_model->get_fatture_passive(['limit' => 5, 'letto' => 0]);
+        $data['fatture_attive_recenti'] = $this->Fatturazione_elettronica_model->get_fatture_attive(['limit' => 10]);
+        $data['fatture_passive_recenti'] = $this->Fatturazione_elettronica_model->get_fatture_passive(['limit' => 10]);
+
+        // Fatture da inviare (generate ma non inviate)
+        $data['fatture_da_inviare'] = $this->Fatturazione_elettronica_model->get_fatture_attive(['stato' => FE_STATO_GENERATA]);
+
+        // Provider info
+        $this->load->library('fatturazione_elettronica/Sdi_client');
+        $providers = Sdi_client::getAvailableProviders();
+        $current_provider = get_option('fe_provider') ?: 'test';
+        $data['provider_info'] = $providers[$current_provider] ?? $providers['test'];
+        $data['provider_configured'] = $this->sdi_client->isProviderConfigured()['configured'];
+
+        // Dati per il grafico andamento mensile
+        $data['chart_labels'] = ['Gen', 'Feb', 'Mar', 'Apr', 'Mag', 'Giu', 'Lug', 'Ago', 'Set', 'Ott', 'Nov', 'Dic'];
+        $data['chart_data'] = $this->Fatturazione_elettronica_model->get_monthly_stats(date('Y'));
+
+        // Fatture Perfex non ancora importate
+        $data['invoices_to_import'] = $this->get_invoices_to_import();
 
         $this->load->view('fatturazione_elettronica/admin/dashboard', $data);
+    }
+
+    /**
+     * Ottiene le fatture Perfex non ancora importate
+     */
+    protected function get_invoices_to_import()
+    {
+        // Ottieni gli ID fatture già importate
+        $this->db->select('invoice_id');
+        $this->db->from(db_prefix() . 'fe_fatture_attive');
+        $this->db->where('invoice_id IS NOT NULL');
+        $existing = $this->db->get()->result();
+
+        $existing_ids = array_map(function ($f) {
+            return $f->invoice_id;
+        }, $existing);
+
+        // Ottieni fatture non ancora importate
+        $this->db->select('id, number, clientid, total, currency_name, status');
+        $this->db->from(db_prefix() . 'invoices');
+        $this->db->where('status', 2); // Solo fatture pagate o inviate
+        $this->db->or_where('status', 3);
+
+        if (!empty($existing_ids)) {
+            $this->db->where_not_in('id', $existing_ids);
+        }
+
+        $this->db->order_by('date', 'DESC');
+        $this->db->limit(50);
+
+        return $this->db->get()->result();
+    }
+
+    /**
+     * Invia tutte le fatture generate
+     */
+    public function invia_tutte_generate()
+    {
+        if (!has_permission('fatturazione_elettronica', '', 'edit') && !is_admin()) {
+            access_denied('fatturazione_elettronica');
+        }
+
+        $fatture = $this->Fatturazione_elettronica_model->get_fatture_attive(['stato' => FE_STATO_GENERATA]);
+        $sent = 0;
+        $errors = 0;
+
+        foreach ($fatture as $fattura) {
+            $result = $this->Fatturazione_elettronica_model->invia_fattura($fattura->id);
+            if ($result) {
+                $sent++;
+            } else {
+                $errors++;
+            }
+        }
+
+        set_alert('success', sprintf(_l('fe_bulk_send_result'), $sent, $errors));
+        redirect(admin_url('fatturazione_elettronica'));
+    }
+
+    /**
+     * Verifica stati delle fatture inviate
+     */
+    public function verifica_stati()
+    {
+        if (!has_permission('fatturazione_elettronica', '', 'edit') && !is_admin()) {
+            access_denied('fatturazione_elettronica');
+        }
+
+        $fatture = $this->Fatturazione_elettronica_model->get_fatture_attive(['stato' => FE_STATO_INVIATA]);
+        $updated = 0;
+
+        $this->load->library('fatturazione_elettronica/Sdi_client');
+
+        foreach ($fatture as $fattura) {
+            if (!empty($fattura->identificativo_sdi)) {
+                $status = $this->sdi_client->checkInvoiceStatus($fattura->identificativo_sdi);
+
+                if ($status && isset($status['stato'])) {
+                    $this->Fatturazione_elettronica_model->update_fattura_attiva($fattura->id, [
+                        'stato'       => $status['stato'],
+                        'esito_sdi'   => $status['message'] ?? null,
+                        'data_esito'  => date('Y-m-d H:i:s'),
+                    ]);
+                    $updated++;
+                }
+            }
+        }
+
+        set_alert('success', sprintf(_l('fe_stati_aggiornati'), $updated));
+        redirect(admin_url('fatturazione_elettronica'));
     }
 
     // =========================================================================

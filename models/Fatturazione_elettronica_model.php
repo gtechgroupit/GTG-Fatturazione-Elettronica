@@ -776,4 +776,155 @@ class Fatturazione_elettronica_model extends App_Model
         $this->db->limit($limit, $offset);
         return $this->db->get(db_prefix() . 'fe_log')->result();
     }
+
+    /**
+     * Ottiene le statistiche mensili per i grafici
+     *
+     * @param int $anno Anno
+     * @return array
+     */
+    public function get_monthly_stats($anno)
+    {
+        $stats = [
+            'inviate'  => array_fill(0, 12, 0),
+            'ricevute' => array_fill(0, 12, 0),
+        ];
+
+        // Fatture inviate (attive)
+        $this->db->select('MONTH(data_invio) as mese, COUNT(*) as count');
+        $this->db->where('YEAR(data_invio)', $anno);
+        $this->db->where('data_invio IS NOT NULL');
+        $this->db->group_by('MONTH(data_invio)');
+        $result = $this->db->get(db_prefix() . 'fe_fatture_attive')->result();
+
+        foreach ($result as $row) {
+            $stats['inviate'][$row->mese - 1] = (int)$row->count;
+        }
+
+        // Fatture ricevute (passive)
+        $this->db->select('MONTH(data_ricezione) as mese, COUNT(*) as count');
+        $this->db->where('YEAR(data_ricezione)', $anno);
+        $this->db->where('data_ricezione IS NOT NULL');
+        $this->db->group_by('MONTH(data_ricezione)');
+        $result = $this->db->get(db_prefix() . 'fe_fatture_passive')->result();
+
+        foreach ($result as $row) {
+            $stats['ricevute'][$row->mese - 1] = (int)$row->count;
+        }
+
+        return $stats;
+    }
+
+    /**
+     * Aggiorna una fattura attiva
+     *
+     * @param int $id ID della fattura
+     * @param array $data Dati da aggiornare
+     * @return bool
+     */
+    public function update_fattura_attiva($id, $data)
+    {
+        $data['updated_at'] = date('Y-m-d H:i:s');
+
+        $this->db->where('id', $id);
+        return $this->db->update(db_prefix() . 'fe_fatture_attive', $data);
+    }
+
+    /**
+     * Metodo per il cron job: verifica stati fatture
+     *
+     * @return int Numero di fatture aggiornate
+     */
+    public function cron_verifica_stati()
+    {
+        $CI = &get_instance();
+        $CI->load->library('fatturazione_elettronica/Sdi_client');
+
+        $this->db->where('stato', FE_STATO_INVIATA);
+        $this->db->where('identificativo_sdi IS NOT NULL');
+        $fatture = $this->db->get(db_prefix() . 'fe_fatture_attive')->result();
+
+        $updated = 0;
+
+        foreach ($fatture as $fattura) {
+            $status = $CI->sdi_client->checkInvoiceStatus($fattura->identificativo_sdi);
+
+            if ($status && isset($status['stato']) && $status['stato'] != $fattura->stato) {
+                $this->update_fattura_attiva($fattura->id, [
+                    'stato'      => $status['stato'],
+                    'esito_sdi'  => $status['message'] ?? null,
+                    'data_esito' => date('Y-m-d H:i:s'),
+                ]);
+
+                // Log
+                fe_log('cron', 'Stato aggiornato: ' . $status['stato'], $fattura->id);
+
+                // Notifica email
+                if (in_array($status['stato'], [FE_STATO_CONSEGNATA, FE_STATO_ACCETTATA, FE_STATO_RIFIUTATA, FE_STATO_SCARTATA])) {
+                    $this->send_status_notification($fattura, $status['stato']);
+                }
+
+                $updated++;
+            }
+        }
+
+        return $updated;
+    }
+
+    /**
+     * Metodo per il cron job: sincronizza fatture passive
+     *
+     * @return int Numero di fatture scaricate
+     */
+    public function cron_sync_passive()
+    {
+        $CI = &get_instance();
+        $CI->load->library('fatturazione_elettronica/Sdi_client');
+
+        // Scarica nuove fatture passive
+        $fatture = $CI->sdi_client->downloadPassiveInvoices();
+
+        if (!$fatture || !is_array($fatture)) {
+            return 0;
+        }
+
+        $imported = 0;
+
+        foreach ($fatture as $fattura_data) {
+            // Verifica se già esiste
+            $this->db->where('identificativo_sdi', $fattura_data['identificativo_sdi']);
+            $existing = $this->db->get(db_prefix() . 'fe_fatture_passive')->row();
+
+            if (!$existing) {
+                $this->add_fattura_passiva($fattura_data);
+                $imported++;
+            }
+        }
+
+        if ($imported > 0) {
+            fe_log('cron', "Sincronizzate {$imported} nuove fatture passive");
+        }
+
+        return $imported;
+    }
+
+    /**
+     * Invia notifica email per cambio stato
+     *
+     * @param object $fattura Fattura
+     * @param string $nuovo_stato Nuovo stato
+     */
+    protected function send_status_notification($fattura, $nuovo_stato)
+    {
+        if (get_option('fe_email_notifiche') != '1') {
+            return;
+        }
+
+        $to = get_option('fe_email') ?: get_option('admin_email');
+
+        $subject = sprintf(_l('fe_notifica_email_subject'), $fattura->nome_file);
+        $message = sprintf(_l('fe_notifica_email_body'), $fattura->nome_file, fe_get_stato_label($nuovo_stato));
+
+        fe_send_email($to, $subject, $message);
+    }
 }
