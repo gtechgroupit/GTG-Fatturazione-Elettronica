@@ -72,6 +72,12 @@ class FatturaPA_Generator
     public function __construct()
     {
         $this->CI = &get_instance();
+
+        // Carica l'helper se non già caricato
+        if (!function_exists('fe_normalizza_partita_iva')) {
+            $this->CI->load->helper('fatturazione_elettronica/fatturazione_elettronica');
+        }
+
         $this->loadCompanyData();
     }
 

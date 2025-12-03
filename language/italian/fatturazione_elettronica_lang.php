@@ -329,3 +329,9 @@ $lang['fe_xml_errori'] = 'Errori nella validazione XML';
 // Cron
 $lang['fe_cron_eseguito'] = 'Cron job eseguito con successo';
 $lang['fe_cron_errore'] = 'Errore durante l\'esecuzione del cron job';
+
+// Pulsante nella pagina fattura Perfex
+$lang['fe_fatturazione_elettronica'] = 'Fatturazione Elettronica';
+$lang['fe_fattura_non_generata'] = 'La fattura elettronica non è ancora stata generata per questa fattura.';
+$lang['fe_genera_fattura_elettronica'] = 'Genera Fattura Elettronica';
+$lang['fe_vedi_dettagli'] = 'Vedi Dettagli';
