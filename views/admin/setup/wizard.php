@@ -62,7 +62,13 @@
 
                                 <?php if (!empty($provider['pricing'])): ?>
                                 <div class="tw-mb-2">
-                                    <span class="label label-info"><?php echo $provider['pricing']; ?></span>
+                                    <?php if (is_array($provider['pricing'])): ?>
+                                        <?php foreach ($provider['pricing'] as $price): ?>
+                                        <span class="label label-info tw-mr-1"><?php echo $price; ?></span>
+                                        <?php endforeach; ?>
+                                    <?php else: ?>
+                                        <span class="label label-info"><?php echo $provider['pricing']; ?></span>
+                                    <?php endif; ?>
                                 </div>
                                 <?php endif; ?>
 
