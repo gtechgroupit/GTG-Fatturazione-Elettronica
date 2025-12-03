@@ -11,7 +11,7 @@
             </div>
         </div>
 
-        <form method="post">
+        <form method="post" enctype="multipart/form-data">
             <input type="hidden" name="<?php echo $this->security->get_csrf_token_name(); ?>" value="<?php echo $this->security->get_csrf_hash(); ?>">
 
             <!-- Tabs -->
@@ -197,19 +197,30 @@
                 <div role="tabpanel" class="tab-pane" id="tab-provider">
                     <div class="panel_s">
                         <div class="panel-body">
+                            <!-- Provider attivo -->
                             <div class="row">
-                                <div class="col-md-4">
-                                    <div class="form-group">
-                                        <label><?php echo _l('fe_provider'); ?> <span class="text-danger">*</span></label>
-                                        <select name="fe_provider" id="fe_provider" class="form-control" required>
-                                            <?php foreach ($providers as $code => $label): ?>
-                                                <option value="<?php echo $code; ?>" <?php echo $settings['fe_provider'] == $code ? 'selected' : ''; ?>>
-                                                    <?php echo $label; ?>
-                                                </option>
-                                            <?php endforeach; ?>
-                                        </select>
+                                <div class="col-md-8">
+                                    <div class="tw-flex tw-items-center tw-mb-4">
+                                        <div class="tw-p-3 tw-rounded-lg tw-mr-4" style="background-color: <?php echo $provider_info['color'] ?? '#333'; ?>">
+                                            <i class="fa <?php echo $provider_info['icon'] ?? 'fa-plug'; ?> tw-text-2xl tw-text-white"></i>
+                                        </div>
+                                        <div>
+                                            <h5 class="tw-font-bold tw-mb-1"><?php echo $provider_info['name']; ?></h5>
+                                            <p class="tw-text-gray-600 tw-mb-0"><?php echo $provider_info['description']; ?></p>
+                                        </div>
                                     </div>
                                 </div>
+                                <div class="col-md-4 tw-text-right">
+                                    <a href="<?php echo admin_url('fatturazione_elettronica/setup/1'); ?>" class="btn btn-default">
+                                        <i class="fa fa-exchange tw-mr-1"></i>
+                                        <?php echo _l('fe_change_provider'); ?>
+                                    </a>
+                                </div>
+                            </div>
+
+                            <input type="hidden" name="fe_provider" value="<?php echo $current_provider; ?>">
+
+                            <div class="row">
                                 <div class="col-md-4">
                                     <div class="form-group">
                                         <label><?php echo _l('fe_ambiente'); ?></label>
@@ -230,48 +241,92 @@
                                 </div>
                             </div>
 
-                            <div id="provider-custom-fields">
-                                <hr>
-                                <div class="row">
-                                    <div class="col-md-6">
-                                        <div class="form-group" id="field-endpoint">
-                                            <label><?php echo _l('fe_api_endpoint'); ?></label>
-                                            <input type="url" name="fe_api_endpoint" class="form-control" value="<?php echo $settings['fe_api_endpoint']; ?>" placeholder="https://api.example.com/sdi">
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="row">
-                                    <div class="col-md-3">
-                                        <div class="form-group" id="field-username">
-                                            <label><?php echo _l('fe_api_username'); ?></label>
-                                            <input type="text" name="fe_api_username" class="form-control" value="<?php echo $settings['fe_api_username']; ?>">
-                                        </div>
-                                    </div>
-                                    <div class="col-md-3">
-                                        <div class="form-group" id="field-password">
-                                            <label><?php echo _l('fe_api_password'); ?></label>
-                                            <input type="password" name="fe_api_password" class="form-control" value="<?php echo $settings['fe_api_password']; ?>">
-                                        </div>
-                                    </div>
-                                    <div class="col-md-3">
-                                        <div class="form-group" id="field-api-key">
-                                            <label><?php echo _l('fe_api_key'); ?></label>
-                                            <input type="text" name="fe_api_key" class="form-control" value="<?php echo $settings['fe_api_key']; ?>">
-                                        </div>
-                                    </div>
-                                    <div class="col-md-3">
-                                        <div class="form-group" id="field-api-secret">
-                                            <label><?php echo _l('fe_api_secret'); ?></label>
-                                            <input type="password" name="fe_api_secret" class="form-control" value="<?php echo $settings['fe_api_secret']; ?>">
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
+                            <?php if (!empty($provider_info['fields'])): ?>
+                            <hr>
+                            <h5 class="tw-font-semibold tw-mb-3"><?php echo _l('fe_provider_credentials'); ?></h5>
 
-                            <div class="alert alert-info tw-mt-4" id="provider-help">
-                                <i class="fa fa-info-circle"></i>
-                                <span id="provider-help-text"></span>
+                            <div class="row">
+                                <?php foreach ($provider_info['fields'] as $field): ?>
+                                <div class="col-md-<?php echo $field['col'] ?? 6; ?>">
+                                    <div class="form-group">
+                                        <label>
+                                            <?php echo $field['label']; ?>
+                                            <?php if (!empty($field['required'])): ?>
+                                            <span class="text-danger">*</span>
+                                            <?php endif; ?>
+                                        </label>
+
+                                        <?php if ($field['type'] == 'file'): ?>
+                                        <input type="file" name="<?php echo $field['name']; ?>" class="form-control"
+                                               accept="<?php echo $field['accept'] ?? ''; ?>">
+                                        <?php if (!empty($settings[$field['name']])): ?>
+                                        <small class="text-success">
+                                            <i class="fa fa-check"></i> <?php echo _l('fe_file_uploaded'); ?>: <?php echo basename($settings[$field['name']]); ?>
+                                        </small>
+                                        <?php endif; ?>
+
+                                        <?php elseif ($field['type'] == 'password'): ?>
+                                        <input type="password" name="<?php echo $field['name']; ?>" class="form-control"
+                                               value="<?php echo $settings[$field['name']] ?? ''; ?>"
+                                               placeholder="<?php echo $field['placeholder'] ?? ''; ?>">
+
+                                        <?php elseif ($field['type'] == 'select'): ?>
+                                        <select name="<?php echo $field['name']; ?>" class="form-control">
+                                            <?php foreach ($field['options'] as $val => $label): ?>
+                                            <option value="<?php echo $val; ?>"
+                                                    <?php echo ($settings[$field['name']] ?? '') == $val ? 'selected' : ''; ?>>
+                                                <?php echo $label; ?>
+                                            </option>
+                                            <?php endforeach; ?>
+                                        </select>
+
+                                        <?php else: ?>
+                                        <input type="<?php echo $field['type']; ?>" name="<?php echo $field['name']; ?>"
+                                               class="form-control"
+                                               value="<?php echo $settings[$field['name']] ?? ''; ?>"
+                                               placeholder="<?php echo $field['placeholder'] ?? ''; ?>">
+                                        <?php endif; ?>
+
+                                        <?php if (!empty($field['help'])): ?>
+                                        <small class="text-muted"><?php echo $field['help']; ?></small>
+                                        <?php endif; ?>
+                                    </div>
+                                </div>
+                                <?php endforeach; ?>
                             </div>
+                            <?php endif; ?>
+
+                            <?php if ($current_provider == 'fattureincloud'): ?>
+                            <!-- Stato OAuth per FattureInCloud -->
+                            <hr>
+                            <h5 class="tw-font-semibold tw-mb-3"><?php echo _l('fe_oauth_status'); ?></h5>
+
+                            <?php if (!empty($settings['fe_fic_access_token'])): ?>
+                            <div class="alert alert-success">
+                                <i class="fa fa-check-circle"></i>
+                                <?php echo _l('fe_oauth_connected'); ?>
+                                <?php if (!empty($settings['fe_fic_company_name'])): ?>
+                                - <strong><?php echo $settings['fe_fic_company_name']; ?></strong>
+                                <?php endif; ?>
+                            </div>
+                            <a href="<?php echo admin_url('fatturazione_elettronica/oauth_disconnect'); ?>"
+                               class="btn btn-danger btn-sm"
+                               onclick="return confirm('<?php echo _l('fe_confirm_disconnect'); ?>');">
+                                <i class="fa fa-unlink tw-mr-1"></i>
+                                <?php echo _l('fe_disconnect_account'); ?>
+                            </a>
+                            <?php else: ?>
+                            <div class="alert alert-warning">
+                                <i class="fa fa-exclamation-triangle"></i>
+                                <?php echo _l('fe_oauth_not_connected'); ?>
+                            </div>
+                            <a href="<?php echo admin_url('fatturazione_elettronica/setup/2?provider=fattureincloud'); ?>"
+                               class="btn btn-primary">
+                                <i class="fa fa-link tw-mr-1"></i>
+                                <?php echo _l('fe_connect_account'); ?>
+                            </a>
+                            <?php endif; ?>
+                            <?php endif; ?>
                         </div>
                     </div>
                 </div>
@@ -439,48 +494,6 @@ function copyToClipboard(text) {
 }
 
 $(function() {
-    var providerHelp = {
-        'test': '<?php echo _l("fe_provider_test_help"); ?>',
-        'aruba': '<?php echo _l("fe_provider_aruba_help"); ?>',
-        'infocert': '<?php echo _l("fe_provider_infocert_help"); ?>',
-        'fattureincloud': '<?php echo _l("fe_provider_fattureincloud_help"); ?>',
-        'custom': '<?php echo _l("fe_provider_custom_help"); ?>'
-    };
-
-    function updateProviderFields() {
-        var provider = $('#fe_provider').val();
-
-        $('#provider-help-text').text(providerHelp[provider] || '');
-
-        // Nascondi/mostra campi in base al provider
-        if (provider === 'test') {
-            $('#provider-custom-fields').hide();
-        } else {
-            $('#provider-custom-fields').show();
-        }
-
-        // Mostra solo i campi rilevanti
-        if (provider === 'aruba') {
-            $('#field-endpoint').hide();
-            $('#field-username, #field-password').show();
-            $('#field-api-key, #field-api-secret').hide();
-        } else if (provider === 'infocert') {
-            $('#field-endpoint').hide();
-            $('#field-username, #field-password').hide();
-            $('#field-api-key').show();
-            $('#field-api-secret').hide();
-        } else if (provider === 'fattureincloud') {
-            $('#field-endpoint').hide();
-            $('#field-username, #field-password').hide();
-            $('#field-api-key, #field-api-secret').show();
-        } else if (provider === 'custom') {
-            $('#field-endpoint, #field-username, #field-password, #field-api-key, #field-api-secret').show();
-        }
-    }
-
-    $('#fe_provider').on('change', updateProviderFields);
-    updateProviderFields();
-
     $('#btn-test-connection').on('click', function() {
         var $btn = $(this);
         $btn.prop('disabled', true).html('<i class="fa fa-spinner fa-spin"></i> <?php echo _l("fe_testing"); ?>');

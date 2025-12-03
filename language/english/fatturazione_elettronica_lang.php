@@ -246,3 +246,42 @@ $lang['fe_notifica_email_subject_consegnata'] = 'Electronic Invoice Delivered';
 $lang['fe_notifica_email_subject_accettata'] = 'Electronic Invoice Accepted';
 $lang['fe_notifica_email_subject_rifiutata'] = 'Electronic Invoice Rejected';
 $lang['fe_notifica_email_subject_scartata'] = 'Electronic Invoice Discarded';
+
+// Setup Wizard
+$lang['fe_setup_wizard'] = 'Electronic Invoicing Setup';
+$lang['fe_setup_wizard_title'] = 'Configure Electronic Invoicing';
+$lang['fe_setup_wizard_subtitle'] = 'Follow the steps to configure the electronic invoicing module';
+$lang['fe_step_provider'] = 'Provider';
+$lang['fe_step_credentials'] = 'Credentials';
+$lang['fe_step_company'] = 'Company';
+$lang['fe_select_provider'] = 'Select your electronic invoicing provider';
+$lang['fe_select'] = 'Select';
+$lang['fe_selected'] = 'Selected';
+$lang['fe_skip_setup'] = 'Skip setup';
+$lang['fe_configure_credentials'] = 'Enter credentials to connect to the service';
+$lang['fe_requirements'] = 'Requirements';
+$lang['fe_back'] = 'Back';
+$lang['fe_continue'] = 'Continue';
+$lang['fe_complete_setup'] = 'Complete Setup';
+$lang['fe_company_data'] = 'Company Data';
+$lang['fe_file_uploaded'] = 'File uploaded';
+$lang['fe_credentials_saved'] = 'Credentials saved successfully';
+$lang['fe_setup_complete'] = 'Setup completed successfully!';
+
+// OAuth
+$lang['fe_oauth_status'] = 'OAuth Connection Status';
+$lang['fe_oauth_connected'] = 'Account connected';
+$lang['fe_oauth_not_connected'] = 'Account not connected';
+$lang['fe_oauth_instructions'] = 'Enter the OAuth credentials from the application created in the developer portal';
+$lang['fe_connect_account'] = 'Connect Account';
+$lang['fe_disconnect_account'] = 'Disconnect Account';
+$lang['fe_confirm_disconnect'] = 'Are you sure you want to disconnect the account?';
+$lang['fe_oauth_success'] = 'Account connected successfully!';
+$lang['fe_oauth_error'] = 'OAuth authentication error';
+$lang['fe_oauth_denied'] = 'Authorization denied';
+$lang['fe_oauth_no_code'] = 'Missing authorization code';
+$lang['fe_oauth_disconnected'] = 'Account disconnected successfully';
+
+// Provider Settings
+$lang['fe_change_provider'] = 'Change Provider';
+$lang['fe_provider_credentials'] = 'Provider Credentials';

@@ -246,3 +246,42 @@ $lang['fe_notifica_email_subject_consegnata'] = 'Fattura Elettronica Consegnata'
 $lang['fe_notifica_email_subject_accettata'] = 'Fattura Elettronica Accettata';
 $lang['fe_notifica_email_subject_rifiutata'] = 'Fattura Elettronica Rifiutata';
 $lang['fe_notifica_email_subject_scartata'] = 'Fattura Elettronica Scartata';
+
+// Setup Wizard
+$lang['fe_setup_wizard'] = 'Configurazione Fatturazione Elettronica';
+$lang['fe_setup_wizard_title'] = 'Configura la Fatturazione Elettronica';
+$lang['fe_setup_wizard_subtitle'] = 'Segui i passaggi per configurare il modulo di fatturazione elettronica';
+$lang['fe_step_provider'] = 'Provider';
+$lang['fe_step_credentials'] = 'Credenziali';
+$lang['fe_step_company'] = 'Azienda';
+$lang['fe_select_provider'] = 'Seleziona il tuo provider di fatturazione elettronica';
+$lang['fe_select'] = 'Seleziona';
+$lang['fe_selected'] = 'Selezionato';
+$lang['fe_skip_setup'] = 'Salta configurazione';
+$lang['fe_configure_credentials'] = 'Inserisci le credenziali per connetterti al servizio';
+$lang['fe_requirements'] = 'Requisiti';
+$lang['fe_back'] = 'Indietro';
+$lang['fe_continue'] = 'Continua';
+$lang['fe_complete_setup'] = 'Completa Configurazione';
+$lang['fe_company_data'] = 'Dati Aziendali';
+$lang['fe_file_uploaded'] = 'File caricato';
+$lang['fe_credentials_saved'] = 'Credenziali salvate con successo';
+$lang['fe_setup_complete'] = 'Configurazione completata con successo!';
+
+// OAuth
+$lang['fe_oauth_status'] = 'Stato Connessione OAuth';
+$lang['fe_oauth_connected'] = 'Account collegato';
+$lang['fe_oauth_not_connected'] = 'Account non collegato';
+$lang['fe_oauth_instructions'] = 'Inserisci le credenziali OAuth dell\'applicazione creata nel portale sviluppatori';
+$lang['fe_connect_account'] = 'Collega Account';
+$lang['fe_disconnect_account'] = 'Scollega Account';
+$lang['fe_confirm_disconnect'] = 'Sei sicuro di voler scollegare l\'account?';
+$lang['fe_oauth_success'] = 'Account collegato con successo!';
+$lang['fe_oauth_error'] = 'Errore durante l\'autenticazione OAuth';
+$lang['fe_oauth_denied'] = 'Autorizzazione negata';
+$lang['fe_oauth_no_code'] = 'Codice di autorizzazione mancante';
+$lang['fe_oauth_disconnected'] = 'Account scollegato con successo';
+
+// Provider Settings
+$lang['fe_change_provider'] = 'Cambia Provider';
+$lang['fe_provider_credentials'] = 'Credenziali Provider';

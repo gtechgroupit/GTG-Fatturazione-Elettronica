@@ -417,26 +417,200 @@ class Fatturazione_elettronica extends AdminController
     }
 
     // =========================================================================
-    // IMPOSTAZIONI
+    // SETUP WIZARD
     // =========================================================================
 
     /**
-     * Pagina impostazioni
+     * Wizard di setup per la configurazione del provider
      */
-    public function impostazioni()
+    public function setup($step = 1)
     {
         if (!has_permission('fatturazione_elettronica', '', 'edit') && !is_admin()) {
             access_denied('fatturazione_elettronica');
         }
 
-        if ($this->input->post()) {
-            $this->save_settings();
+        $data['title'] = _l('fe_setup_wizard');
+        $data['step'] = (int)$step;
+        $data['current_provider'] = get_option('fe_provider') ?: 'test';
+
+        // Carica i provider disponibili
+        $this->load->library('fatturazione_elettronica/Sdi_client');
+        $data['providers'] = Sdi_client::getAvailableProviders();
+
+        // Provider selezionato (da query string o configurazione)
+        $selected_provider = $this->input->get('provider') ?: $data['current_provider'];
+        $data['selected_provider'] = $selected_provider;
+        $data['provider_info'] = $data['providers'][$selected_provider] ?? $data['providers']['test'];
+
+        // Carica settings
+        $data['settings'] = $this->get_all_settings();
+
+        // Per step 3: regimi fiscali
+        if ($step == 3) {
+            $data['regimi_fiscali'] = $this->get_regimi_fiscali();
         }
 
-        $data['title'] = _l('fe_impostazioni');
+        $this->load->view('fatturazione_elettronica/admin/setup/wizard', $data);
+    }
 
-        // Carica tutte le opzioni
-        $data['settings'] = [
+    /**
+     * Salva le credenziali OAuth per FattureInCloud
+     */
+    public function save_oauth_credentials()
+    {
+        if (!has_permission('fatturazione_elettronica', '', 'edit') && !is_admin()) {
+            access_denied('fatturazione_elettronica');
+        }
+
+        $client_id = $this->input->post('fe_fic_client_id');
+        $client_secret = $this->input->post('fe_fic_client_secret');
+
+        if (!empty($client_id) && !empty($client_secret)) {
+            update_option('fe_fic_client_id', $client_id);
+            update_option('fe_fic_client_secret', $client_secret);
+            update_option('fe_provider', 'fattureincloud');
+
+            // Genera URL di autorizzazione e reindirizza
+            $this->load->library('fatturazione_elettronica/Fattureincloud_client');
+            $auth_url = $this->fattureincloud_client->getAuthorizationUrl();
+
+            if ($auth_url) {
+                redirect($auth_url);
+            }
+        }
+
+        set_alert('danger', _l('fe_oauth_error'));
+        redirect(admin_url('fatturazione_elettronica/setup/2?provider=fattureincloud'));
+    }
+
+    /**
+     * Callback OAuth per FattureInCloud
+     */
+    public function oauth_callback()
+    {
+        $code = $this->input->get('code');
+        $state = $this->input->get('state');
+        $error = $this->input->get('error');
+
+        if ($error) {
+            set_alert('danger', _l('fe_oauth_denied') . ': ' . $error);
+            redirect(admin_url('fatturazione_elettronica/setup/2?provider=fattureincloud'));
+        }
+
+        if (empty($code)) {
+            set_alert('danger', _l('fe_oauth_no_code'));
+            redirect(admin_url('fatturazione_elettronica/setup/2?provider=fattureincloud'));
+        }
+
+        $this->load->library('fatturazione_elettronica/Fattureincloud_client');
+        $result = $this->fattureincloud_client->handleCallback($code);
+
+        if ($result) {
+            set_alert('success', _l('fe_oauth_success'));
+            redirect(admin_url('fatturazione_elettronica/setup/3'));
+        } else {
+            set_alert('danger', _l('fe_oauth_error') . ': ' . $this->fattureincloud_client->getLastError());
+            redirect(admin_url('fatturazione_elettronica/setup/2?provider=fattureincloud'));
+        }
+    }
+
+    /**
+     * Disconnetti OAuth
+     */
+    public function oauth_disconnect()
+    {
+        if (!has_permission('fatturazione_elettronica', '', 'edit') && !is_admin()) {
+            access_denied('fatturazione_elettronica');
+        }
+
+        $provider = get_option('fe_provider');
+
+        if ($provider == 'fattureincloud') {
+            $this->load->library('fatturazione_elettronica/Fattureincloud_client');
+            $this->fattureincloud_client->disconnect();
+        }
+
+        set_alert('success', _l('fe_oauth_disconnected'));
+        redirect(admin_url('fatturazione_elettronica/setup/2?provider=' . $provider));
+    }
+
+    /**
+     * Salva credenziali provider
+     */
+    public function save_credentials()
+    {
+        if (!has_permission('fatturazione_elettronica', '', 'edit') && !is_admin()) {
+            access_denied('fatturazione_elettronica');
+        }
+
+        $provider = $this->input->get('provider') ?: $this->input->post('provider');
+
+        if (!empty($provider)) {
+            update_option('fe_provider', $provider);
+        }
+
+        // Salva tutti i campi che iniziano con fe_
+        $fields = $this->input->post();
+        foreach ($fields as $key => $value) {
+            if (strpos($key, 'fe_') === 0) {
+                update_option($key, $value);
+            }
+        }
+
+        // Gestione upload file (es. certificato per AdE)
+        if (!empty($_FILES)) {
+            foreach ($_FILES as $field_name => $file) {
+                if ($file['error'] === UPLOAD_ERR_OK) {
+                    $upload_path = fe_get_upload_path('certificates');
+
+                    if (!is_dir($upload_path)) {
+                        mkdir($upload_path, 0755, true);
+                    }
+
+                    $new_name = $field_name . '_' . time() . '_' . basename($file['name']);
+                    $target = $upload_path . $new_name;
+
+                    if (move_uploaded_file($file['tmp_name'], $target)) {
+                        update_option($field_name, $target);
+                    }
+                }
+            }
+        }
+
+        set_alert('success', _l('fe_credentials_saved'));
+        redirect(admin_url('fatturazione_elettronica/setup/3'));
+    }
+
+    /**
+     * Salva dati azienda e completa setup
+     */
+    public function save_company()
+    {
+        if (!has_permission('fatturazione_elettronica', '', 'edit') && !is_admin()) {
+            access_denied('fatturazione_elettronica');
+        }
+
+        $fields = $this->input->post();
+
+        foreach ($fields as $key => $value) {
+            if (strpos($key, 'fe_') === 0) {
+                update_option($key, $value);
+            }
+        }
+
+        // Segna il setup come completato
+        update_option('fe_setup_completed', '1');
+
+        set_alert('success', _l('fe_setup_complete'));
+        redirect(admin_url('fatturazione_elettronica'));
+    }
+
+    /**
+     * Ottiene tutte le impostazioni
+     */
+    protected function get_all_settings()
+    {
+        return [
             // Dati azienda
             'fe_denominazione'        => get_option('fe_denominazione'),
             'fe_partita_iva'          => get_option('fe_partita_iva'),
@@ -466,6 +640,21 @@ class Fatturazione_elettronica extends AdminController
             'fe_api_secret'           => get_option('fe_api_secret'),
             'fe_ambiente'             => get_option('fe_ambiente'),
 
+            // Agenzia Entrate
+            'fe_ade_certificato_path' => get_option('fe_ade_certificato_path'),
+            'fe_ade_certificato_password' => get_option('fe_ade_certificato_password'),
+            'fe_ade_codice_accreditamento' => get_option('fe_ade_codice_accreditamento'),
+
+            // Fattura24
+            'fe_f24_api_key'          => get_option('fe_f24_api_key'),
+
+            // FattureInCloud
+            'fe_fic_client_id'        => get_option('fe_fic_client_id'),
+            'fe_fic_client_secret'    => get_option('fe_fic_client_secret'),
+            'fe_fic_access_token'     => get_option('fe_fic_access_token'),
+            'fe_fic_company_id'       => get_option('fe_fic_company_id'),
+            'fe_fic_company_name'     => get_option('fe_fic_company_name'),
+
             // Opzioni
             'fe_auto_generate_xml'    => get_option('fe_auto_generate_xml'),
             'fe_auto_send'            => get_option('fe_auto_send'),
@@ -477,12 +666,41 @@ class Fatturazione_elettronica extends AdminController
             'fe_webhook_enabled'      => get_option('fe_webhook_enabled'),
             'fe_webhook_secret'       => get_option('fe_webhook_secret'),
         ];
+    }
+
+    // =========================================================================
+    // IMPOSTAZIONI
+    // =========================================================================
+
+    /**
+     * Pagina impostazioni
+     */
+    public function impostazioni()
+    {
+        if (!has_permission('fatturazione_elettronica', '', 'edit') && !is_admin()) {
+            access_denied('fatturazione_elettronica');
+        }
+
+        if ($this->input->post()) {
+            $this->save_settings();
+        }
+
+        $data['title'] = _l('fe_impostazioni');
+
+        // Carica tutte le opzioni
+        $data['settings'] = $this->get_all_settings();
+
+        // Carica provider info
+        $this->load->library('fatturazione_elettronica/Sdi_client');
+        $data['available_providers'] = Sdi_client::getAvailableProviders();
+        $data['current_provider'] = get_option('fe_provider') ?: 'test';
+        $data['provider_info'] = $data['available_providers'][$data['current_provider']] ?? $data['available_providers']['test'];
 
         // Liste per i select
         $data['regimi_fiscali'] = $this->get_regimi_fiscali();
         $data['modalita_pagamento'] = $this->get_modalita_pagamento();
         $data['condizioni_pagamento'] = $this->get_condizioni_pagamento();
-        $data['providers'] = $this->get_providers();
+        $data['providers'] = $this->get_providers_list();
 
         $this->load->view('fatturazione_elettronica/admin/impostazioni/index', $data);
     }
@@ -743,16 +961,17 @@ class Fatturazione_elettronica extends AdminController
     }
 
     /**
-     * Lista provider SDI
+     * Lista provider SDI per dropdown
      */
-    protected function get_providers()
+    protected function get_providers_list()
     {
-        return [
-            'test'           => _l('fe_provider_test'),
-            'aruba'          => 'Aruba',
-            'infocert'       => 'InfoCert',
-            'fattureincloud' => 'Fatture in Cloud',
-            'custom'         => _l('fe_provider_custom'),
-        ];
+        $providers = Sdi_client::getAvailableProviders();
+        $list = [];
+
+        foreach ($providers as $id => $info) {
+            $list[$id] = $info['name'];
+        }
+
+        return $list;
     }
 }
