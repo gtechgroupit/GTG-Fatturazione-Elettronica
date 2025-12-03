@@ -329,3 +329,9 @@ $lang['fe_xml_errori'] = 'XML validation errors';
 // Cron
 $lang['fe_cron_eseguito'] = 'Cron job executed successfully';
 $lang['fe_cron_errore'] = 'Error during cron job execution';
+
+// Button in Perfex invoice page
+$lang['fe_fatturazione_elettronica'] = 'Electronic Invoicing';
+$lang['fe_fattura_non_generata'] = 'The electronic invoice has not yet been generated for this invoice.';
+$lang['fe_genera_fattura_elettronica'] = 'Generate Electronic Invoice';
+$lang['fe_vedi_dettagli'] = 'View Details';

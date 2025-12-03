@@ -190,13 +190,13 @@ if (function_exists('hooks')) {
     hooks()->add_action('app_admin_head', 'fatturazione_elettronica_add_head_css');
     hooks()->add_action('app_admin_footer', 'fatturazione_elettronica_add_footer_js');
 
-    // Hook per le fatture
-    hooks()->add_action('after_invoice_added', 'fatturazione_elettronica_after_invoice_added');
+    // Hook per le fatture - RIMOSSO invio automatico, ora è solo manuale
+    // hooks()->add_action('after_invoice_added', 'fatturazione_elettronica_after_invoice_added');
     hooks()->add_action('after_invoice_updated', 'fatturazione_elettronica_after_invoice_updated');
     hooks()->add_filter('invoice_html_pdf_data', 'fatturazione_elettronica_invoice_pdf_data');
 
-    // Hook per le note di credito
-    hooks()->add_action('after_credit_note_added', 'fatturazione_elettronica_after_credit_note_added');
+    // Hook per le note di credito - RIMOSSO invio automatico, ora è solo manuale
+    // hooks()->add_action('after_credit_note_added', 'fatturazione_elettronica_after_credit_note_added');
     hooks()->add_action('after_credit_note_updated', 'fatturazione_elettronica_after_credit_note_updated');
 
     // Menu administration
@@ -207,6 +207,9 @@ if (function_exists('hooks')) {
 
     // Cron job per controllo notifiche SDI
     hooks()->add_action('cron_job', 'fatturazione_elettronica_cron');
+
+    // Hook per mostrare pulsante invio fattura nella pagina fattura Perfex
+    hooks()->add_action('before_admin_invoice_view_bottom', 'fatturazione_elettronica_invoice_view_button');
 
     // Link azioni modulo
     hooks()->add_filter('module_' . FATTURAZIONE_ELETTRONICA_MODULE_NAME . '_action_links', function ($actions) {
@@ -584,4 +587,76 @@ function fatturazione_elettronica_activation_hook()
 function fatturazione_elettronica_deactivation_hook()
 {
     // Non rimuoviamo i dati per sicurezza
+}
+
+/**
+ * Mostra pulsante per inviare fattura elettronica nella pagina fattura Perfex
+ *
+ * @param object $invoice La fattura Perfex
+ */
+function fatturazione_elettronica_invoice_view_button($invoice)
+{
+    if (!isset($invoice->id)) {
+        return;
+    }
+
+    // Carica la lingua
+    fatturazione_elettronica_load_language();
+
+    $CI = &get_instance();
+    $CI->load->model(FATTURAZIONE_ELETTRONICA_MODULE_NAME . '/Fatturazione_elettronica_model');
+    $CI->load->helper(FATTURAZIONE_ELETTRONICA_MODULE_NAME . '/fatturazione_elettronica');
+
+    // Verifica se esiste già una fattura elettronica per questa invoice
+    $fe_fattura = $CI->Fatturazione_elettronica_model->get_fattura_attiva_by_invoice_id($invoice->id);
+
+    echo '<div class="panel_s mtop15">';
+    echo '<div class="panel-body">';
+    echo '<h4 class="tw-font-bold tw-flex tw-items-center tw-mb-4">';
+    echo '<i class="fa-solid fa-file-invoice tw-mr-2"></i> ';
+    echo _l('fe_fatturazione_elettronica');
+    echo '</h4>';
+
+    if ($fe_fattura) {
+        // Esiste già una fattura elettronica
+        echo '<div class="tw-mb-3">';
+        echo '<p><strong>' . _l('fe_stato') . ':</strong> ';
+        echo '<span class="label label-' . fe_get_stato_class($fe_fattura->stato) . '">';
+        echo fe_get_stato_label($fe_fattura->stato);
+        echo '</span></p>';
+        echo '<p><strong>' . _l('fe_nome_file') . ':</strong> <code>' . $fe_fattura->nome_file . '</code></p>';
+
+        if ($fe_fattura->identificativo_sdi) {
+            echo '<p><strong>' . _l('fe_id_sdi') . ':</strong> <code>' . $fe_fattura->identificativo_sdi . '</code></p>';
+        }
+        echo '</div>';
+
+        echo '<div class="btn-group">';
+
+        // Pulsante per vedere dettagli
+        echo '<a href="' . admin_url('fatturazione_elettronica/fattura_attiva/' . $fe_fattura->id) . '" class="btn btn-default">';
+        echo '<i class="fa fa-eye tw-mr-1"></i> ' . _l('fe_vedi_dettagli');
+        echo '</a>';
+
+        // Se generata o scartata, mostra pulsante invio
+        if (in_array($fe_fattura->stato, [FE_STATO_GENERATA, FE_STATO_SCARTATA])) {
+            echo '<a href="' . admin_url('fatturazione_elettronica/invia_fattura/' . $fe_fattura->id) . '" ';
+            echo 'class="btn btn-primary" onclick="return confirm(\'' . _l('fe_confirm_send') . '\');">';
+            echo '<i class="fa fa-paper-plane tw-mr-1"></i> ' . _l('fe_invia_sdi');
+            echo '</a>';
+        }
+
+        echo '</div>';
+    } else {
+        // Non esiste ancora una fattura elettronica
+        echo '<p class="text-muted tw-mb-3">' . _l('fe_fattura_non_generata') . '</p>';
+
+        // Pulsante per generare la fattura elettronica
+        echo '<a href="' . admin_url('fatturazione_elettronica/genera_xml/' . $invoice->id) . '" class="btn btn-info">';
+        echo '<i class="fa fa-file-code tw-mr-1"></i> ' . _l('fe_genera_fattura_elettronica');
+        echo '</a>';
+    }
+
+    echo '</div>';
+    echo '</div>';
 }
