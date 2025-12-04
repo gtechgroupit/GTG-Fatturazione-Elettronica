@@ -643,9 +643,21 @@ class FatturaPA_Generator
         // Carica gli items della fattura
         $items = $this->invoice_data->items ?? [];
 
+        fe_log('debug_fatturaPA', 'Invoice ID: ' . $this->invoice_data->id);
+        fe_log('debug_fatturaPA', 'Items from invoice_data: ' . count($items));
+
         if (empty($items)) {
             $this->CI->load->model('invoices_model');
             $items = $this->CI->invoices_model->get_invoice_items($this->invoice_data->id);
+            fe_log('debug_fatturaPA', 'Items loaded from model: ' . (is_array($items) ? count($items) : 'null/empty'));
+        }
+
+        // Debug: log primo item per vedere la struttura
+        if (!empty($items)) {
+            $first_item = is_array($items) ? reset($items) : $items[0];
+            fe_log('debug_fatturaPA', 'First item structure: ' . json_encode($first_item, JSON_UNESCAPED_UNICODE));
+        } else {
+            fe_log('debug_fatturaPA', 'ATTENZIONE: Nessun item trovato per la fattura');
         }
 
         $lineNumber = 0;

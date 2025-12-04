@@ -6,7 +6,7 @@ defined('BASEPATH') or exit('No direct script access allowed');
  * Module Name: Fatturazione Elettronica SDI
  * URI: https://github.com/gtechgroupit/GTG-Fatturazione-Elettronica
  * Description: Modulo per la fatturazione elettronica italiana tramite SDI (Sistema di Interscambio) dell'Agenzia delle Entrate. Supporta invio e ricezione fatture B2B/B2C/PA.
- * Version: 1.1.0
+ * Version: 1.2.2
  * Author: GTech Group IT
  * Author URI: https://gtechgroup.it
  * Requires at least: 3.2
@@ -17,7 +17,7 @@ if (!defined('FATTURAZIONE_ELETTRONICA_MODULE_NAME')) {
     define('FATTURAZIONE_ELETTRONICA_MODULE_NAME', 'fatturazione_elettronica');
 }
 if (!defined('FATTURAZIONE_ELETTRONICA_MODULE_VERSION')) {
-    define('FATTURAZIONE_ELETTRONICA_MODULE_VERSION', '1.2.1');
+    define('FATTURAZIONE_ELETTRONICA_MODULE_VERSION', '1.2.2');
 }
 if (!defined('FATTURAZIONE_ELETTRONICA_MODULE_PATH')) {
     define('FATTURAZIONE_ELETTRONICA_MODULE_PATH', __DIR__);
