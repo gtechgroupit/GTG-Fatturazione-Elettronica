@@ -94,9 +94,10 @@ $condizioni_pagamento = isset($condizioni_pagamento) ? $condizioni_pagamento : [
                             <div class="row">
                                 <div class="col-md-6 col-sm-12">
                                     <div class="form-group">
-                                        <label for="fe_denominazione">
+                                        <label for="fe_denominazione" data-toggle="tooltip" title="<?php echo _l('fe_denominazione_tooltip'); ?>">
                                             <?php echo _l('fe_denominazione'); ?>
                                             <span class="text-danger" aria-label="campo obbligatorio">*</span>
+                                            <i class="fa fa-question-circle text-muted" aria-hidden="true"></i>
                                         </label>
                                         <input type="text"
                                                id="fe_denominazione"
@@ -109,9 +110,10 @@ $condizioni_pagamento = isset($condizioni_pagamento) ? $condizioni_pagamento : [
                                 </div>
                                 <div class="col-md-3 col-sm-6 col-xs-6">
                                     <div class="form-group">
-                                        <label for="fe_partita_iva">
+                                        <label for="fe_partita_iva" data-toggle="tooltip" title="<?php echo _l('fe_partita_iva_tooltip'); ?>">
                                             <?php echo _l('fe_partita_iva'); ?>
                                             <span class="text-danger" aria-label="campo obbligatorio">*</span>
+                                            <i class="fa fa-question-circle text-muted" aria-hidden="true"></i>
                                         </label>
                                         <input type="text"
                                                id="fe_partita_iva"
@@ -127,7 +129,10 @@ $condizioni_pagamento = isset($condizioni_pagamento) ? $condizioni_pagamento : [
                                 </div>
                                 <div class="col-md-3 col-sm-6 col-xs-6">
                                     <div class="form-group">
-                                        <label for="fe_codice_fiscale"><?php echo _l('fe_codice_fiscale'); ?></label>
+                                        <label for="fe_codice_fiscale" data-toggle="tooltip" title="<?php echo _l('fe_codice_fiscale_tooltip'); ?>">
+                                            <?php echo _l('fe_codice_fiscale'); ?>
+                                            <i class="fa fa-question-circle text-muted" aria-hidden="true"></i>
+                                        </label>
                                         <input type="text"
                                                id="fe_codice_fiscale"
                                                name="fe_codice_fiscale"
@@ -141,9 +146,10 @@ $condizioni_pagamento = isset($condizioni_pagamento) ? $condizioni_pagamento : [
                             <div class="row">
                                 <div class="col-md-6 col-sm-12">
                                     <div class="form-group">
-                                        <label for="fe_regime_fiscale">
+                                        <label for="fe_regime_fiscale" data-toggle="tooltip" title="<?php echo _l('fe_regime_fiscale_tooltip'); ?>">
                                             <?php echo _l('fe_regime_fiscale'); ?>
                                             <span class="text-danger" aria-label="campo obbligatorio">*</span>
+                                            <i class="fa fa-question-circle text-muted" aria-hidden="true"></i>
                                         </label>
                                         <select id="fe_regime_fiscale"
                                                 name="fe_regime_fiscale"
@@ -161,7 +167,10 @@ $condizioni_pagamento = isset($condizioni_pagamento) ? $condizioni_pagamento : [
                                 </div>
                                 <div class="col-md-3 col-sm-6 col-xs-6">
                                     <div class="form-group">
-                                        <label for="fe_codice_destinatario"><?php echo _l('fe_codice_destinatario'); ?></label>
+                                        <label for="fe_codice_destinatario" data-toggle="tooltip" title="<?php echo _l('fe_codice_destinatario_tooltip'); ?>">
+                                            <?php echo _l('fe_codice_destinatario'); ?>
+                                            <i class="fa fa-question-circle text-muted" aria-hidden="true"></i>
+                                        </label>
                                         <input type="text"
                                                id="fe_codice_destinatario"
                                                name="fe_codice_destinatario"
@@ -174,7 +183,10 @@ $condizioni_pagamento = isset($condizioni_pagamento) ? $condizioni_pagamento : [
                                 </div>
                                 <div class="col-md-3 col-sm-6 col-xs-6">
                                     <div class="form-group">
-                                        <label for="fe_pec"><?php echo _l('fe_pec'); ?></label>
+                                        <label for="fe_pec" data-toggle="tooltip" title="<?php echo _l('fe_pec_tooltip'); ?>">
+                                            <?php echo _l('fe_pec'); ?>
+                                            <i class="fa fa-question-circle text-muted" aria-hidden="true"></i>
+                                        </label>
                                         <input type="email"
                                                id="fe_pec"
                                                name="fe_pec"
@@ -285,7 +297,10 @@ $condizioni_pagamento = isset($condizioni_pagamento) ? $condizioni_pagamento : [
                             </div>
 
                             <hr>
-                            <h5 class="tw-font-semibold"><?php echo _l('fe_dati_rea'); ?></h5>
+                            <h5 class="tw-font-semibold" data-toggle="tooltip" title="<?php echo _l('fe_dati_rea_tooltip'); ?>">
+                                <?php echo _l('fe_dati_rea'); ?>
+                                <i class="fa fa-question-circle text-muted" aria-hidden="true"></i>
+                            </h5>
 
                             <div class="row">
                                 <div class="col-md-2 col-sm-3 col-xs-6">

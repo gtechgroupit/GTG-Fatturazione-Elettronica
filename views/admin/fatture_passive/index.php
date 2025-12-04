@@ -52,7 +52,9 @@ $filters = isset($filters) ? $filters : [];
                                            value="<?php echo isset($filters['to_date']) ? $filters['to_date'] : ''; ?>">
                                 </div>
                                 <div class="col-md-3 col-sm-3 col-xs-6 mbot10">
-                                    <div class="checkbox" style="margin-top: 8px;">
+                                    <div class="checkbox" style="margin-top: 8px;"
+                                         data-toggle="tooltip"
+                                         title="<?php echo _l('fe_solo_non_lette_tooltip'); ?>">
                                         <input type="checkbox"
                                                id="filter_non_lette"
                                                name="non_lette"
@@ -87,12 +89,16 @@ $filters = isset($filters) ? $filters : [];
                                     <tr>
                                         <th width="30"></th>
                                         <th><?php echo _l('fe_fornitore'); ?></th>
-                                        <th><?php echo _l('fe_numero'); ?></th>
+                                        <th data-toggle="tooltip" title="<?php echo _l('fe_tipo_tooltip'); ?>">
+                                            <?php echo _l('fe_numero'); ?>
+                                        </th>
                                         <th><?php echo _l('fe_data'); ?></th>
                                         <th class="text-right"><?php echo _l('fe_totale'); ?></th>
                                         <th><?php echo _l('fe_data_ricezione'); ?></th>
-                                        <th><?php echo _l('fe_stato'); ?></th>
-                                        <th width="120"></th>
+                                        <th data-toggle="tooltip" title="<?php echo _l('fe_stato_tooltip'); ?>">
+                                            <?php echo _l('fe_stato'); ?>
+                                        </th>
+                                        <th width="120"><?php echo _l('fe_azioni'); ?></th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -138,16 +144,22 @@ $filters = isset($filters) ? $filters : [];
                                             </td>
                                             <td>
                                                 <?php if ($has_expense): ?>
-                                                    <span class="label label-success">
+                                                    <span class="label label-success"
+                                                          data-toggle="tooltip"
+                                                          title="<?php echo _l('fe_collegata_tooltip'); ?>">
                                                         <i class="fa fa-check" aria-hidden="true"></i>
                                                         <?php echo _l('fe_collegata'); ?>
                                                     </span>
                                                 <?php elseif ($is_archived): ?>
-                                                    <span class="label label-default">
+                                                    <span class="label label-default"
+                                                          data-toggle="tooltip"
+                                                          title="<?php echo _l('fe_archiviata_tooltip'); ?>">
                                                         <?php echo _l('fe_archiviata'); ?>
                                                     </span>
                                                 <?php else: ?>
-                                                    <span class="label label-warning">
+                                                    <span class="label label-warning"
+                                                          data-toggle="tooltip"
+                                                          title="<?php echo _l('fe_da_processare_tooltip'); ?>">
                                                         <?php echo _l('fe_da_processare'); ?>
                                                     </span>
                                                 <?php endif; ?>
@@ -157,14 +169,14 @@ $filters = isset($filters) ? $filters : [];
                                                     <a href="<?php echo admin_url('fatturazione_elettronica/fattura_passiva/' . $fattura->id); ?>"
                                                        class="btn btn-default btn-xs"
                                                        data-toggle="tooltip"
-                                                       title="<?php echo _l('fe_visualizza'); ?>"
+                                                       title="<?php echo _l('fe_visualizza_tooltip'); ?>"
                                                        aria-label="<?php echo _l('fe_visualizza'); ?>">
                                                         <i class="fa fa-eye" aria-hidden="true"></i>
                                                     </a>
                                                     <a href="<?php echo admin_url('fatturazione_elettronica/download_xml_passiva/' . $fattura->id); ?>"
                                                        class="btn btn-default btn-xs"
                                                        data-toggle="tooltip"
-                                                       title="<?php echo _l('fe_download_xml'); ?>"
+                                                       title="<?php echo _l('fe_download_xml_tooltip'); ?>"
                                                        aria-label="<?php echo _l('fe_download_xml'); ?>">
                                                         <i class="fa fa-download" aria-hidden="true"></i>
                                                     </a>
@@ -172,14 +184,14 @@ $filters = isset($filters) ? $filters : [];
                                                         <a href="<?php echo admin_url('fatturazione_elettronica/crea_spesa/' . $fattura->id); ?>"
                                                            class="btn btn-info btn-xs"
                                                            data-toggle="tooltip"
-                                                           title="<?php echo _l('fe_crea_spesa'); ?>"
+                                                           title="<?php echo _l('fe_crea_spesa_tooltip'); ?>"
                                                            aria-label="<?php echo _l('fe_crea_spesa'); ?>">
                                                             <i class="fa fa-receipt" aria-hidden="true"></i>
                                                         </a>
                                                         <a href="<?php echo admin_url('fatturazione_elettronica/archivia_passiva/' . $fattura->id); ?>"
                                                            class="btn btn-default btn-xs"
                                                            data-toggle="tooltip"
-                                                           title="<?php echo _l('fe_archivia'); ?>"
+                                                           title="<?php echo _l('fe_archivia_tooltip'); ?>"
                                                            aria-label="<?php echo _l('fe_archivia'); ?>">
                                                             <i class="fa fa-archive" aria-hidden="true"></i>
                                                         </a>
