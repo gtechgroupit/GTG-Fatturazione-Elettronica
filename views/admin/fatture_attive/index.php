@@ -1,4 +1,9 @@
 <?php defined('BASEPATH') or exit('No direct script access allowed'); ?>
+<?php
+// Variabili sicure con valori di default
+$fatture = isset($fatture) ? $fatture : [];
+$filters = isset($filters) ? $filters : [];
+?>
 <?php init_head(); ?>
 <div id="wrapper">
     <div class="content">
@@ -22,31 +27,34 @@
                         <!-- Filtri -->
                         <form method="get" class="tw-mb-4">
                             <div class="row">
-                                <div class="col-md-3">
-                                    <select name="stato" class="form-control selectpicker" data-live-search="true" data-none-selected-text="<?php echo _l('fe_tutti_stati'); ?>">
+                                <div class="col-md-3 col-sm-6 tw-mb-2 sm:tw-mb-0">
+                                    <label class="sr-only"><?php echo _l('fe_stato'); ?></label>
+                                    <select name="stato" class="form-control selectpicker" data-live-search="true" data-none-selected-text="<?php echo _l('fe_tutti_stati'); ?>" title="<?php echo _l('fe_tutti_stati'); ?>">
                                         <option value=""><?php echo _l('fe_tutti_stati'); ?></option>
-                                        <option value="bozza" <?php echo ($filters['stato'] ?? '') == 'bozza' ? 'selected' : ''; ?>><?php echo _l('fe_stato_bozza'); ?></option>
-                                        <option value="generata" <?php echo ($filters['stato'] ?? '') == 'generata' ? 'selected' : ''; ?>><?php echo _l('fe_stato_generata'); ?></option>
-                                        <option value="inviata" <?php echo ($filters['stato'] ?? '') == 'inviata' ? 'selected' : ''; ?>><?php echo _l('fe_stato_inviata'); ?></option>
-                                        <option value="consegnata" <?php echo ($filters['stato'] ?? '') == 'consegnata' ? 'selected' : ''; ?>><?php echo _l('fe_stato_consegnata'); ?></option>
-                                        <option value="accettata" <?php echo ($filters['stato'] ?? '') == 'accettata' ? 'selected' : ''; ?>><?php echo _l('fe_stato_accettata'); ?></option>
-                                        <option value="rifiutata" <?php echo ($filters['stato'] ?? '') == 'rifiutata' ? 'selected' : ''; ?>><?php echo _l('fe_stato_rifiutata'); ?></option>
-                                        <option value="scartata" <?php echo ($filters['stato'] ?? '') == 'scartata' ? 'selected' : ''; ?>><?php echo _l('fe_stato_scartata'); ?></option>
+                                        <option value="bozza" <?php echo (isset($filters['stato']) && $filters['stato'] == 'bozza') ? 'selected' : ''; ?>><?php echo _l('fe_stato_bozza'); ?></option>
+                                        <option value="generata" <?php echo (isset($filters['stato']) && $filters['stato'] == 'generata') ? 'selected' : ''; ?>><?php echo _l('fe_stato_generata'); ?></option>
+                                        <option value="inviata" <?php echo (isset($filters['stato']) && $filters['stato'] == 'inviata') ? 'selected' : ''; ?>><?php echo _l('fe_stato_inviata'); ?></option>
+                                        <option value="consegnata" <?php echo (isset($filters['stato']) && $filters['stato'] == 'consegnata') ? 'selected' : ''; ?>><?php echo _l('fe_stato_consegnata'); ?></option>
+                                        <option value="accettata" <?php echo (isset($filters['stato']) && $filters['stato'] == 'accettata') ? 'selected' : ''; ?>><?php echo _l('fe_stato_accettata'); ?></option>
+                                        <option value="rifiutata" <?php echo (isset($filters['stato']) && $filters['stato'] == 'rifiutata') ? 'selected' : ''; ?>><?php echo _l('fe_stato_rifiutata'); ?></option>
+                                        <option value="scartata" <?php echo (isset($filters['stato']) && $filters['stato'] == 'scartata') ? 'selected' : ''; ?>><?php echo _l('fe_stato_scartata'); ?></option>
                                     </select>
                                 </div>
-                                <div class="col-md-2">
-                                    <input type="date" name="from_date" class="form-control" placeholder="<?php echo _l('fe_da_data'); ?>" value="<?php echo $filters['from_date'] ?? ''; ?>">
+                                <div class="col-md-2 col-sm-3 col-xs-6 tw-mb-2 sm:tw-mb-0">
+                                    <label class="sr-only"><?php echo _l('fe_da_data'); ?></label>
+                                    <input type="date" name="from_date" class="form-control" title="<?php echo _l('fe_da_data'); ?>" value="<?php echo isset($filters['from_date']) ? $filters['from_date'] : ''; ?>">
                                 </div>
-                                <div class="col-md-2">
-                                    <input type="date" name="to_date" class="form-control" placeholder="<?php echo _l('fe_a_data'); ?>" value="<?php echo $filters['to_date'] ?? ''; ?>">
+                                <div class="col-md-2 col-sm-3 col-xs-6 tw-mb-2 sm:tw-mb-0">
+                                    <label class="sr-only"><?php echo _l('fe_a_data'); ?></label>
+                                    <input type="date" name="to_date" class="form-control" title="<?php echo _l('fe_a_data'); ?>" value="<?php echo isset($filters['to_date']) ? $filters['to_date'] : ''; ?>">
                                 </div>
-                                <div class="col-md-2">
-                                    <button type="submit" class="btn btn-default">
-                                        <i class="fa fa-filter"></i>
-                                        <?php echo _l('fe_filtra'); ?>
+                                <div class="col-md-3 col-sm-12 tw-mb-2 sm:tw-mb-0">
+                                    <button type="submit" class="btn btn-default" data-toggle="tooltip" title="<?php echo _l('fe_applica_filtri'); ?>">
+                                        <i class="fa fa-filter" aria-hidden="true"></i>
+                                        <span class="hidden-xs"><?php echo _l('fe_filtra'); ?></span>
                                     </button>
-                                    <a href="<?php echo admin_url('fatturazione_elettronica/fatture_attive'); ?>" class="btn btn-default">
-                                        <i class="fa fa-times"></i>
+                                    <a href="<?php echo admin_url('fatturazione_elettronica/fatture_attive'); ?>" class="btn btn-default" data-toggle="tooltip" title="<?php echo _l('fe_reset_filtri'); ?>">
+                                        <i class="fa fa-times" aria-hidden="true"></i>
                                     </a>
                                 </div>
                             </div>
@@ -123,21 +131,25 @@
                                                 <?php endif; ?>
                                             </td>
                                             <td>
-                                                <div class="btn-group">
-                                                    <a href="<?php echo admin_url('fatturazione_elettronica/fattura_attiva/' . $fattura->id); ?>" class="btn btn-default btn-xs" data-toggle="tooltip" title="<?php echo _l('fe_visualizza'); ?>">
-                                                        <i class="fa fa-eye"></i>
+                                                <div class="btn-group" role="group" aria-label="<?php echo _l('fe_azioni'); ?>">
+                                                    <a href="<?php echo admin_url('fatturazione_elettronica/fattura_attiva/' . $fattura->id); ?>" class="btn btn-default btn-xs" data-toggle="tooltip" title="<?php echo _l('fe_visualizza'); ?>" aria-label="<?php echo _l('fe_visualizza'); ?>">
+                                                        <i class="fa fa-eye" aria-hidden="true"></i>
                                                     </a>
-                                                    <a href="<?php echo admin_url('fatturazione_elettronica/download_xml/' . $fattura->id); ?>" class="btn btn-default btn-xs" data-toggle="tooltip" title="<?php echo _l('fe_download'); ?>">
-                                                        <i class="fa fa-download"></i>
+                                                    <a href="<?php echo admin_url('fatturazione_elettronica/download_xml/' . $fattura->id); ?>" class="btn btn-default btn-xs" data-toggle="tooltip" title="<?php echo _l('fe_download_xml'); ?>" aria-label="<?php echo _l('fe_download_xml'); ?>">
+                                                        <i class="fa fa-download" aria-hidden="true"></i>
                                                     </a>
-                                                    <?php if ($fattura->stato == FE_STATO_GENERATA || $fattura->stato == FE_STATO_SCARTATA): ?>
-                                                        <a href="<?php echo admin_url('fatturazione_elettronica/invia_fattura/' . $fattura->id); ?>" class="btn btn-primary btn-xs" data-toggle="tooltip" title="<?php echo _l('fe_invia'); ?>" onclick="return confirm('<?php echo _l('fe_confirm_send'); ?>');">
-                                                            <i class="fa fa-paper-plane"></i>
+                                                    <?php if (defined('FE_STATO_GENERATA') && defined('FE_STATO_SCARTATA') && ($fattura->stato == FE_STATO_GENERATA || $fattura->stato == FE_STATO_SCARTATA)): ?>
+                                                        <a href="<?php echo admin_url('fatturazione_elettronica/invia_fattura/' . $fattura->id); ?>" class="btn btn-primary btn-xs" data-toggle="tooltip" title="<?php echo _l('fe_invia_sdi'); ?>" aria-label="<?php echo _l('fe_invia_sdi'); ?>" onclick="return confirm('<?php echo _l('fe_confirm_send'); ?>');">
+                                                            <i class="fa fa-paper-plane" aria-hidden="true"></i>
+                                                        </a>
+                                                    <?php elseif ($fattura->stato == 'generata' || $fattura->stato == 'scartata'): ?>
+                                                        <a href="<?php echo admin_url('fatturazione_elettronica/invia_fattura/' . $fattura->id); ?>" class="btn btn-primary btn-xs" data-toggle="tooltip" title="<?php echo _l('fe_invia_sdi'); ?>" aria-label="<?php echo _l('fe_invia_sdi'); ?>" onclick="return confirm('<?php echo _l('fe_confirm_send'); ?>');">
+                                                            <i class="fa fa-paper-plane" aria-hidden="true"></i>
                                                         </a>
                                                     <?php endif; ?>
-                                                    <?php if (in_array($fattura->stato, [FE_STATO_BOZZA, FE_STATO_GENERATA])): ?>
-                                                        <a href="<?php echo admin_url('fatturazione_elettronica/delete_fattura_attiva/' . $fattura->id); ?>" class="btn btn-danger btn-xs _delete" data-toggle="tooltip" title="<?php echo _l('fe_elimina'); ?>">
-                                                            <i class="fa fa-trash"></i>
+                                                    <?php if ((defined('FE_STATO_BOZZA') && defined('FE_STATO_GENERATA') && in_array($fattura->stato, [FE_STATO_BOZZA, FE_STATO_GENERATA])) || in_array($fattura->stato, ['bozza', 'generata'])): ?>
+                                                        <a href="<?php echo admin_url('fatturazione_elettronica/delete_fattura_attiva/' . $fattura->id); ?>" class="btn btn-danger btn-xs _delete" data-toggle="tooltip" title="<?php echo _l('fe_elimina'); ?>" aria-label="<?php echo _l('fe_elimina'); ?>">
+                                                            <i class="fa fa-trash" aria-hidden="true"></i>
                                                         </a>
                                                     <?php endif; ?>
                                                 </div>
@@ -209,6 +221,9 @@
 
 <script>
 $(function() {
+    // Inizializza tooltip
+    $('[data-toggle="tooltip"]').tooltip();
+
     // Carica le fatture non ancora importate
     $('#modal-import').on('show.bs.modal', function() {
         var $select = $(this).find('select[name="invoice_id"]');
