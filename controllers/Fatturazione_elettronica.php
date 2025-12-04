@@ -751,66 +751,84 @@ class Fatturazione_elettronica extends AdminController
     }
 
     /**
-     * Ottiene tutte le impostazioni
+     * Ottiene tutte le impostazioni con valori di default
      */
     protected function get_all_settings()
     {
-        return [
+        // Genera webhook secret se non esiste
+        $webhook_secret = get_option('fe_webhook_secret');
+        if (empty($webhook_secret)) {
+            $webhook_secret = bin2hex(random_bytes(32));
+            update_option('fe_webhook_secret', $webhook_secret);
+        }
+
+        // Definizione impostazioni con valori di default
+        $defaults = [
             // Dati azienda
-            'fe_denominazione'        => get_option('fe_denominazione'),
-            'fe_partita_iva'          => get_option('fe_partita_iva'),
-            'fe_codice_fiscale'       => get_option('fe_codice_fiscale'),
-            'fe_regime_fiscale'       => get_option('fe_regime_fiscale'),
-            'fe_indirizzo'            => get_option('fe_indirizzo'),
-            'fe_cap'                  => get_option('fe_cap'),
-            'fe_comune'               => get_option('fe_comune'),
-            'fe_provincia'            => get_option('fe_provincia'),
-            'fe_nazione'              => get_option('fe_nazione'),
-            'fe_telefono'             => get_option('fe_telefono'),
-            'fe_email'                => get_option('fe_email'),
-            'fe_pec'                  => get_option('fe_pec'),
-            'fe_codice_destinatario'  => get_option('fe_codice_destinatario'),
-            'fe_rea_ufficio'          => get_option('fe_rea_ufficio'),
-            'fe_rea_numero'           => get_option('fe_rea_numero'),
-            'fe_capitale_sociale'     => get_option('fe_capitale_sociale'),
-            'fe_socio_unico'          => get_option('fe_socio_unico'),
-            'fe_stato_liquidazione'   => get_option('fe_stato_liquidazione'),
+            'fe_denominazione'        => '',
+            'fe_partita_iva'          => '',
+            'fe_codice_fiscale'       => '',
+            'fe_regime_fiscale'       => 'RF01',
+            'fe_indirizzo'            => '',
+            'fe_cap'                  => '',
+            'fe_comune'               => '',
+            'fe_provincia'            => '',
+            'fe_nazione'              => 'IT',
+            'fe_telefono'             => '',
+            'fe_email'                => '',
+            'fe_pec'                  => '',
+            'fe_codice_destinatario'  => '',
+            'fe_rea_ufficio'          => '',
+            'fe_rea_numero'           => '',
+            'fe_capitale_sociale'     => '',
+            'fe_socio_unico'          => '',
+            'fe_stato_liquidazione'   => 'LN',
 
             // Provider SDI
-            'fe_provider'             => get_option('fe_provider'),
-            'fe_api_endpoint'         => get_option('fe_api_endpoint'),
-            'fe_api_username'         => get_option('fe_api_username'),
-            'fe_api_password'         => get_option('fe_api_password'),
-            'fe_api_key'              => get_option('fe_api_key'),
-            'fe_api_secret'           => get_option('fe_api_secret'),
-            'fe_ambiente'             => get_option('fe_ambiente'),
+            'fe_provider'             => 'test',
+            'fe_api_endpoint'         => '',
+            'fe_api_username'         => '',
+            'fe_api_password'         => '',
+            'fe_api_key'              => '',
+            'fe_api_secret'           => '',
+            'fe_ambiente'             => 'test',
 
             // Agenzia Entrate
-            'fe_ade_certificato_path' => get_option('fe_ade_certificato_path'),
-            'fe_ade_certificato_password' => get_option('fe_ade_certificato_password'),
-            'fe_ade_codice_accreditamento' => get_option('fe_ade_codice_accreditamento'),
+            'fe_ade_certificato_path' => '',
+            'fe_ade_certificato_password' => '',
+            'fe_ade_codice_accreditamento' => '',
 
             // Fattura24
-            'fe_f24_api_key'          => get_option('fe_f24_api_key'),
+            'fe_f24_api_key'          => '',
 
             // FattureInCloud
-            'fe_fic_client_id'        => get_option('fe_fic_client_id'),
-            'fe_fic_client_secret'    => get_option('fe_fic_client_secret'),
-            'fe_fic_access_token'     => get_option('fe_fic_access_token'),
-            'fe_fic_company_id'       => get_option('fe_fic_company_id'),
-            'fe_fic_company_name'     => get_option('fe_fic_company_name'),
+            'fe_fic_client_id'        => '',
+            'fe_fic_client_secret'    => '',
+            'fe_fic_access_token'     => '',
+            'fe_fic_company_id'       => '',
+            'fe_fic_company_name'     => '',
 
-            // Opzioni
-            'fe_auto_generate_xml'    => get_option('fe_auto_generate_xml'),
-            'fe_auto_send'            => get_option('fe_auto_send'),
-            'fe_bollo_virtuale_soglia' => get_option('fe_bollo_virtuale_soglia'),
-            'fe_bollo_virtuale_importo' => get_option('fe_bollo_virtuale_importo'),
-            'fe_email_notifiche'      => get_option('fe_email_notifiche'),
-            'fe_default_modalita_pagamento' => get_option('fe_default_modalita_pagamento'),
-            'fe_default_condizioni_pagamento' => get_option('fe_default_condizioni_pagamento'),
-            'fe_webhook_enabled'      => get_option('fe_webhook_enabled'),
-            'fe_webhook_secret'       => get_option('fe_webhook_secret'),
+            // Opzioni (flag booleani come stringhe '0' o '1')
+            'fe_auto_generate_xml'    => '0',
+            'fe_auto_send'            => '0',
+            'fe_bollo_virtuale_soglia' => '77.47',
+            'fe_bollo_virtuale_importo' => '2.00',
+            'fe_email_notifiche'      => '0',
+            'fe_default_modalita_pagamento' => 'MP05',
+            'fe_default_condizioni_pagamento' => 'TP02',
+            'fe_webhook_enabled'      => '0',
+            'fe_webhook_secret'       => $webhook_secret,
         ];
+
+        // Carica i valori dal database, usa default se vuoto
+        $settings = [];
+        foreach ($defaults as $key => $default) {
+            $value = get_option($key);
+            // Usa il valore dal DB se non è null/vuoto, altrimenti usa il default
+            $settings[$key] = ($value !== null && $value !== '') ? $value : $default;
+        }
+
+        return $settings;
     }
 
     // =========================================================================
@@ -857,9 +875,47 @@ class Fatturazione_elettronica extends AdminController
     {
         $settings = $this->input->post();
 
+        // Lista dei campi checkbox (flag booleani)
+        $checkbox_fields = [
+            'fe_auto_generate_xml',
+            'fe_auto_send',
+            'fe_email_notifiche',
+            'fe_webhook_enabled',
+        ];
+
+        // Gestisci i checkbox: se non sono nel POST, imposta a '0'
+        foreach ($checkbox_fields as $field) {
+            if (!isset($settings[$field])) {
+                $settings[$field] = '0';
+            }
+        }
+
+        // Salva tutte le impostazioni
         foreach ($settings as $key => $value) {
             if (strpos($key, 'fe_') === 0) {
+                // Sanitizza il valore
+                $value = is_string($value) ? trim($value) : $value;
                 update_option($key, $value);
+            }
+        }
+
+        // Gestisci upload file (certificati, etc.)
+        if (!empty($_FILES)) {
+            foreach ($_FILES as $field_name => $file) {
+                if (strpos($field_name, 'fe_') === 0 && $file['error'] === UPLOAD_ERR_OK) {
+                    $upload_path = fe_get_upload_path('certificates');
+
+                    if (!is_dir($upload_path)) {
+                        mkdir($upload_path, 0755, true);
+                    }
+
+                    $new_name = $field_name . '_' . time() . '_' . basename($file['name']);
+                    $target = $upload_path . $new_name;
+
+                    if (move_uploaded_file($file['tmp_name'], $target)) {
+                        update_option($field_name, $target);
+                    }
+                }
             }
         }
 

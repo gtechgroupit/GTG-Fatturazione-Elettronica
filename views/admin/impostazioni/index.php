@@ -1,4 +1,17 @@
 <?php defined('BASEPATH') or exit('No direct script access allowed'); ?>
+<?php
+// Helper per accesso sicuro alle impostazioni (definiti solo se non esistono)
+if (!function_exists('fe_setting')) {
+    function fe_setting($settings, $key, $default = '') {
+        return isset($settings[$key]) && $settings[$key] !== '' ? $settings[$key] : $default;
+    }
+}
+if (!function_exists('fe_is_checked')) {
+    function fe_is_checked($settings, $key) {
+        return isset($settings[$key]) && $settings[$key] === '1';
+    }
+}
+?>
 <?php init_head(); ?>
 <div id="wrapper">
     <div class="content">
@@ -51,19 +64,19 @@
                                 <div class="col-md-6">
                                     <div class="form-group">
                                         <label><?php echo _l('fe_denominazione'); ?> <span class="text-danger">*</span></label>
-                                        <input type="text" name="fe_denominazione" class="form-control" value="<?php echo $settings['fe_denominazione']; ?>" required>
+                                        <input type="text" name="fe_denominazione" class="form-control" value="<?php echo fe_setting($settings, 'fe_denominazione'); ?>" required>
                                     </div>
                                 </div>
                                 <div class="col-md-3">
                                     <div class="form-group">
                                         <label><?php echo _l('fe_partita_iva'); ?> <span class="text-danger">*</span></label>
-                                        <input type="text" name="fe_partita_iva" class="form-control" value="<?php echo $settings['fe_partita_iva']; ?>" required maxlength="11">
+                                        <input type="text" name="fe_partita_iva" class="form-control" value="<?php echo fe_setting($settings, 'fe_partita_iva'); ?>" required maxlength="11">
                                     </div>
                                 </div>
                                 <div class="col-md-3">
                                     <div class="form-group">
                                         <label><?php echo _l('fe_codice_fiscale'); ?></label>
-                                        <input type="text" name="fe_codice_fiscale" class="form-control" value="<?php echo $settings['fe_codice_fiscale']; ?>" maxlength="16">
+                                        <input type="text" name="fe_codice_fiscale" class="form-control" value="<?php echo fe_setting($settings, 'fe_codice_fiscale'); ?>" maxlength="16">
                                     </div>
                                 </div>
                             </div>
@@ -74,7 +87,7 @@
                                         <label><?php echo _l('fe_regime_fiscale'); ?> <span class="text-danger">*</span></label>
                                         <select name="fe_regime_fiscale" class="form-control selectpicker" data-live-search="true" required>
                                             <?php foreach ($regimi_fiscali as $code => $label): ?>
-                                                <option value="<?php echo $code; ?>" <?php echo $settings['fe_regime_fiscale'] == $code ? 'selected' : ''; ?>>
+                                                <option value="<?php echo $code; ?>" <?php echo fe_setting($settings, 'fe_regime_fiscale', 'RF01') == $code ? 'selected' : ''; ?>>
                                                     <?php echo $label; ?>
                                                 </option>
                                             <?php endforeach; ?>
@@ -84,14 +97,14 @@
                                 <div class="col-md-3">
                                     <div class="form-group">
                                         <label><?php echo _l('fe_codice_destinatario'); ?></label>
-                                        <input type="text" name="fe_codice_destinatario" class="form-control" value="<?php echo $settings['fe_codice_destinatario']; ?>" maxlength="7">
+                                        <input type="text" name="fe_codice_destinatario" class="form-control" value="<?php echo fe_setting($settings, 'fe_codice_destinatario'); ?>" maxlength="7">
                                         <small class="text-muted"><?php echo _l('fe_codice_destinatario_help'); ?></small>
                                     </div>
                                 </div>
                                 <div class="col-md-3">
                                     <div class="form-group">
                                         <label><?php echo _l('fe_pec'); ?></label>
-                                        <input type="email" name="fe_pec" class="form-control" value="<?php echo $settings['fe_pec']; ?>">
+                                        <input type="email" name="fe_pec" class="form-control" value="<?php echo fe_setting($settings, 'fe_pec'); ?>">
                                     </div>
                                 </div>
                             </div>
@@ -103,19 +116,19 @@
                                 <div class="col-md-6">
                                     <div class="form-group">
                                         <label><?php echo _l('fe_indirizzo'); ?> <span class="text-danger">*</span></label>
-                                        <input type="text" name="fe_indirizzo" class="form-control" value="<?php echo $settings['fe_indirizzo']; ?>" required>
+                                        <input type="text" name="fe_indirizzo" class="form-control" value="<?php echo fe_setting($settings, 'fe_indirizzo'); ?>" required>
                                     </div>
                                 </div>
                                 <div class="col-md-2">
                                     <div class="form-group">
                                         <label><?php echo _l('fe_cap'); ?> <span class="text-danger">*</span></label>
-                                        <input type="text" name="fe_cap" class="form-control" value="<?php echo $settings['fe_cap']; ?>" required maxlength="5">
+                                        <input type="text" name="fe_cap" class="form-control" value="<?php echo fe_setting($settings, 'fe_cap'); ?>" required maxlength="5">
                                     </div>
                                 </div>
                                 <div class="col-md-4">
                                     <div class="form-group">
                                         <label><?php echo _l('fe_comune'); ?> <span class="text-danger">*</span></label>
-                                        <input type="text" name="fe_comune" class="form-control" value="<?php echo $settings['fe_comune']; ?>" required>
+                                        <input type="text" name="fe_comune" class="form-control" value="<?php echo fe_setting($settings, 'fe_comune'); ?>" required>
                                     </div>
                                 </div>
                             </div>
@@ -124,25 +137,25 @@
                                 <div class="col-md-2">
                                     <div class="form-group">
                                         <label><?php echo _l('fe_provincia'); ?></label>
-                                        <input type="text" name="fe_provincia" class="form-control" value="<?php echo $settings['fe_provincia']; ?>" maxlength="2" placeholder="RM">
+                                        <input type="text" name="fe_provincia" class="form-control" value="<?php echo fe_setting($settings, 'fe_provincia'); ?>" maxlength="2" placeholder="RM">
                                     </div>
                                 </div>
                                 <div class="col-md-2">
                                     <div class="form-group">
                                         <label><?php echo _l('fe_nazione'); ?></label>
-                                        <input type="text" name="fe_nazione" class="form-control" value="<?php echo $settings['fe_nazione'] ?: 'IT'; ?>" maxlength="2">
+                                        <input type="text" name="fe_nazione" class="form-control" value="<?php echo fe_setting($settings, 'fe_nazione', 'IT'); ?>" maxlength="2">
                                     </div>
                                 </div>
                                 <div class="col-md-4">
                                     <div class="form-group">
                                         <label><?php echo _l('fe_telefono'); ?></label>
-                                        <input type="text" name="fe_telefono" class="form-control" value="<?php echo $settings['fe_telefono']; ?>">
+                                        <input type="text" name="fe_telefono" class="form-control" value="<?php echo fe_setting($settings, 'fe_telefono'); ?>">
                                     </div>
                                 </div>
                                 <div class="col-md-4">
                                     <div class="form-group">
                                         <label><?php echo _l('fe_email'); ?></label>
-                                        <input type="email" name="fe_email" class="form-control" value="<?php echo $settings['fe_email']; ?>">
+                                        <input type="email" name="fe_email" class="form-control" value="<?php echo fe_setting($settings, 'fe_email'); ?>">
                                     </div>
                                 </div>
                             </div>
@@ -154,19 +167,19 @@
                                 <div class="col-md-2">
                                     <div class="form-group">
                                         <label><?php echo _l('fe_rea_ufficio'); ?></label>
-                                        <input type="text" name="fe_rea_ufficio" class="form-control" value="<?php echo $settings['fe_rea_ufficio']; ?>" maxlength="2" placeholder="RM">
+                                        <input type="text" name="fe_rea_ufficio" class="form-control" value="<?php echo fe_setting($settings, 'fe_rea_ufficio'); ?>" maxlength="2" placeholder="RM">
                                     </div>
                                 </div>
                                 <div class="col-md-3">
                                     <div class="form-group">
                                         <label><?php echo _l('fe_rea_numero'); ?></label>
-                                        <input type="text" name="fe_rea_numero" class="form-control" value="<?php echo $settings['fe_rea_numero']; ?>">
+                                        <input type="text" name="fe_rea_numero" class="form-control" value="<?php echo fe_setting($settings, 'fe_rea_numero'); ?>">
                                     </div>
                                 </div>
                                 <div class="col-md-3">
                                     <div class="form-group">
                                         <label><?php echo _l('fe_capitale_sociale'); ?></label>
-                                        <input type="text" name="fe_capitale_sociale" class="form-control" value="<?php echo $settings['fe_capitale_sociale']; ?>" placeholder="10000.00">
+                                        <input type="text" name="fe_capitale_sociale" class="form-control" value="<?php echo fe_setting($settings, 'fe_capitale_sociale'); ?>" placeholder="10000.00">
                                     </div>
                                 </div>
                                 <div class="col-md-2">
@@ -174,8 +187,8 @@
                                         <label><?php echo _l('fe_socio_unico'); ?></label>
                                         <select name="fe_socio_unico" class="form-control">
                                             <option value="">-</option>
-                                            <option value="SU" <?php echo $settings['fe_socio_unico'] == 'SU' ? 'selected' : ''; ?>>SU - Socio unico</option>
-                                            <option value="SM" <?php echo $settings['fe_socio_unico'] == 'SM' ? 'selected' : ''; ?>>SM - Più soci</option>
+                                            <option value="SU" <?php echo fe_setting($settings, 'fe_socio_unico') == 'SU' ? 'selected' : ''; ?>>SU - Socio unico</option>
+                                            <option value="SM" <?php echo fe_setting($settings, 'fe_socio_unico') == 'SM' ? 'selected' : ''; ?>>SM - Più soci</option>
                                         </select>
                                     </div>
                                 </div>
@@ -183,8 +196,8 @@
                                     <div class="form-group">
                                         <label><?php echo _l('fe_stato_liquidazione'); ?></label>
                                         <select name="fe_stato_liquidazione" class="form-control">
-                                            <option value="LN" <?php echo $settings['fe_stato_liquidazione'] == 'LN' ? 'selected' : ''; ?>>LN - Non in liquidazione</option>
-                                            <option value="LS" <?php echo $settings['fe_stato_liquidazione'] == 'LS' ? 'selected' : ''; ?>>LS - In liquidazione</option>
+                                            <option value="LN" <?php echo fe_setting($settings, 'fe_stato_liquidazione', 'LN') == 'LN' ? 'selected' : ''; ?>>LN - Non in liquidazione</option>
+                                            <option value="LS" <?php echo fe_setting($settings, 'fe_stato_liquidazione', 'LN') == 'LS' ? 'selected' : ''; ?>>LS - In liquidazione</option>
                                         </select>
                                     </div>
                                 </div>
@@ -225,8 +238,8 @@
                                     <div class="form-group">
                                         <label><?php echo _l('fe_ambiente'); ?></label>
                                         <select name="fe_ambiente" class="form-control">
-                                            <option value="test" <?php echo $settings['fe_ambiente'] == 'test' ? 'selected' : ''; ?>><?php echo _l('fe_ambiente_test'); ?></option>
-                                            <option value="produzione" <?php echo $settings['fe_ambiente'] == 'produzione' ? 'selected' : ''; ?>><?php echo _l('fe_ambiente_produzione'); ?></option>
+                                            <option value="test" <?php echo fe_setting($settings, 'fe_ambiente', 'test') == 'test' ? 'selected' : ''; ?>><?php echo _l('fe_ambiente_test'); ?></option>
+                                            <option value="produzione" <?php echo fe_setting($settings, 'fe_ambiente', 'test') == 'produzione' ? 'selected' : ''; ?>><?php echo _l('fe_ambiente_produzione'); ?></option>
                                         </select>
                                     </div>
                                 </div>
@@ -342,7 +355,7 @@
                                     <div class="checkbox">
                                         <label>
                                             <input type="hidden" name="fe_auto_generate_xml" value="0">
-                                            <input type="checkbox" name="fe_auto_generate_xml" value="1" <?php echo $settings['fe_auto_generate_xml'] == '1' ? 'checked' : ''; ?>>
+                                            <input type="checkbox" name="fe_auto_generate_xml" value="1" <?php echo fe_is_checked($settings, 'fe_auto_generate_xml') ? 'checked' : ''; ?>>
                                             <?php echo _l('fe_auto_generate_xml'); ?>
                                         </label>
                                         <p class="text-muted"><?php echo _l('fe_auto_generate_xml_help'); ?></p>
@@ -352,7 +365,7 @@
                                     <div class="checkbox">
                                         <label>
                                             <input type="hidden" name="fe_auto_send" value="0">
-                                            <input type="checkbox" name="fe_auto_send" value="1" <?php echo $settings['fe_auto_send'] == '1' ? 'checked' : ''; ?>>
+                                            <input type="checkbox" name="fe_auto_send" value="1" <?php echo fe_is_checked($settings, 'fe_auto_send') ? 'checked' : ''; ?>>
                                             <?php echo _l('fe_auto_send'); ?>
                                         </label>
                                         <p class="text-muted"><?php echo _l('fe_auto_send_help'); ?></p>
@@ -369,7 +382,7 @@
                                         <label><?php echo _l('fe_bollo_soglia'); ?></label>
                                         <div class="input-group">
                                             <span class="input-group-addon">&euro;</span>
-                                            <input type="text" name="fe_bollo_virtuale_soglia" class="form-control" value="<?php echo $settings['fe_bollo_virtuale_soglia']; ?>">
+                                            <input type="text" name="fe_bollo_virtuale_soglia" class="form-control" value="<?php echo fe_setting($settings, 'fe_bollo_virtuale_soglia', '77.47'); ?>">
                                         </div>
                                         <small class="text-muted"><?php echo _l('fe_bollo_soglia_help'); ?></small>
                                     </div>
@@ -379,7 +392,7 @@
                                         <label><?php echo _l('fe_bollo_importo'); ?></label>
                                         <div class="input-group">
                                             <span class="input-group-addon">&euro;</span>
-                                            <input type="text" name="fe_bollo_virtuale_importo" class="form-control" value="<?php echo $settings['fe_bollo_virtuale_importo']; ?>">
+                                            <input type="text" name="fe_bollo_virtuale_importo" class="form-control" value="<?php echo fe_setting($settings, 'fe_bollo_virtuale_importo', '2.00'); ?>">
                                         </div>
                                     </div>
                                 </div>
@@ -394,7 +407,7 @@
                                         <label><?php echo _l('fe_modalita_pagamento'); ?></label>
                                         <select name="fe_default_modalita_pagamento" class="form-control selectpicker" data-live-search="true">
                                             <?php foreach ($modalita_pagamento as $code => $label): ?>
-                                                <option value="<?php echo $code; ?>" <?php echo $settings['fe_default_modalita_pagamento'] == $code ? 'selected' : ''; ?>>
+                                                <option value="<?php echo $code; ?>" <?php echo fe_setting($settings, 'fe_default_modalita_pagamento', 'MP05') == $code ? 'selected' : ''; ?>>
                                                     <?php echo $label; ?>
                                                 </option>
                                             <?php endforeach; ?>
@@ -406,7 +419,7 @@
                                         <label><?php echo _l('fe_condizioni_pagamento'); ?></label>
                                         <select name="fe_default_condizioni_pagamento" class="form-control">
                                             <?php foreach ($condizioni_pagamento as $code => $label): ?>
-                                                <option value="<?php echo $code; ?>" <?php echo $settings['fe_default_condizioni_pagamento'] == $code ? 'selected' : ''; ?>>
+                                                <option value="<?php echo $code; ?>" <?php echo fe_setting($settings, 'fe_default_condizioni_pagamento', 'TP02') == $code ? 'selected' : ''; ?>>
                                                     <?php echo $label; ?>
                                                 </option>
                                             <?php endforeach; ?>
@@ -421,7 +434,7 @@
                             <div class="checkbox">
                                 <label>
                                     <input type="hidden" name="fe_email_notifiche" value="0">
-                                    <input type="checkbox" name="fe_email_notifiche" value="1" <?php echo $settings['fe_email_notifiche'] == '1' ? 'checked' : ''; ?>>
+                                    <input type="checkbox" name="fe_email_notifiche" value="1" <?php echo fe_is_checked($settings, 'fe_email_notifiche') ? 'checked' : ''; ?>>
                                     <?php echo _l('fe_email_notifiche'); ?>
                                 </label>
                             </div>
@@ -439,7 +452,7 @@
                             <div class="checkbox">
                                 <label>
                                     <input type="hidden" name="fe_webhook_enabled" value="0">
-                                    <input type="checkbox" name="fe_webhook_enabled" value="1" <?php echo $settings['fe_webhook_enabled'] == '1' ? 'checked' : ''; ?>>
+                                    <input type="checkbox" name="fe_webhook_enabled" value="1" <?php echo fe_is_checked($settings, 'fe_webhook_enabled') ? 'checked' : ''; ?>>
                                     <?php echo _l('fe_webhook_enabled'); ?>
                                 </label>
                             </div>
@@ -459,7 +472,7 @@
                             <div class="form-group">
                                 <label><?php echo _l('fe_webhook_secret'); ?></label>
                                 <div class="input-group">
-                                    <input type="text" name="fe_webhook_secret" class="form-control" value="<?php echo $settings['fe_webhook_secret']; ?>" readonly>
+                                    <input type="text" name="fe_webhook_secret" class="form-control" value="<?php echo fe_setting($settings, 'fe_webhook_secret'); ?>" readonly>
                                     <span class="input-group-btn">
                                         <button type="button" class="btn btn-default" onclick="copyToClipboard(this.parentElement.previousElementSibling.value)">
                                             <i class="fa fa-copy"></i>
