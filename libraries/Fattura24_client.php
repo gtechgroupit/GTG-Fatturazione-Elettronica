@@ -144,13 +144,17 @@ class Fattura24_client
 
         if (!$doc->documentElement) {
             $this->last_error = 'XML FatturaPA non valido';
+            fe_log('errore_fattura24', 'XML FatturaPA non valido - contenuto vuoto o malformato');
             return false;
         }
 
         $xpath = new DOMXPath($doc);
 
-        // Registra i namespace FatturaPA
+        // Registra i namespace FatturaPA - prova entrambi i casi
         $xpath->registerNamespace('p', 'http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.2');
+
+        // Log per debug
+        fe_log('debug_fattura24', 'Inizio conversione FatturaPA -> Fattura24');
 
         // Estrai i dati dal FatturaPA
         $cessionario = $this->extractCessionario($xpath);
@@ -158,13 +162,23 @@ class Fattura24_client
         $linee = $this->extractLinee($xpath);
         $pagamento = $this->extractPagamento($xpath);
 
-        if (empty($cessionario) || empty($documento)) {
-            $this->last_error = 'Impossibile estrarre i dati dalla fattura';
+        // Log dei dati estratti
+        fe_log('debug_fattura24', 'Cessionario: ' . json_encode($cessionario, JSON_UNESCAPED_UNICODE));
+        fe_log('debug_fattura24', 'Documento: ' . json_encode($documento, JSON_UNESCAPED_UNICODE));
+        fe_log('debug_fattura24', 'Linee (' . count($linee) . '): ' . json_encode($linee, JSON_UNESCAPED_UNICODE));
+        fe_log('debug_fattura24', 'Pagamento: ' . json_encode($pagamento, JSON_UNESCAPED_UNICODE));
+
+        if (empty($cessionario['denominazione']) && empty($documento['numero'])) {
+            $this->last_error = 'Impossibile estrarre i dati dalla fattura - dati vuoti';
+            fe_log('errore_fattura24', $this->last_error);
             return false;
         }
 
         // Costruisci l'XML Fattura24
         $f24_xml = $this->buildFattura24Xml($cessionario, $documento, $linee, $pagamento);
+
+        // Log dell'XML generato
+        fe_log('debug_fattura24', 'XML Fattura24 generato: ' . $f24_xml);
 
         return $f24_xml;
     }
@@ -174,30 +188,87 @@ class Fattura24_client
      */
     protected function extractCessionario($xpath)
     {
-        // Prova con namespace
-        $denominazione = $xpath->evaluate('string(//p:CessionarioCommittente/p:DatiAnagrafici/p:Anagrafica/p:Denominazione)');
-        if (empty($denominazione)) {
-            // Prova senza namespace
-            $denominazione = $xpath->evaluate('string(//CessionarioCommittente/DatiAnagrafici/Anagrafica/Denominazione)');
-        }
-        if (empty($denominazione)) {
-            $nome = $xpath->evaluate('string(//CessionarioCommittente/DatiAnagrafici/Anagrafica/Nome)');
-            $cognome = $xpath->evaluate('string(//CessionarioCommittente/DatiAnagrafici/Anagrafica/Cognome)');
-            $denominazione = trim($nome . ' ' . $cognome);
+        // Prova vari pattern XPath per trovare i dati
+        // Prima senza namespace, poi con namespace
+        $patterns = [
+            'denominazione' => [
+                '//CessionarioCommittente/DatiAnagrafici/Anagrafica/Denominazione',
+                '//p:CessionarioCommittente/p:DatiAnagrafici/p:Anagrafica/p:Denominazione',
+                '//*[local-name()="CessionarioCommittente"]//*[local-name()="Denominazione"]',
+            ],
+            'nome' => [
+                '//CessionarioCommittente/DatiAnagrafici/Anagrafica/Nome',
+                '//p:CessionarioCommittente/p:DatiAnagrafici/p:Anagrafica/p:Nome',
+                '//*[local-name()="CessionarioCommittente"]//*[local-name()="Nome"]',
+            ],
+            'cognome' => [
+                '//CessionarioCommittente/DatiAnagrafici/Anagrafica/Cognome',
+                '//p:CessionarioCommittente/p:DatiAnagrafici/p:Anagrafica/p:Cognome',
+                '//*[local-name()="CessionarioCommittente"]//*[local-name()="Cognome"]',
+            ],
+            'partita_iva' => [
+                '//CessionarioCommittente/DatiAnagrafici/IdFiscaleIVA/IdCodice',
+                '//p:CessionarioCommittente/p:DatiAnagrafici/p:IdFiscaleIVA/p:IdCodice',
+                '//*[local-name()="CessionarioCommittente"]//*[local-name()="IdCodice"]',
+            ],
+            'codice_fiscale' => [
+                '//CessionarioCommittente/DatiAnagrafici/CodiceFiscale',
+                '//p:CessionarioCommittente/p:DatiAnagrafici/p:CodiceFiscale',
+                '//*[local-name()="CessionarioCommittente"]//*[local-name()="CodiceFiscale"]',
+            ],
+            'indirizzo' => [
+                '//CessionarioCommittente/Sede/Indirizzo',
+                '//p:CessionarioCommittente/p:Sede/p:Indirizzo',
+                '//*[local-name()="CessionarioCommittente"]//*[local-name()="Sede"]//*[local-name()="Indirizzo"]',
+            ],
+            'cap' => [
+                '//CessionarioCommittente/Sede/CAP',
+                '//p:CessionarioCommittente/p:Sede/p:CAP',
+                '//*[local-name()="CessionarioCommittente"]//*[local-name()="CAP"]',
+            ],
+            'comune' => [
+                '//CessionarioCommittente/Sede/Comune',
+                '//p:CessionarioCommittente/p:Sede/p:Comune',
+                '//*[local-name()="CessionarioCommittente"]//*[local-name()="Comune"]',
+            ],
+            'provincia' => [
+                '//CessionarioCommittente/Sede/Provincia',
+                '//p:CessionarioCommittente/p:Sede/p:Provincia',
+                '//*[local-name()="CessionarioCommittente"]//*[local-name()="Provincia"]',
+            ],
+            'nazione' => [
+                '//CessionarioCommittente/Sede/Nazione',
+                '//p:CessionarioCommittente/p:Sede/p:Nazione',
+                '//*[local-name()="CessionarioCommittente"]//*[local-name()="Nazione"]',
+            ],
+            'pec' => [
+                '//DatiTrasmissione/PECDestinatario',
+                '//p:DatiTrasmissione/p:PECDestinatario',
+                '//*[local-name()="PECDestinatario"]',
+            ],
+            'codice_destinatario' => [
+                '//DatiTrasmissione/CodiceDestinatario',
+                '//p:DatiTrasmissione/p:CodiceDestinatario',
+                '//*[local-name()="CodiceDestinatario"]',
+            ],
+        ];
+
+        $result = [];
+        foreach ($patterns as $field => $xpaths) {
+            $result[$field] = $this->extractFirstMatch($xpath, $xpaths);
         }
 
-        return [
-            'denominazione'    => $denominazione ?: $xpath->evaluate('string(//p:CessionarioCommittente//p:Denominazione)'),
-            'partita_iva'      => $xpath->evaluate('string(//CessionarioCommittente/DatiAnagrafici/IdFiscaleIVA/IdCodice)') ?: $xpath->evaluate('string(//p:CessionarioCommittente//p:IdCodice)'),
-            'codice_fiscale'   => $xpath->evaluate('string(//CessionarioCommittente/DatiAnagrafici/CodiceFiscale)') ?: $xpath->evaluate('string(//p:CessionarioCommittente//p:CodiceFiscale)'),
-            'indirizzo'        => $xpath->evaluate('string(//CessionarioCommittente/Sede/Indirizzo)') ?: $xpath->evaluate('string(//p:CessionarioCommittente//p:Indirizzo)'),
-            'cap'              => $xpath->evaluate('string(//CessionarioCommittente/Sede/CAP)') ?: $xpath->evaluate('string(//p:CessionarioCommittente//p:CAP)'),
-            'comune'           => $xpath->evaluate('string(//CessionarioCommittente/Sede/Comune)') ?: $xpath->evaluate('string(//p:CessionarioCommittente//p:Comune)'),
-            'provincia'        => $xpath->evaluate('string(//CessionarioCommittente/Sede/Provincia)') ?: $xpath->evaluate('string(//p:CessionarioCommittente//p:Provincia)'),
-            'nazione'          => $xpath->evaluate('string(//CessionarioCommittente/Sede/Nazione)') ?: $xpath->evaluate('string(//p:CessionarioCommittente//p:Nazione)') ?: 'IT',
-            'pec'              => $xpath->evaluate('string(//CessionarioCommittente/Contatti/PECDestinatario)') ?: $xpath->evaluate('string(//p:CessionarioCommittente//p:PECDestinatario)'),
-            'codice_destinatario' => $xpath->evaluate('string(//DatiTrasmissione/CodiceDestinatario)') ?: $xpath->evaluate('string(//p:DatiTrasmissione/p:CodiceDestinatario)'),
-        ];
+        // Se non c'è denominazione, prova con nome + cognome
+        if (empty($result['denominazione'])) {
+            $result['denominazione'] = trim($result['nome'] . ' ' . $result['cognome']);
+        }
+
+        // Default nazione
+        if (empty($result['nazione'])) {
+            $result['nazione'] = 'IT';
+        }
+
+        return $result;
     }
 
     /**
@@ -205,14 +276,45 @@ class Fattura24_client
      */
     protected function extractDocumento($xpath)
     {
-        return [
-            'tipo_documento'   => $xpath->evaluate('string(//DatiGeneraliDocumento/TipoDocumento)') ?: $xpath->evaluate('string(//p:DatiGeneraliDocumento/p:TipoDocumento)'),
-            'numero'           => $xpath->evaluate('string(//DatiGeneraliDocumento/Numero)') ?: $xpath->evaluate('string(//p:DatiGeneraliDocumento/p:Numero)'),
-            'data'             => $xpath->evaluate('string(//DatiGeneraliDocumento/Data)') ?: $xpath->evaluate('string(//p:DatiGeneraliDocumento/p:Data)'),
-            'causale'          => $xpath->evaluate('string(//DatiGeneraliDocumento/Causale)') ?: $xpath->evaluate('string(//p:DatiGeneraliDocumento/p:Causale)'),
-            'importo_totale'   => $xpath->evaluate('string(//DatiGeneraliDocumento/ImportoTotaleDocumento)') ?: $xpath->evaluate('string(//p:DatiGeneraliDocumento/p:ImportoTotaleDocumento)'),
-            'bollo_virtuale'   => $xpath->evaluate('string(//DatiGeneraliDocumento/DatiBollo/BolloVirtuale)') ?: $xpath->evaluate('string(//p:DatiGeneraliDocumento//p:BolloVirtuale)'),
+        $patterns = [
+            'tipo_documento' => [
+                '//DatiGeneraliDocumento/TipoDocumento',
+                '//p:DatiGeneraliDocumento/p:TipoDocumento',
+                '//*[local-name()="TipoDocumento"]',
+            ],
+            'numero' => [
+                '//DatiGeneraliDocumento/Numero',
+                '//p:DatiGeneraliDocumento/p:Numero',
+                '//*[local-name()="DatiGeneraliDocumento"]//*[local-name()="Numero"]',
+            ],
+            'data' => [
+                '//DatiGeneraliDocumento/Data',
+                '//p:DatiGeneraliDocumento/p:Data',
+                '//*[local-name()="DatiGeneraliDocumento"]//*[local-name()="Data"]',
+            ],
+            'causale' => [
+                '//DatiGeneraliDocumento/Causale',
+                '//p:DatiGeneraliDocumento/p:Causale',
+                '//*[local-name()="Causale"]',
+            ],
+            'importo_totale' => [
+                '//DatiGeneraliDocumento/ImportoTotaleDocumento',
+                '//p:DatiGeneraliDocumento/p:ImportoTotaleDocumento',
+                '//*[local-name()="ImportoTotaleDocumento"]',
+            ],
+            'bollo_virtuale' => [
+                '//DatiGeneraliDocumento/DatiBollo/BolloVirtuale',
+                '//p:DatiGeneraliDocumento/p:DatiBollo/p:BolloVirtuale',
+                '//*[local-name()="BolloVirtuale"]',
+            ],
         ];
+
+        $result = [];
+        foreach ($patterns as $field => $xpaths) {
+            $result[$field] = $this->extractFirstMatch($xpath, $xpaths);
+        }
+
+        return $result;
     }
 
     /**
@@ -222,22 +324,43 @@ class Fattura24_client
     {
         $linee = [];
 
-        // Prova con namespace
-        $nodes = $xpath->query('//p:DettaglioLinee');
-        if ($nodes->length === 0) {
-            // Prova senza namespace
-            $nodes = $xpath->query('//DettaglioLinee');
+        // Prova vari pattern per trovare le linee
+        $nodePatterns = [
+            '//DettaglioLinee',
+            '//p:DettaglioLinee',
+            '//*[local-name()="DettaglioLinee"]',
+        ];
+
+        $nodes = null;
+        foreach ($nodePatterns as $pattern) {
+            $nodes = $xpath->query($pattern);
+            if ($nodes && $nodes->length > 0) {
+                fe_log('debug_fattura24', "Trovate {$nodes->length} linee con pattern: {$pattern}");
+                break;
+            }
+        }
+
+        if (!$nodes || $nodes->length === 0) {
+            fe_log('debug_fattura24', 'Nessuna linea DettaglioLinee trovata nell\'XML');
+            return $linee;
         }
 
         foreach ($nodes as $node) {
-            $linee[] = [
-                'descrizione'     => $xpath->evaluate('string(Descrizione)', $node) ?: $xpath->evaluate('string(p:Descrizione)', $node),
-                'quantita'        => $xpath->evaluate('string(Quantita)', $node) ?: $xpath->evaluate('string(p:Quantita)', $node) ?: '1',
-                'prezzo_unitario' => $xpath->evaluate('string(PrezzoUnitario)', $node) ?: $xpath->evaluate('string(p:PrezzoUnitario)', $node),
-                'prezzo_totale'   => $xpath->evaluate('string(PrezzoTotale)', $node) ?: $xpath->evaluate('string(p:PrezzoTotale)', $node),
-                'aliquota_iva'    => $xpath->evaluate('string(AliquotaIVA)', $node) ?: $xpath->evaluate('string(p:AliquotaIVA)', $node),
-                'natura'          => $xpath->evaluate('string(Natura)', $node) ?: $xpath->evaluate('string(p:Natura)', $node),
+            $linea = [
+                'descrizione'     => $this->extractFromNode($xpath, $node, ['Descrizione', 'p:Descrizione']),
+                'quantita'        => $this->extractFromNode($xpath, $node, ['Quantita', 'p:Quantita']) ?: '1',
+                'prezzo_unitario' => $this->extractFromNode($xpath, $node, ['PrezzoUnitario', 'p:PrezzoUnitario']),
+                'prezzo_totale'   => $this->extractFromNode($xpath, $node, ['PrezzoTotale', 'p:PrezzoTotale']),
+                'aliquota_iva'    => $this->extractFromNode($xpath, $node, ['AliquotaIVA', 'p:AliquotaIVA']),
+                'natura'          => $this->extractFromNode($xpath, $node, ['Natura', 'p:Natura']),
             ];
+
+            // Se manca prezzo_totale, calcolalo
+            if (empty($linea['prezzo_totale']) && !empty($linea['prezzo_unitario'])) {
+                $linea['prezzo_totale'] = floatval($linea['prezzo_unitario']) * floatval($linea['quantita'] ?: 1);
+            }
+
+            $linee[] = $linea;
         }
 
         return $linee;
@@ -248,12 +371,70 @@ class Fattura24_client
      */
     protected function extractPagamento($xpath)
     {
-        return [
-            'modalita'   => $xpath->evaluate('string(//DettaglioPagamento/ModalitaPagamento)') ?: $xpath->evaluate('string(//p:DettaglioPagamento/p:ModalitaPagamento)'),
-            'importo'    => $xpath->evaluate('string(//DettaglioPagamento/ImportoPagamento)') ?: $xpath->evaluate('string(//p:DettaglioPagamento/p:ImportoPagamento)'),
-            'iban'       => $xpath->evaluate('string(//DettaglioPagamento/IBAN)') ?: $xpath->evaluate('string(//p:DettaglioPagamento/p:IBAN)'),
-            'istituto'   => $xpath->evaluate('string(//DettaglioPagamento/IstitutoFinanziario)') ?: $xpath->evaluate('string(//p:DettaglioPagamento/p:IstitutoFinanziario)'),
+        $patterns = [
+            'modalita' => [
+                '//DettaglioPagamento/ModalitaPagamento',
+                '//p:DettaglioPagamento/p:ModalitaPagamento',
+                '//*[local-name()="ModalitaPagamento"]',
+            ],
+            'importo' => [
+                '//DettaglioPagamento/ImportoPagamento',
+                '//p:DettaglioPagamento/p:ImportoPagamento',
+                '//*[local-name()="ImportoPagamento"]',
+            ],
+            'iban' => [
+                '//DettaglioPagamento/IBAN',
+                '//p:DettaglioPagamento/p:IBAN',
+                '//*[local-name()="IBAN"]',
+            ],
+            'istituto' => [
+                '//DettaglioPagamento/IstitutoFinanziario',
+                '//p:DettaglioPagamento/p:IstitutoFinanziario',
+                '//*[local-name()="IstitutoFinanziario"]',
+            ],
         ];
+
+        $result = [];
+        foreach ($patterns as $field => $xpaths) {
+            $result[$field] = $this->extractFirstMatch($xpath, $xpaths);
+        }
+
+        return $result;
+    }
+
+    /**
+     * Estrae il primo valore trovato tra i pattern XPath forniti
+     */
+    protected function extractFirstMatch($xpath, $patterns)
+    {
+        foreach ($patterns as $pattern) {
+            $value = $xpath->evaluate('string(' . $pattern . ')');
+            if (!empty($value)) {
+                return $value;
+            }
+        }
+        return '';
+    }
+
+    /**
+     * Estrae un valore da un nodo usando vari nomi elemento
+     */
+    protected function extractFromNode($xpath, $node, $elementNames)
+    {
+        foreach ($elementNames as $name) {
+            // Prova come figlio diretto
+            $value = $xpath->evaluate('string(' . $name . ')', $node);
+            if (!empty($value)) {
+                return $value;
+            }
+
+            // Prova con local-name
+            $value = $xpath->evaluate('string(*[local-name()="' . str_replace('p:', '', $name) . '"])', $node);
+            if (!empty($value)) {
+                return $value;
+            }
+        }
+        return '';
     }
 
     /**
