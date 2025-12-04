@@ -510,64 +510,111 @@ $condizioni_pagamento = isset($condizioni_pagamento) ? $condizioni_pagamento : [
                 <div role="tabpanel" class="tab-pane" id="tab-opzioni" aria-labelledby="tab-link-opzioni">
                     <div class="panel_s">
                         <div class="panel-body">
-                            <h5 class="tw-font-semibold"><?php echo _l('fe_opzioni_generazione'); ?></h5>
+                            <h5 class="tw-font-semibold" data-toggle="tooltip" title="<?php echo _l('fe_opzioni_generazione_tooltip'); ?>">
+                                <?php echo _l('fe_opzioni_generazione'); ?>
+                                <i class="fa fa-question-circle text-muted" aria-hidden="true"></i>
+                            </h5>
 
-                            <div class="row">
+                            <div class="row tw-mt-4">
                                 <div class="col-md-6">
-                                    <div class="checkbox">
-                                        <label>
-                                            <input type="hidden" name="fe_auto_generate_xml" value="0">
-                                            <input type="checkbox" name="fe_auto_generate_xml" value="1" <?php echo fe_is_checked($settings, 'fe_auto_generate_xml') ? 'checked' : ''; ?>>
+                                    <div class="form-group">
+                                        <label for="fe_auto_generate_xml" class="control-label" data-toggle="tooltip" title="<?php echo _l('fe_auto_generate_xml_tooltip'); ?>">
                                             <?php echo _l('fe_auto_generate_xml'); ?>
+                                            <i class="fa fa-question-circle text-muted" aria-hidden="true"></i>
                                         </label>
-                                        <p class="text-muted"><?php echo _l('fe_auto_generate_xml_help'); ?></p>
+                                        <div class="onoffswitch">
+                                            <input type="hidden" name="fe_auto_generate_xml" value="0">
+                                            <input type="checkbox"
+                                                   id="fe_auto_generate_xml"
+                                                   name="fe_auto_generate_xml"
+                                                   value="1"
+                                                   class="onoffswitch-checkbox"
+                                                   <?php echo fe_is_checked($settings, 'fe_auto_generate_xml') ? 'checked' : ''; ?>>
+                                            <label class="onoffswitch-label" for="fe_auto_generate_xml"></label>
+                                        </div>
+                                        <p class="text-muted tw-mt-1"><?php echo _l('fe_auto_generate_xml_help'); ?></p>
                                     </div>
                                 </div>
                                 <div class="col-md-6">
-                                    <div class="checkbox">
-                                        <label>
-                                            <input type="hidden" name="fe_auto_send" value="0">
-                                            <input type="checkbox" name="fe_auto_send" value="1" <?php echo fe_is_checked($settings, 'fe_auto_send') ? 'checked' : ''; ?>>
+                                    <div class="form-group">
+                                        <label for="fe_auto_send" class="control-label" data-toggle="tooltip" title="<?php echo _l('fe_auto_send_tooltip'); ?>">
                                             <?php echo _l('fe_auto_send'); ?>
+                                            <i class="fa fa-question-circle text-muted" aria-hidden="true"></i>
                                         </label>
-                                        <p class="text-muted"><?php echo _l('fe_auto_send_help'); ?></p>
+                                        <div class="onoffswitch">
+                                            <input type="hidden" name="fe_auto_send" value="0">
+                                            <input type="checkbox"
+                                                   id="fe_auto_send"
+                                                   name="fe_auto_send"
+                                                   value="1"
+                                                   class="onoffswitch-checkbox"
+                                                   <?php echo fe_is_checked($settings, 'fe_auto_send') ? 'checked' : ''; ?>>
+                                            <label class="onoffswitch-label" for="fe_auto_send"></label>
+                                        </div>
+                                        <p class="text-muted tw-mt-1"><?php echo _l('fe_auto_send_help'); ?></p>
                                     </div>
                                 </div>
                             </div>
 
                             <hr>
-                            <h5 class="tw-font-semibold"><?php echo _l('fe_bollo_virtuale'); ?></h5>
+                            <h5 class="tw-font-semibold" data-toggle="tooltip" title="<?php echo _l('fe_bollo_virtuale_tooltip'); ?>">
+                                <?php echo _l('fe_bollo_virtuale'); ?>
+                                <i class="fa fa-question-circle text-muted" aria-hidden="true"></i>
+                            </h5>
 
-                            <div class="row">
+                            <div class="row tw-mt-4">
                                 <div class="col-md-3">
                                     <div class="form-group">
-                                        <label><?php echo _l('fe_bollo_soglia'); ?></label>
+                                        <label for="fe_bollo_virtuale_soglia" data-toggle="tooltip" title="<?php echo _l('fe_bollo_soglia_tooltip'); ?>">
+                                            <?php echo _l('fe_bollo_soglia'); ?>
+                                            <i class="fa fa-question-circle text-muted" aria-hidden="true"></i>
+                                        </label>
                                         <div class="input-group">
                                             <span class="input-group-addon">&euro;</span>
-                                            <input type="text" name="fe_bollo_virtuale_soglia" class="form-control" value="<?php echo fe_setting($settings, 'fe_bollo_virtuale_soglia', '77.47'); ?>">
+                                            <input type="text"
+                                                   id="fe_bollo_virtuale_soglia"
+                                                   name="fe_bollo_virtuale_soglia"
+                                                   class="form-control"
+                                                   value="<?php echo fe_setting($settings, 'fe_bollo_virtuale_soglia', '77.47'); ?>">
                                         </div>
                                         <small class="text-muted"><?php echo _l('fe_bollo_soglia_help'); ?></small>
                                     </div>
                                 </div>
                                 <div class="col-md-3">
                                     <div class="form-group">
-                                        <label><?php echo _l('fe_bollo_importo'); ?></label>
+                                        <label for="fe_bollo_virtuale_importo" data-toggle="tooltip" title="<?php echo _l('fe_bollo_importo_tooltip'); ?>">
+                                            <?php echo _l('fe_bollo_importo'); ?>
+                                            <i class="fa fa-question-circle text-muted" aria-hidden="true"></i>
+                                        </label>
                                         <div class="input-group">
                                             <span class="input-group-addon">&euro;</span>
-                                            <input type="text" name="fe_bollo_virtuale_importo" class="form-control" value="<?php echo fe_setting($settings, 'fe_bollo_virtuale_importo', '2.00'); ?>">
+                                            <input type="text"
+                                                   id="fe_bollo_virtuale_importo"
+                                                   name="fe_bollo_virtuale_importo"
+                                                   class="form-control"
+                                                   value="<?php echo fe_setting($settings, 'fe_bollo_virtuale_importo', '2.00'); ?>">
                                         </div>
                                     </div>
                                 </div>
                             </div>
 
                             <hr>
-                            <h5 class="tw-font-semibold"><?php echo _l('fe_default_pagamento'); ?></h5>
+                            <h5 class="tw-font-semibold" data-toggle="tooltip" title="<?php echo _l('fe_default_pagamento_tooltip'); ?>">
+                                <?php echo _l('fe_default_pagamento'); ?>
+                                <i class="fa fa-question-circle text-muted" aria-hidden="true"></i>
+                            </h5>
 
-                            <div class="row">
+                            <div class="row tw-mt-4">
                                 <div class="col-md-6">
                                     <div class="form-group">
-                                        <label><?php echo _l('fe_modalita_pagamento'); ?></label>
-                                        <select name="fe_default_modalita_pagamento" class="form-control selectpicker" data-live-search="true">
+                                        <label for="fe_default_modalita_pagamento" data-toggle="tooltip" title="<?php echo _l('fe_modalita_pagamento_tooltip'); ?>">
+                                            <?php echo _l('fe_modalita_pagamento'); ?>
+                                            <i class="fa fa-question-circle text-muted" aria-hidden="true"></i>
+                                        </label>
+                                        <select id="fe_default_modalita_pagamento"
+                                                name="fe_default_modalita_pagamento"
+                                                class="form-control selectpicker"
+                                                data-live-search="true">
                                             <?php foreach ($modalita_pagamento as $code => $label): ?>
                                                 <option value="<?php echo $code; ?>" <?php echo fe_setting($settings, 'fe_default_modalita_pagamento', 'MP05') == $code ? 'selected' : ''; ?>>
                                                     <?php echo $label; ?>
@@ -578,8 +625,13 @@ $condizioni_pagamento = isset($condizioni_pagamento) ? $condizioni_pagamento : [
                                 </div>
                                 <div class="col-md-6">
                                     <div class="form-group">
-                                        <label><?php echo _l('fe_condizioni_pagamento'); ?></label>
-                                        <select name="fe_default_condizioni_pagamento" class="form-control">
+                                        <label for="fe_default_condizioni_pagamento" data-toggle="tooltip" title="<?php echo _l('fe_condizioni_pagamento_tooltip'); ?>">
+                                            <?php echo _l('fe_condizioni_pagamento'); ?>
+                                            <i class="fa fa-question-circle text-muted" aria-hidden="true"></i>
+                                        </label>
+                                        <select id="fe_default_condizioni_pagamento"
+                                                name="fe_default_condizioni_pagamento"
+                                                class="form-control">
                                             <?php foreach ($condizioni_pagamento as $code => $label): ?>
                                                 <option value="<?php echo $code; ?>" <?php echo fe_setting($settings, 'fe_default_condizioni_pagamento', 'TP02') == $code ? 'selected' : ''; ?>>
                                                     <?php echo $label; ?>
@@ -591,14 +643,26 @@ $condizioni_pagamento = isset($condizioni_pagamento) ? $condizioni_pagamento : [
                             </div>
 
                             <hr>
-                            <h5 class="tw-font-semibold"><?php echo _l('fe_notifiche'); ?></h5>
+                            <h5 class="tw-font-semibold" data-toggle="tooltip" title="<?php echo _l('fe_notifiche_tooltip'); ?>">
+                                <?php echo _l('fe_notifiche'); ?>
+                                <i class="fa fa-question-circle text-muted" aria-hidden="true"></i>
+                            </h5>
 
-                            <div class="checkbox">
-                                <label>
-                                    <input type="hidden" name="fe_email_notifiche" value="0">
-                                    <input type="checkbox" name="fe_email_notifiche" value="1" <?php echo fe_is_checked($settings, 'fe_email_notifiche') ? 'checked' : ''; ?>>
+                            <div class="form-group tw-mt-4">
+                                <label for="fe_email_notifiche" class="control-label" data-toggle="tooltip" title="<?php echo _l('fe_email_notifiche_tooltip'); ?>">
                                     <?php echo _l('fe_email_notifiche'); ?>
+                                    <i class="fa fa-question-circle text-muted" aria-hidden="true"></i>
                                 </label>
+                                <div class="onoffswitch">
+                                    <input type="hidden" name="fe_email_notifiche" value="0">
+                                    <input type="checkbox"
+                                           id="fe_email_notifiche"
+                                           name="fe_email_notifiche"
+                                           value="1"
+                                           class="onoffswitch-checkbox"
+                                           <?php echo fe_is_checked($settings, 'fe_email_notifiche') ? 'checked' : ''; ?>>
+                                    <label class="onoffswitch-label" for="fe_email_notifiche"></label>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -608,35 +672,71 @@ $condizioni_pagamento = isset($condizioni_pagamento) ? $condizioni_pagamento : [
                 <div role="tabpanel" class="tab-pane" id="tab-webhook" aria-labelledby="tab-link-webhook">
                     <div class="panel_s">
                         <div class="panel-body">
-                            <h5 class="tw-font-semibold"><?php echo _l('fe_webhook_config'); ?></h5>
+                            <h5 class="tw-font-semibold" data-toggle="tooltip" title="<?php echo _l('fe_webhook_config_tooltip'); ?>">
+                                <?php echo _l('fe_webhook_config'); ?>
+                                <i class="fa fa-question-circle text-muted" aria-hidden="true"></i>
+                            </h5>
                             <p class="text-muted"><?php echo _l('fe_webhook_help'); ?></p>
 
-                            <div class="checkbox">
-                                <label>
-                                    <input type="hidden" name="fe_webhook_enabled" value="0">
-                                    <input type="checkbox" name="fe_webhook_enabled" value="1" <?php echo fe_is_checked($settings, 'fe_webhook_enabled') ? 'checked' : ''; ?>>
+                            <div class="form-group tw-mt-4">
+                                <label for="fe_webhook_enabled" class="control-label" data-toggle="tooltip" title="<?php echo _l('fe_webhook_enabled_tooltip'); ?>">
                                     <?php echo _l('fe_webhook_enabled'); ?>
+                                    <i class="fa fa-question-circle text-muted" aria-hidden="true"></i>
                                 </label>
+                                <div class="onoffswitch">
+                                    <input type="hidden" name="fe_webhook_enabled" value="0">
+                                    <input type="checkbox"
+                                           id="fe_webhook_enabled"
+                                           name="fe_webhook_enabled"
+                                           value="1"
+                                           class="onoffswitch-checkbox"
+                                           <?php echo fe_is_checked($settings, 'fe_webhook_enabled') ? 'checked' : ''; ?>>
+                                    <label class="onoffswitch-label" for="fe_webhook_enabled"></label>
+                                </div>
                             </div>
 
                             <div class="form-group tw-mt-4">
-                                <label><?php echo _l('fe_webhook_url'); ?></label>
+                                <label for="fe_webhook_url_display" data-toggle="tooltip" title="<?php echo _l('fe_webhook_url_tooltip'); ?>">
+                                    <?php echo _l('fe_webhook_url'); ?>
+                                    <i class="fa fa-question-circle text-muted" aria-hidden="true"></i>
+                                </label>
                                 <div class="input-group">
-                                    <input type="text" class="form-control" value="<?php echo site_url('fatturazione_elettronica/webhook'); ?>" readonly>
+                                    <input type="text"
+                                           id="fe_webhook_url_display"
+                                           class="form-control"
+                                           value="<?php echo site_url('fatturazione_elettronica/webhook'); ?>"
+                                           readonly>
                                     <span class="input-group-btn">
-                                        <button type="button" class="btn btn-default" onclick="copyToClipboard(this.parentElement.previousElementSibling.value)">
+                                        <button type="button"
+                                                class="btn btn-default"
+                                                onclick="copyToClipboard(this.parentElement.previousElementSibling.value)"
+                                                data-toggle="tooltip"
+                                                title="<?php echo _l('fe_copia_url'); ?>">
                                             <i class="fa fa-copy"></i>
                                         </button>
                                     </span>
                                 </div>
+                                <small class="text-muted"><?php echo _l('fe_webhook_url_help'); ?></small>
                             </div>
 
                             <div class="form-group">
-                                <label><?php echo _l('fe_webhook_secret'); ?></label>
+                                <label for="fe_webhook_secret" data-toggle="tooltip" title="<?php echo _l('fe_webhook_secret_tooltip'); ?>">
+                                    <?php echo _l('fe_webhook_secret'); ?>
+                                    <i class="fa fa-question-circle text-muted" aria-hidden="true"></i>
+                                </label>
                                 <div class="input-group">
-                                    <input type="text" name="fe_webhook_secret" class="form-control" value="<?php echo fe_setting($settings, 'fe_webhook_secret'); ?>" readonly>
+                                    <input type="text"
+                                           id="fe_webhook_secret"
+                                           name="fe_webhook_secret"
+                                           class="form-control"
+                                           value="<?php echo fe_setting($settings, 'fe_webhook_secret'); ?>"
+                                           readonly>
                                     <span class="input-group-btn">
-                                        <button type="button" class="btn btn-default" onclick="copyToClipboard(this.parentElement.previousElementSibling.value)">
+                                        <button type="button"
+                                                class="btn btn-default"
+                                                onclick="copyToClipboard(this.parentElement.previousElementSibling.value)"
+                                                data-toggle="tooltip"
+                                                title="<?php echo _l('fe_copia_secret'); ?>">
                                             <i class="fa fa-copy"></i>
                                         </button>
                                     </span>

@@ -206,10 +206,11 @@
 
                         <?php else: ?>
                         <!-- Form standard per altri provider -->
-                        <form method="post" action="<?php echo admin_url('fatturazione_elettronica/save_credentials'); ?>"
+                        <form method="post" action="<?php echo admin_url('fatturazione_elettronica/save_credentials?provider=' . $selected_provider); ?>"
                               enctype="multipart/form-data">
                             <input type="hidden" name="<?php echo $this->security->get_csrf_token_name(); ?>"
                                    value="<?php echo $this->security->get_csrf_hash(); ?>">
+                            <input type="hidden" name="provider" value="<?php echo $selected_provider; ?>">
 
                             <?php if (!empty($provider_info['fields'])): ?>
                             <div class="row">

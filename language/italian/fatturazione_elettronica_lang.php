@@ -431,18 +431,26 @@ $lang['fe_api_key_tooltip'] = 'Chiave API fornita dal provider';
 $lang['fe_api_secret_tooltip'] = 'Secret API per la firma delle richieste';
 
 // Tooltip Impostazioni - Opzioni
+$lang['fe_opzioni_generazione_tooltip'] = 'Configura come vengono generate e inviate automaticamente le fatture elettroniche';
 $lang['fe_auto_generate_xml_tooltip'] = 'Se attivo, l\'XML viene generato automaticamente quando crei una fattura in Perfex';
 $lang['fe_auto_send_tooltip'] = 'Se attivo, la fattura viene inviata automaticamente allo SDI dopo la generazione';
+$lang['fe_bollo_virtuale_tooltip'] = 'Configurazione del bollo virtuale per fatture esenti IVA oltre una certa soglia';
 $lang['fe_bollo_soglia_tooltip'] = 'Importo oltre il quale applicare il bollo virtuale di 2€ (default 77.47€)';
 $lang['fe_bollo_importo_tooltip'] = 'Importo del bollo virtuale (normalmente 2.00€)';
+$lang['fe_default_pagamento_tooltip'] = 'Modalità e condizioni di pagamento predefinite per le nuove fatture';
 $lang['fe_modalita_pagamento_tooltip'] = 'Modalità di pagamento predefinita per le nuove fatture';
 $lang['fe_condizioni_pagamento_tooltip'] = 'Condizioni di pagamento predefinite (pagamento completo, rate, ecc.)';
+$lang['fe_notifiche_tooltip'] = 'Configura le notifiche email per gli eventi relativi alle fatture elettroniche';
 $lang['fe_email_notifiche_tooltip'] = 'Ricevi un\'email quando cambia lo stato di una fattura (consegnata, scartata, ecc.)';
 
 // Tooltip Impostazioni - Webhook
+$lang['fe_webhook_config_tooltip'] = 'Il webhook permette di ricevere automaticamente le notifiche dallo SDI in tempo reale';
 $lang['fe_webhook_enabled_tooltip'] = 'Abilita la ricezione automatica delle notifiche SDI tramite webhook';
 $lang['fe_webhook_url_tooltip'] = 'Copia questo URL nel pannello del tuo provider SDI per ricevere le notifiche';
+$lang['fe_webhook_url_help'] = 'Configura questo URL nel pannello del tuo provider per ricevere le notifiche automaticamente';
 $lang['fe_webhook_secret_tooltip'] = 'Chiave segreta per validare l\'autenticità delle richieste webhook';
+$lang['fe_copia_url'] = 'Copia URL webhook';
+$lang['fe_copia_secret'] = 'Copia secret webhook';
 $lang['fe_copy_tooltip'] = 'Copia negli appunti';
 
 // Tooltip Filtri
