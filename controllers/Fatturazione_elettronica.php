@@ -1088,6 +1088,95 @@ class Fatturazione_elettronica extends AdminController
     }
 
     /**
+     * Ottiene lo stato FE di una fattura dato l'invoice_id di Perfex
+     * Usato nella pagina pagamenti per mostrare lo stato e permettere l'invio
+     */
+    public function ajax_get_fe_status_by_invoice($invoice_id)
+    {
+        if (!$invoice_id) {
+            echo json_encode(['error' => 'Invoice ID non fornito']);
+            return;
+        }
+
+        $fe_fattura = $this->Fatturazione_elettronica_model->get_fattura_attiva_by_invoice_id($invoice_id);
+
+        if (!$fe_fattura) {
+            // La fattura elettronica non è stata ancora generata
+            echo json_encode([
+                'exists'     => false,
+                'invoice_id' => $invoice_id,
+                'message'    => _l('fe_fattura_non_generata'),
+                'can_generate' => true,
+                'generate_url' => admin_url('fatturazione_elettronica/genera_xml/' . $invoice_id),
+            ]);
+            return;
+        }
+
+        // La fattura elettronica esiste
+        $can_send = in_array($fe_fattura->stato, [FE_STATO_GENERATA, FE_STATO_SCARTATA]);
+
+        echo json_encode([
+            'exists'      => true,
+            'fe_id'       => $fe_fattura->id,
+            'invoice_id'  => $invoice_id,
+            'stato'       => $fe_fattura->stato,
+            'label'       => fe_get_stato_label($fe_fattura->stato),
+            'class'       => fe_get_stato_class($fe_fattura->stato),
+            'id_sdi'      => $fe_fattura->identificativo_sdi ?: '',
+            'can_send'    => $can_send,
+            'send_url'    => $can_send ? admin_url('fatturazione_elettronica/invia_fattura/' . $fe_fattura->id) : '',
+            'view_url'    => admin_url('fatturazione_elettronica/fattura_attiva/' . $fe_fattura->id),
+        ]);
+    }
+
+    /**
+     * Ottiene lo stato FE per più fatture (bulk) - usato per la tabella pagamenti
+     */
+    public function ajax_get_fe_status_bulk()
+    {
+        $invoice_ids = $this->input->post('invoice_ids');
+
+        if (!$invoice_ids || !is_array($invoice_ids)) {
+            echo json_encode(['error' => 'Nessun Invoice ID fornito']);
+            return;
+        }
+
+        $results = [];
+
+        foreach ($invoice_ids as $invoice_id) {
+            $invoice_id = (int) $invoice_id;
+            if ($invoice_id <= 0) {
+                continue;
+            }
+
+            $fe_fattura = $this->Fatturazione_elettronica_model->get_fattura_attiva_by_invoice_id($invoice_id);
+
+            if (!$fe_fattura) {
+                $results[$invoice_id] = [
+                    'exists'       => false,
+                    'can_generate' => true,
+                    'generate_url' => admin_url('fatturazione_elettronica/genera_xml/' . $invoice_id),
+                ];
+            } else {
+                $can_send = in_array($fe_fattura->stato, [FE_STATO_GENERATA, FE_STATO_SCARTATA]);
+                $results[$invoice_id] = [
+                    'exists'   => true,
+                    'fe_id'    => $fe_fattura->id,
+                    'stato'    => $fe_fattura->stato,
+                    'label'    => fe_get_stato_label($fe_fattura->stato),
+                    'class'    => fe_get_stato_class($fe_fattura->stato),
+                    'id_sdi'   => $fe_fattura->identificativo_sdi ?: '',
+                    'can_send' => $can_send,
+                    'send_url' => $can_send ? admin_url('fatturazione_elettronica/invia_fattura/' . $fe_fattura->id) : '',
+                    'view_url' => admin_url('fatturazione_elettronica/fattura_attiva/' . $fe_fattura->id),
+                ];
+            }
+        }
+
+        echo json_encode(['results' => $results]);
+    }
+
+    /**
      * Controlla lo stato di una fattura via AJAX
      */
     public function ajax_check_status($id)

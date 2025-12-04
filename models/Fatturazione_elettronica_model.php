@@ -281,7 +281,11 @@ class Fatturazione_elettronica_model extends App_Model
     }
 
     /**
-     * Elimina una fattura attiva (solo se in bozza)
+     * Elimina una fattura attiva
+     *
+     * NOTA: L'eliminazione rimuove solo il record dal database locale,
+     * non annulla l'invio al SDI. Per annullare una fattura inviata
+     * è necessario emettere una nota di credito.
      *
      * @param int $id ID della fattura
      * @return bool
@@ -290,21 +294,26 @@ class Fatturazione_elettronica_model extends App_Model
     {
         $fattura = $this->get_fattura_attiva($id);
 
-        if (!$fattura || !in_array($fattura->stato, [FE_STATO_BOZZA, FE_STATO_GENERATA])) {
+        if (!$fattura) {
             return false;
         }
 
-        // Rimuovi il file
+        // Rimuovi il file XML se esiste
         $path = fe_get_upload_path('attive');
         if (file_exists($path . $fattura->nome_file)) {
             unlink($path . $fattura->nome_file);
         }
 
+        // Log dettagliato per fatture già inviate
+        if (!in_array($fattura->stato, [FE_STATO_BOZZA, FE_STATO_GENERATA])) {
+            fe_log('fattura_eliminata', "ATTENZIONE: Eliminata fattura già inviata al SDI - ID SDI: {$fattura->identificativo_sdi}, Stato: {$fattura->stato}, File: {$fattura->nome_file}");
+        } else {
+            fe_log('fattura_eliminata', "Fattura eliminata: {$fattura->nome_file}");
+        }
+
         // Rimuovi il record
         $this->db->where('id', $id);
         $this->db->delete(db_prefix() . 'fe_fatture_attive');
-
-        fe_log('fattura_eliminata', "Fattura eliminata: {$fattura->nome_file}");
 
         return true;
     }
