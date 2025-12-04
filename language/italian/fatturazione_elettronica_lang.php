@@ -574,5 +574,81 @@ $lang['fe_doc_faq_5_a'] = 'Se hai configurato il webhook, le fatture passive ven
 
 // Supporto
 $lang['fe_doc_supporto'] = 'Hai bisogno di aiuto?';
-$lang['fe_doc_supporto_text'] = 'Se hai domande o problemi con il modulo, il nostro team di supporto e a tua disposizione.';
+$lang['fe_doc_supporto_text'] = 'Se hai domande o problemi con il modulo, il nostro team di supporto e a tua disposizione per aiutarti.';
 $lang['fe_doc_contatta_supporto'] = 'Contatta il Supporto';
+$lang['fe_doc_email_supporto'] = 'Email Supporto';
+$lang['fe_doc_sito_web'] = 'Sito Web';
+$lang['fe_doc_sviluppato_da'] = 'Sviluppato con passione in Italia';
+$lang['fe_doc_visita_sito'] = 'Visita il Sito';
+
+// Documentazione - Vantaggi
+$lang['fe_doc_vantaggi'] = 'Vantaggi';
+$lang['fe_doc_vantaggio_1'] = 'Risparmio di tempo: automatizza la generazione e l\'invio delle fatture';
+$lang['fe_doc_vantaggio_2'] = 'Conformita garantita: XML sempre validi secondo le specifiche SDI';
+$lang['fe_doc_vantaggio_3'] = 'Monitoraggio in tempo reale: traccia lo stato di ogni fattura';
+$lang['fe_doc_vantaggio_4'] = 'Integrazione nativa: si integra perfettamente con Perfex CRM';
+
+// Documentazione - Quick Start
+$lang['fe_doc_quickstart'] = 'Guida Rapida';
+$lang['fe_doc_quickstart_text'] = 'Segui questi 4 semplici passaggi per iniziare ad utilizzare la fatturazione elettronica:';
+$lang['fe_doc_qs_step_1_title'] = 'Scegli Provider';
+$lang['fe_doc_qs_step_1_desc'] = 'Seleziona il servizio SDI che preferisci utilizzare';
+$lang['fe_doc_qs_step_2_title'] = 'Configura';
+$lang['fe_doc_qs_step_2_desc'] = 'Inserisci le credenziali e i dati aziendali';
+$lang['fe_doc_qs_step_3_title'] = 'Importa';
+$lang['fe_doc_qs_step_3_desc'] = 'Importa le fatture Perfex e genera gli XML';
+$lang['fe_doc_qs_step_4_title'] = 'Invia';
+$lang['fe_doc_qs_step_4_desc'] = 'Invia le fatture allo SDI con un click';
+
+// Documentazione - Requisiti Note
+$lang['fe_doc_requisiti_note'] = 'Note importanti';
+$lang['fe_doc_requisiti_note_1'] = 'Assicurati che il server abbia accesso a internet per comunicare con lo SDI';
+$lang['fe_doc_requisiti_note_2'] = 'I certificati SSL devono essere aggiornati per le connessioni sicure';
+$lang['fe_doc_requisiti_note_3'] = 'Verifica che il firewall non blocchi le connessioni in uscita verso i provider';
+
+// Documentazione - Clienti
+$lang['fe_doc_clienti'] = 'Configurazione Clienti';
+$lang['fe_doc_clienti_text'] = 'Per inviare correttamente le fatture elettroniche, e necessario configurare alcuni campi specifici per ogni cliente nella scheda cliente di Perfex CRM.';
+$lang['fe_doc_clienti_campi'] = 'Campi Fatturazione Elettronica';
+$lang['fe_doc_cliente_cod_dest'] = 'Codice SDI a 7 caratteri del cliente';
+$lang['fe_doc_cliente_pec'] = 'PEC del cliente (alternativa al codice destinatario)';
+$lang['fe_doc_cliente_split'] = 'Abilita per clienti PA soggetti a split payment';
+$lang['fe_doc_clienti_nota'] = 'Nota';
+$lang['fe_doc_clienti_nota_text'] = 'Se il cliente non ha ne codice destinatario ne PEC, usa il codice generico "0000000" e la fattura sara disponibile nel cassetto fiscale del cliente.';
+
+// Documentazione - Azioni Fatture
+$lang['fe_doc_azioni_disponibili'] = 'Azioni disponibili';
+$lang['fe_doc_azione_download'] = 'Scarica il file XML';
+$lang['fe_doc_azione_invia'] = 'Trasmetti allo SDI';
+$lang['fe_doc_azione_rigenera'] = 'Ricrea l\'XML con i dati aggiornati';
+$lang['fe_doc_azione_verifica'] = 'Controlla lo stato presso lo SDI';
+$lang['fe_doc_azione_elimina'] = 'Rimuovi la fattura (solo se non inviata)';
+
+// Documentazione - Stati
+$lang['fe_doc_flusso_stati'] = 'Flusso degli stati';
+$lang['fe_doc_azione_richiesta'] = 'Azione';
+$lang['fe_doc_genera'] = 'Genera XML';
+$lang['fe_doc_invia'] = 'Invia';
+$lang['fe_doc_attendi'] = 'Attendi';
+$lang['fe_doc_contatta_cliente'] = 'Contatta cliente';
+$lang['fe_doc_correggi'] = 'Correggi e reinvia';
+
+// Documentazione - Troubleshooting
+$lang['fe_doc_troubleshooting'] = 'Risoluzione Problemi';
+$lang['fe_doc_troubleshooting_text'] = 'Ecco le soluzioni ai problemi piu comuni che potresti incontrare:';
+$lang['fe_doc_ts_1_title'] = 'La fattura viene scartata dallo SDI';
+$lang['fe_doc_ts_1_text'] = 'Lo scarto puo avvenire per diversi motivi. Verifica il messaggio di errore nei dettagli della fattura.';
+$lang['fe_doc_ts_1_sol_1'] = 'Controlla che la Partita IVA del cliente sia corretta e attiva';
+$lang['fe_doc_ts_1_sol_2'] = 'Verifica che il Codice Destinatario sia valido (7 caratteri) o la PEC sia corretta';
+$lang['fe_doc_ts_1_sol_3'] = 'Assicurati che tutti i campi obbligatori della fattura siano compilati';
+$lang['fe_doc_ts_2_title'] = 'Errore di connessione al provider';
+$lang['fe_doc_ts_2_text'] = 'Se non riesci a connetterti al provider SDI, potrebbe essere un problema di rete o di credenziali.';
+$lang['fe_doc_ts_2_sol_1'] = 'Verifica le credenziali nelle impostazioni del provider';
+$lang['fe_doc_ts_2_sol_2'] = 'Controlla che il server possa accedere a internet e che il firewall non blocchi le connessioni';
+$lang['fe_doc_ts_3_title'] = 'Le fatture passive non si sincronizzano';
+$lang['fe_doc_ts_3_text'] = 'Se le fatture passive non vengono scaricate, verifica la configurazione del webhook o esegui una sincronizzazione manuale.';
+$lang['fe_doc_ts_3_sol_1'] = 'Clicca su "Sincronizza Passive" per scaricare manualmente le fatture';
+$lang['fe_doc_ts_3_sol_2'] = 'Verifica che il webhook sia configurato correttamente nel pannello del provider';
+
+// Documentazione - Extra
+$lang['fe_doc_copia'] = 'Copia';
