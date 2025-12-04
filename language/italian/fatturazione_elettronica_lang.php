@@ -64,6 +64,8 @@ $lang['fe_tutti_stati'] = 'Tutti gli stati';
 $lang['fe_da_data'] = 'Da data';
 $lang['fe_a_data'] = 'A data';
 $lang['fe_filtra'] = 'Filtra';
+$lang['fe_applica_filtri'] = 'Applica filtri';
+$lang['fe_reset_filtri'] = 'Rimuovi filtri';
 
 // Azioni
 $lang['fe_visualizza'] = 'Visualizza';
