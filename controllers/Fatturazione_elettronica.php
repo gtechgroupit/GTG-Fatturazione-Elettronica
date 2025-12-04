@@ -944,6 +944,30 @@ class Fatturazione_elettronica extends AdminController
         echo json_encode($response);
     }
 
+    /**
+     * Pagina documentazione del modulo
+     */
+    public function documentazione()
+    {
+        $data['title'] = _l('fe_documentazione');
+
+        // Info provider
+        $this->load->library('fatturazione_elettronica/Sdi_client');
+        $providers = Sdi_client::getAvailableProviders();
+        $data['providers'] = $providers;
+        $current_provider = get_option('fe_provider') ?: 'test';
+        $data['current_provider'] = $current_provider;
+        $data['provider_info'] = $providers[$current_provider] ?? $providers['test'];
+
+        // Versione modulo
+        $data['module_version'] = '1.0.0';
+
+        // URL webhook
+        $data['webhook_url'] = site_url('fatturazione_elettronica/webhook');
+
+        $this->load->view('fatturazione_elettronica/admin/documentazione/index', $data);
+    }
+
     // =========================================================================
     // WEBHOOK
     // =========================================================================

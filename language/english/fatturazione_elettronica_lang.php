@@ -7,7 +7,7 @@ defined('BASEPATH') or exit('No direct script access allowed');
  */
 
 // Menu and titles
-$lang['fe_menu_title'] = 'Electronic Invoicing';
+$lang['fe_menu_title'] = 'E-Invoicing';
 $lang['fe_dashboard'] = 'Dashboard';
 $lang['fe_fatture_attive'] = 'Sales Invoices';
 $lang['fe_fatture_passive'] = 'Purchase Invoices';

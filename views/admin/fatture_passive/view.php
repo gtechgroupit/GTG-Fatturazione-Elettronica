@@ -6,11 +6,14 @@
             <div class="col-md-12">
                 <div class="tw-flex tw-justify-between tw-items-center tw-mb-4">
                     <h4 class="tw-font-bold tw-m-0">
-                        <i class="fa-solid fa-file-invoice-dollar tw-mr-2"></i>
+                        <i class="fa-solid fa-file-invoice-dollar tw-mr-2" aria-hidden="true"></i>
                         <?php echo _l('fe_fattura_passiva_dettaglio'); ?>
                     </h4>
-                    <a href="<?php echo admin_url('fatturazione_elettronica/fatture_passive'); ?>" class="btn btn-default">
-                        <i class="fa fa-arrow-left tw-mr-1"></i>
+                    <a href="<?php echo admin_url('fatturazione_elettronica/fatture_passive'); ?>"
+                       class="btn btn-default"
+                       data-toggle="tooltip"
+                       title="<?php echo _l('fe_torna_lista_tooltip'); ?>">
+                        <i class="fa fa-arrow-left tw-mr-1" aria-hidden="true"></i>
                         <?php echo _l('fe_torna_lista'); ?>
                     </a>
                 </div>
@@ -251,19 +254,28 @@
                         <h5 class="tw-font-semibold tw-mb-3"><?php echo _l('fe_azioni'); ?></h5>
 
                         <div class="btn-group-vertical tw-w-full">
-                            <a href="<?php echo admin_url('fatturazione_elettronica/download_xml_passiva/' . $fattura->id); ?>" class="btn btn-default tw-mb-2">
-                                <i class="fa fa-download tw-mr-2"></i>
+                            <a href="<?php echo admin_url('fatturazione_elettronica/download_xml_passiva/' . $fattura->id); ?>"
+                               class="btn btn-default tw-mb-2"
+                               data-toggle="tooltip"
+                               title="<?php echo _l('fe_download_xml_tooltip'); ?>">
+                                <i class="fa fa-download tw-mr-2" aria-hidden="true"></i>
                                 <?php echo _l('fe_download_xml'); ?>
                             </a>
 
                             <?php if (!$fattura->expense_id && !$fattura->archiviato): ?>
-                                <a href="<?php echo admin_url('fatturazione_elettronica/crea_spesa/' . $fattura->id); ?>" class="btn btn-primary tw-mb-2">
-                                    <i class="fa fa-receipt tw-mr-2"></i>
+                                <a href="<?php echo admin_url('fatturazione_elettronica/crea_spesa/' . $fattura->id); ?>"
+                                   class="btn btn-primary tw-mb-2"
+                                   data-toggle="tooltip"
+                                   title="<?php echo _l('fe_crea_spesa_tooltip'); ?>">
+                                    <i class="fa fa-receipt tw-mr-2" aria-hidden="true"></i>
                                     <?php echo _l('fe_crea_spesa'); ?>
                                 </a>
 
-                                <a href="<?php echo admin_url('fatturazione_elettronica/archivia_passiva/' . $fattura->id); ?>" class="btn btn-default tw-mb-2">
-                                    <i class="fa fa-archive tw-mr-2"></i>
+                                <a href="<?php echo admin_url('fatturazione_elettronica/archivia_passiva/' . $fattura->id); ?>"
+                                   class="btn btn-default tw-mb-2"
+                                   data-toggle="tooltip"
+                                   title="<?php echo _l('fe_archivia_tooltip'); ?>">
+                                    <i class="fa fa-archive tw-mr-2" aria-hidden="true"></i>
                                     <?php echo _l('fe_archivia'); ?>
                                 </a>
                             <?php endif; ?>
@@ -305,5 +317,12 @@
     </div>
 </div>
 <?php init_tail(); ?>
+
+<script>
+$(function() {
+    // Inizializza tooltip
+    $('[data-toggle="tooltip"]').tooltip();
+});
+</script>
 </body>
 </html>
