@@ -660,3 +660,12 @@ $lang['fe_doc_ts_3_sol_2'] = 'Verifica che il webhook sia configurato correttame
 
 // Documentazione - Extra
 $lang['fe_doc_copia'] = 'Copia';
+
+// Fattura24 - Messaggi specifici
+$lang['fe_fattura24_created'] = 'Fattura creata in Fattura24';
+$lang['fe_fattura24_manual_send'] = 'ATTENZIONE: Devi completare l\'invio allo SDI manualmente dal pannello Fattura24';
+$lang['fe_fattura24_no_auto_send'] = 'Fattura24 non supporta l\'invio automatico allo SDI tramite API';
+$lang['fe_fattura24_check_panel'] = 'Verifica lo stato nel pannello Fattura24';
+$lang['fe_fattura24_no_passive'] = 'Fattura24 non fornisce API per scaricare le fatture passive';
+$lang['fe_provider_limitations'] = 'Limitazioni del provider';
+$lang['fe_requires_manual_action'] = 'Richiede azione manuale';
