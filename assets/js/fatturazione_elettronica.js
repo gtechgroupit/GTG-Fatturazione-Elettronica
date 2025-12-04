@@ -272,115 +272,131 @@
     };
 
     // =========================================================================
-    // INTEGRAZIONE PAGINA PAGAMENTI
+    // INTEGRAZIONE PAGINE FATTURE E PAGAMENTI
     // =========================================================================
 
     /**
-     * Inizializza l'integrazione con la pagina pagamenti
+     * Rileva la pagina corrente
      */
-    FE.initPaymentsPage = function() {
-        // Verifica se siamo nella pagina pagamenti
-        if (window.location.href.indexOf('admin/payments') === -1) {
-            return;
+    FE.getCurrentPage = function() {
+        var url = window.location.href;
+        if (url.indexOf('admin/invoices') !== -1 && url.indexOf('list_invoices') === -1) {
+            return 'invoices';
         }
-
-        // Aspetta che la tabella sia caricata
-        FE.waitForPaymentsTable();
+        if (url.indexOf('admin/payments') !== -1) {
+            return 'payments';
+        }
+        return null;
     };
 
     /**
-     * Attende che la tabella pagamenti sia caricata
+     * Inizializza l'integrazione FE nelle pagine fatture e pagamenti
      */
-    FE.waitForPaymentsTable = function() {
-        var $table = $('.table-payments, table.dataTable');
-
-        if ($table.length === 0) {
-            setTimeout(FE.waitForPaymentsTable, 500);
+    FE.initTableIntegration = function() {
+        var page = FE.getCurrentPage();
+        if (!page) {
             return;
         }
 
-        // La tabella esiste, aggiungi la colonna FE
-        FE.enhancePaymentsTable($table);
+        console.log('FE: Inizializzazione integrazione per pagina:', page);
 
-        // Ascolta eventi di ridisegno della tabella (paginazione, filtri)
-        $table.on('draw.dt', function() {
-            FE.updatePaymentsTableFEStatus();
+        // Attendi che DataTables sia pronto
+        FE.waitForDataTable(page);
+    };
+
+    /**
+     * Attende che DataTables sia inizializzato
+     */
+    FE.waitForDataTable = function(page) {
+        var checkInterval = setInterval(function() {
+            var $tables = $('table.dataTable, .table-invoices, .table-payments, table.dt-table');
+
+            if ($tables.length > 0 && $tables.find('tbody tr').length > 0) {
+                clearInterval(checkInterval);
+                console.log('FE: Tabella trovata, aggiungo pulsanti FE');
+
+                // Prima esecuzione
+                FE.addFEButtons(page);
+
+                // Ascolta eventi DataTables per paginazione/filtri
+                $(document).on('draw.dt', function() {
+                    setTimeout(function() {
+                        FE.addFEButtons(page);
+                    }, 100);
+                });
+
+                // Ascolta anche MutationObserver per tabelle dinamiche
+                FE.observeTableChanges(page);
+            }
+        }, 500);
+
+        // Timeout dopo 10 secondi
+        setTimeout(function() {
+            clearInterval(checkInterval);
+        }, 10000);
+    };
+
+    /**
+     * Osserva cambiamenti nella tabella (per AJAX loading)
+     */
+    FE.observeTableChanges = function(page) {
+        var $tbody = $('table.dataTable tbody, .table-invoices tbody, .table-payments tbody');
+        if ($tbody.length === 0) return;
+
+        var observer = new MutationObserver(function(mutations) {
+            FE.addFEButtons(page);
+        });
+
+        observer.observe($tbody[0], {
+            childList: true,
+            subtree: true
         });
     };
 
     /**
-     * Migliora la tabella pagamenti con info FE
+     * Aggiunge i pulsanti FE alle righe della tabella
      */
-    FE.enhancePaymentsTable = function($table) {
-        // Aggiungi header colonna FE se non esiste
-        var $thead = $table.find('thead tr');
-        if ($thead.find('.fe-header').length === 0) {
-            // Trova la colonna delle azioni (ultima)
-            var $lastTh = $thead.find('th').last();
-            $('<th class="fe-header text-center" style="width: 100px;">E-Fattura</th>').insertBefore($lastTh);
-        }
-
-        // Aggiorna lo stato FE per tutte le righe
-        FE.updatePaymentsTableFEStatus();
-    };
-
-    /**
-     * Aggiorna lo stato FE per tutte le righe della tabella pagamenti
-     */
-    FE.updatePaymentsTableFEStatus = function() {
-        var $table = $('.table-payments, table.dataTable');
-        var $rows = $table.find('tbody tr');
+    FE.addFEButtons = function(page) {
+        var $rows = $('table.dataTable tbody tr, .table-invoices tbody tr, .table-payments tbody tr');
         var invoiceIds = [];
-        var rowMap = {};
+        var rowsToProcess = [];
 
-        // Raccogli tutti gli invoice_id dalle righe
         $rows.each(function() {
             var $row = $(this);
 
-            // Salta se la cella FE esiste già
-            if ($row.find('.fe-status-cell').length > 0) {
+            // Salta se già processata
+            if ($row.data('fe-processed')) {
                 return;
             }
 
-            // Cerca il link alla fattura nella riga
-            var $invoiceLink = $row.find('a[href*="invoices/list_invoices/"]');
-            if ($invoiceLink.length === 0) {
-                // Aggiungi cella vuota
-                var $lastTd = $row.find('td').last();
-                $('<td class="fe-status-cell text-center">-</td>').insertBefore($lastTd);
+            // Estrai invoice_id
+            var invoiceId = FE.extractInvoiceId($row, page);
+            if (!invoiceId) {
                 return;
             }
 
-            // Estrai l'invoice_id dal link
-            var href = $invoiceLink.attr('href');
-            var match = href.match(/invoices\/list_invoices\/(\d+)/);
-            if (!match) {
-                var $lastTd = $row.find('td').last();
-                $('<td class="fe-status-cell text-center">-</td>').insertBefore($lastTd);
-                return;
-            }
-
-            var invoiceId = match[1];
             invoiceIds.push(invoiceId);
-            rowMap[invoiceId] = $row;
+            rowsToProcess.push({
+                $row: $row,
+                invoiceId: invoiceId
+            });
 
-            // Aggiungi cella con loading
-            var $lastTd = $row.find('td').last();
-            $('<td class="fe-status-cell text-center" data-invoice-id="' + invoiceId + '"><i class="fa fa-spinner fa-spin"></i></td>').insertBefore($lastTd);
+            // Marca come in elaborazione
+            $row.data('fe-processed', true);
         });
 
-        // Se non ci sono invoice da verificare, esci
         if (invoiceIds.length === 0) {
             return;
         }
 
-        // Chiamata bulk per ottenere lo stato FE di tutte le fatture
+        console.log('FE: Carico stato per', invoiceIds.length, 'fatture');
+
+        // Chiamata AJAX bulk
         $.ajax({
             url: admin_url + 'fatturazione_elettronica/ajax_get_fe_status_bulk',
             type: 'POST',
             data: {
-                invoice_ids: invoiceIds,
-                csrf_token_name: typeof csrfData !== 'undefined' ? csrfData.token : ''
+                invoice_ids: invoiceIds
             },
             dataType: 'json',
             success: function(response) {
@@ -389,71 +405,148 @@
                     return;
                 }
 
-                // Aggiorna ogni cella con lo stato
-                $.each(response.results, function(invoiceId, data) {
-                    var $cell = $('td.fe-status-cell[data-invoice-id="' + invoiceId + '"]');
-                    if ($cell.length === 0) return;
-
-                    var html = FE.buildFEStatusHtml(data, invoiceId);
-                    $cell.html(html);
+                // Aggiorna ogni riga
+                $.each(rowsToProcess, function(i, item) {
+                    var data = response.results[item.invoiceId];
+                    if (data) {
+                        FE.insertFEButton(item.$row, data, item.invoiceId, page);
+                    }
                 });
 
-                // Reinizializza i tooltip
+                // Reinizializza tooltip
                 $('[data-toggle="tooltip"]').tooltip();
             },
-            error: function() {
-                // In caso di errore, mostra icona di errore
-                $('td.fe-status-cell').each(function() {
-                    if ($(this).find('.fa-spinner').length > 0) {
-                        $(this).html('<i class="fa fa-exclamation-circle text-danger" data-toggle="tooltip" title="Errore caricamento"></i>');
-                    }
+            error: function(xhr, status, error) {
+                console.error('FE AJAX Error:', error);
+                // Rimuovi flag per permettere retry
+                $.each(rowsToProcess, function(i, item) {
+                    item.$row.data('fe-processed', false);
                 });
             }
         });
     };
 
     /**
-     * Costruisce l'HTML per lo stato FE
+     * Estrae l'invoice_id da una riga della tabella
      */
-    FE.buildFEStatusHtml = function(data, invoiceId) {
+    FE.extractInvoiceId = function($row, page) {
+        var invoiceId = null;
+
+        // Metodo 1: Cerca data attribute
+        invoiceId = $row.data('invoice-id') || $row.data('id');
+        if (invoiceId) return invoiceId;
+
+        // Metodo 2: Cerca nel link alla fattura
+        var $links = $row.find('a[href*="invoices"]');
+        $links.each(function() {
+            var href = $(this).attr('href');
+
+            // Pattern: invoices/list_invoices/ID o invoice/ID
+            var match = href.match(/invoices?\/(?:list_invoices\/)?(\d+)/);
+            if (match) {
+                invoiceId = match[1];
+                return false; // break
+            }
+        });
+
+        if (invoiceId) return invoiceId;
+
+        // Metodo 3: Per pagina fatture, cerca nella prima colonna (checkbox o ID)
+        if (page === 'invoices') {
+            var $checkbox = $row.find('input[type="checkbox"][name*="ids"]');
+            if ($checkbox.length) {
+                invoiceId = $checkbox.val();
+            }
+        }
+
+        // Metodo 4: Cerca qualsiasi link con numero
+        if (!invoiceId) {
+            $row.find('a').each(function() {
+                var href = $(this).attr('href') || '';
+                var match = href.match(/\/(\d+)(?:\?|$|#)/);
+                if (match && parseInt(match[1]) > 0) {
+                    // Verifica che sia un link a fattura
+                    if (href.indexOf('invoice') !== -1) {
+                        invoiceId = match[1];
+                        return false;
+                    }
+                }
+            });
+        }
+
+        return invoiceId;
+    };
+
+    /**
+     * Inserisce il pulsante FE nella riga
+     */
+    FE.insertFEButton = function($row, data, invoiceId, page) {
+        // Trova la cella delle azioni (di solito l'ultima con pulsanti)
+        var $actionsCell = $row.find('td').filter(function() {
+            return $(this).find('.btn, a.btn').length > 0;
+        }).last();
+
+        // Se non trova una cella con azioni, usa l'ultima
+        if ($actionsCell.length === 0) {
+            $actionsCell = $row.find('td').last();
+        }
+
+        // Verifica che non sia già stato aggiunto
+        if ($actionsCell.find('.fe-btn-group').length > 0) {
+            return;
+        }
+
+        // Costruisci il pulsante
+        var $btnGroup = $('<div class="fe-btn-group btn-group btn-group-xs" style="margin-left: 5px; display: inline-block;"></div>');
+
         if (!data.exists) {
-            // Fattura elettronica non generata - mostra pulsante per generare
-            return '<a href="' + data.generate_url + '" class="btn btn-xs btn-info" data-toggle="tooltip" title="Genera fattura elettronica">' +
-                   '<i class="fa fa-file-code"></i>' +
-                   '</a>';
+            // FE non generata - pulsante genera
+            $btnGroup.append(
+                '<a href="' + data.generate_url + '" class="btn btn-info" data-toggle="tooltip" title="Genera Fattura Elettronica">' +
+                '<i class="fa fa-file-invoice"></i>' +
+                '</a>'
+            );
+        } else {
+            // FE esiste - mostra stato e azioni
+            if (data.can_send) {
+                // Può essere inviata
+                $btnGroup.append(
+                    '<a href="' + data.send_url + '" class="btn btn-success" data-toggle="tooltip" title="Invia al SDI - Stato: ' + data.label + '" onclick="return confirm(\'Inviare la fattura elettronica al SDI?\');">' +
+                    '<i class="fa fa-paper-plane"></i>' +
+                    '</a>'
+                );
+            } else {
+                // Già inviata - mostra solo visualizza
+                var btnClass = 'btn-default';
+                if (data.stato === 'consegnata' || data.stato === 'accettata') {
+                    btnClass = 'btn-success';
+                } else if (data.stato === 'scartata' || data.stato === 'rifiutata') {
+                    btnClass = 'btn-danger';
+                } else if (data.stato === 'inviata') {
+                    btnClass = 'btn-warning';
+                }
+
+                $btnGroup.append(
+                    '<a href="' + data.view_url + '" class="btn ' + btnClass + '" data-toggle="tooltip" title="FE: ' + data.label + (data.id_sdi ? ' (SDI: ' + data.id_sdi + ')' : '') + '">' +
+                    '<i class="fa fa-file-invoice"></i>' +
+                    '</a>'
+                );
+            }
         }
 
-        var html = '';
-
-        // Mostra lo stato
-        html += '<span class="label label-' + data.class + '" data-toggle="tooltip" title="' + data.label + '">';
-        html += data.label;
-        html += '</span> ';
-
-        // Pulsanti azione
-        html += '<div class="btn-group btn-group-xs mtop5">';
-
-        // Pulsante visualizza
-        html += '<a href="' + data.view_url + '" class="btn btn-default" data-toggle="tooltip" title="Visualizza dettagli">';
-        html += '<i class="fa fa-eye"></i>';
-        html += '</a>';
-
-        // Se può essere inviata, mostra pulsante invio
-        if (data.can_send) {
-            html += '<a href="' + data.send_url + '" class="btn btn-primary" data-toggle="tooltip" title="Invia al SDI" onclick="return confirm(\'Inviare la fattura al SDI?\');">';
-            html += '<i class="fa fa-paper-plane"></i>';
-            html += '</a>';
+        // Inserisci il pulsante
+        var $existingBtnGroup = $actionsCell.find('.btn-group').last();
+        if ($existingBtnGroup.length > 0) {
+            $existingBtnGroup.after($btnGroup);
+        } else {
+            $actionsCell.append($btnGroup);
         }
-
-        html += '</div>';
-
-        return html;
     };
 
     // Inizializza quando il documento è pronto
     $(document).ready(function() {
         FE.init();
-        FE.initPaymentsPage();
+        FE.initTableIntegration();
     });
 
 })(jQuery);
