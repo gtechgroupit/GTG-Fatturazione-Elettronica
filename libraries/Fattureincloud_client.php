@@ -254,11 +254,17 @@ class Fattureincloud_client
     /**
      * Crea prima un documento su FIC e poi lo invia al SDI
      *
-     * @param array $invoice_data Dati della fattura
+     * @param array $invoice_data Dati della fattura nel formato FIC
+     * @param bool $dry_run Se true, valida senza inviare realmente al SDI
      * @return array|false
      */
-    public function createAndSendInvoice($invoice_data)
+    public function createAndSendInvoice($invoice_data, $dry_run = false)
     {
+        if (empty($this->config['company_id'])) {
+            $this->last_error = 'Company ID non configurato';
+            return false;
+        }
+
         // Prima crea il documento
         $endpoint = self::API_BASE_URL . '/c/' . $this->config['company_id'] . '/issued_documents';
 
