@@ -5,8 +5,10 @@
         <div class="row">
             <div class="col-md-12">
                 <div class="tw-text-center tw-mb-8">
-                    <h2 class="tw-font-bold tw-text-2xl">
-                        <i class="fa-solid fa-file-invoice tw-mr-2 tw-text-primary"></i>
+                    <h2 class="tw-font-bold tw-text-2xl"
+                        data-toggle="tooltip"
+                        title="<?php echo _l('fe_setup_wizard_title_tooltip'); ?>">
+                        <i class="fa-solid fa-file-invoice tw-mr-2 tw-text-primary" aria-hidden="true"></i>
                         <?php echo _l('fe_setup_wizard_title'); ?>
                     </h2>
                     <p class="tw-text-gray-600 tw-mt-2">
@@ -20,17 +22,23 @@
         <div class="row tw-mb-6">
             <div class="col-md-8 col-md-offset-2">
                 <div class="tw-flex tw-justify-between tw-items-center">
-                    <div class="wizard-step <?php echo $step == 1 ? 'active' : ($step > 1 ? 'completed' : ''); ?>">
+                    <div class="wizard-step <?php echo $step == 1 ? 'active' : ($step > 1 ? 'completed' : ''); ?>"
+                         data-toggle="tooltip"
+                         title="<?php echo _l('fe_step_provider_tooltip'); ?>">
                         <div class="step-number">1</div>
                         <div class="step-label"><?php echo _l('fe_step_provider'); ?></div>
                     </div>
                     <div class="wizard-line"></div>
-                    <div class="wizard-step <?php echo $step == 2 ? 'active' : ($step > 2 ? 'completed' : ''); ?>">
+                    <div class="wizard-step <?php echo $step == 2 ? 'active' : ($step > 2 ? 'completed' : ''); ?>"
+                         data-toggle="tooltip"
+                         title="<?php echo _l('fe_step_credentials_tooltip'); ?>">
                         <div class="step-number">2</div>
                         <div class="step-label"><?php echo _l('fe_step_credentials'); ?></div>
                     </div>
                     <div class="wizard-line"></div>
-                    <div class="wizard-step <?php echo $step == 3 ? 'active' : ''; ?>">
+                    <div class="wizard-step <?php echo $step == 3 ? 'active' : ''; ?>"
+                         data-toggle="tooltip"
+                         title="<?php echo _l('fe_step_company_tooltip'); ?>">
                         <div class="step-number">3</div>
                         <div class="step-label"><?php echo _l('fe_step_company'); ?></div>
                     </div>
@@ -42,7 +50,9 @@
         <!-- Step 1: Selezione Provider -->
         <div class="row">
             <div class="col-md-10 col-md-offset-1">
-                <h4 class="tw-font-semibold tw-mb-4 tw-text-center">
+                <h4 class="tw-font-semibold tw-mb-4 tw-text-center"
+                    data-toggle="tooltip"
+                    title="<?php echo _l('fe_select_provider_tooltip'); ?>">
                     <?php echo _l('fe_select_provider'); ?>
                 </h4>
 
@@ -92,8 +102,11 @@
                 </div>
 
                 <div class="tw-text-center tw-mt-4">
-                    <a href="<?php echo admin_url('fatturazione_elettronica'); ?>" class="btn btn-default">
-                        <i class="fa fa-arrow-left tw-mr-1"></i>
+                    <a href="<?php echo admin_url('fatturazione_elettronica'); ?>"
+                       class="btn btn-default"
+                       data-toggle="tooltip"
+                       title="<?php echo _l('fe_skip_setup_tooltip'); ?>">
+                        <i class="fa fa-arrow-left tw-mr-1" aria-hidden="true"></i>
                         <?php echo _l('fe_skip_setup'); ?>
                     </a>
                 </div>
@@ -137,13 +150,18 @@
                                 <br><strong><?php echo $settings['fe_fic_company_name']; ?></strong>
                                 <?php endif; ?>
                             </div>
-                            <a href="<?php echo admin_url('fatturazione_elettronica/setup/3'); ?>" class="btn btn-primary btn-lg">
+                            <a href="<?php echo admin_url('fatturazione_elettronica/setup/3'); ?>"
+                               class="btn btn-primary btn-lg"
+                               data-toggle="tooltip"
+                               title="<?php echo _l('fe_continue_tooltip'); ?>">
                                 <?php echo _l('fe_continue'); ?>
-                                <i class="fa fa-arrow-right tw-ml-1"></i>
+                                <i class="fa fa-arrow-right tw-ml-1" aria-hidden="true"></i>
                             </a>
                             <br><br>
                             <a href="<?php echo admin_url('fatturazione_elettronica/oauth_disconnect'); ?>"
                                class="btn btn-danger btn-sm"
+                               data-toggle="tooltip"
+                               title="<?php echo _l('fe_disconnect_account_tooltip'); ?>"
                                onclick="return confirm('<?php echo _l('fe_confirm_disconnect'); ?>');">
                                 <?php echo _l('fe_disconnect_account'); ?>
                             </a>
@@ -156,21 +174,30 @@
                                 <div class="row">
                                     <div class="col-md-6">
                                         <div class="form-group">
-                                            <label>Client ID <span class="text-danger">*</span></label>
+                                            <label data-toggle="tooltip" title="<?php echo _l('fe_client_id_tooltip'); ?>">
+                                                Client ID <span class="text-danger" aria-label="campo obbligatorio">*</span>
+                                                <i class="fa fa-question-circle text-muted" aria-hidden="true"></i>
+                                            </label>
                                             <input type="text" name="fe_fic_client_id" class="form-control"
                                                    value="<?php echo $settings['fe_fic_client_id'] ?? ''; ?>" required>
                                         </div>
                                     </div>
                                     <div class="col-md-6">
                                         <div class="form-group">
-                                            <label>Client Secret <span class="text-danger">*</span></label>
+                                            <label data-toggle="tooltip" title="<?php echo _l('fe_client_secret_tooltip'); ?>">
+                                                Client Secret <span class="text-danger" aria-label="campo obbligatorio">*</span>
+                                                <i class="fa fa-question-circle text-muted" aria-hidden="true"></i>
+                                            </label>
                                             <input type="password" name="fe_fic_client_secret" class="form-control"
                                                    value="<?php echo $settings['fe_fic_client_secret'] ?? ''; ?>" required>
                                         </div>
                                     </div>
                                 </div>
-                                <button type="submit" class="btn btn-primary btn-lg">
-                                    <i class="fa fa-link tw-mr-1"></i>
+                                <button type="submit"
+                                        class="btn btn-primary btn-lg"
+                                        data-toggle="tooltip"
+                                        title="<?php echo _l('fe_connect_account_tooltip'); ?>">
+                                    <i class="fa fa-link tw-mr-1" aria-hidden="true"></i>
                                     <?php echo _l('fe_connect_account'); ?>
                                 </button>
                             </form>
@@ -241,13 +268,19 @@
                             <?php endif; ?>
 
                             <div class="tw-flex tw-justify-between tw-mt-4">
-                                <a href="<?php echo admin_url('fatturazione_elettronica/setup/1'); ?>" class="btn btn-default">
-                                    <i class="fa fa-arrow-left tw-mr-1"></i>
+                                <a href="<?php echo admin_url('fatturazione_elettronica/setup/1'); ?>"
+                                   class="btn btn-default"
+                                   data-toggle="tooltip"
+                                   title="<?php echo _l('fe_back_tooltip'); ?>">
+                                    <i class="fa fa-arrow-left tw-mr-1" aria-hidden="true"></i>
                                     <?php echo _l('fe_back'); ?>
                                 </a>
-                                <button type="submit" class="btn btn-primary">
+                                <button type="submit"
+                                        class="btn btn-primary"
+                                        data-toggle="tooltip"
+                                        title="<?php echo _l('fe_continue_tooltip'); ?>">
                                     <?php echo _l('fe_continue'); ?>
-                                    <i class="fa fa-arrow-right tw-ml-1"></i>
+                                    <i class="fa fa-arrow-right tw-ml-1" aria-hidden="true"></i>
                                 </button>
                             </div>
                         </form>
@@ -275,21 +308,32 @@
                             <div class="row">
                                 <div class="col-md-6">
                                     <div class="form-group">
-                                        <label><?php echo _l('fe_denominazione'); ?> <span class="text-danger">*</span></label>
+                                        <label data-toggle="tooltip" title="<?php echo _l('fe_denominazione_tooltip'); ?>">
+                                            <?php echo _l('fe_denominazione'); ?>
+                                            <span class="text-danger" aria-label="campo obbligatorio">*</span>
+                                            <i class="fa fa-question-circle text-muted" aria-hidden="true"></i>
+                                        </label>
                                         <input type="text" name="fe_denominazione" class="form-control"
                                                value="<?php echo $settings['fe_denominazione']; ?>" required>
                                     </div>
                                 </div>
                                 <div class="col-md-3">
                                     <div class="form-group">
-                                        <label><?php echo _l('fe_partita_iva'); ?> <span class="text-danger">*</span></label>
+                                        <label data-toggle="tooltip" title="<?php echo _l('fe_partita_iva_tooltip'); ?>">
+                                            <?php echo _l('fe_partita_iva'); ?>
+                                            <span class="text-danger" aria-label="campo obbligatorio">*</span>
+                                            <i class="fa fa-question-circle text-muted" aria-hidden="true"></i>
+                                        </label>
                                         <input type="text" name="fe_partita_iva" class="form-control"
                                                value="<?php echo $settings['fe_partita_iva']; ?>" required maxlength="11">
                                     </div>
                                 </div>
                                 <div class="col-md-3">
                                     <div class="form-group">
-                                        <label><?php echo _l('fe_codice_fiscale'); ?></label>
+                                        <label data-toggle="tooltip" title="<?php echo _l('fe_codice_fiscale_tooltip'); ?>">
+                                            <?php echo _l('fe_codice_fiscale'); ?>
+                                            <i class="fa fa-question-circle text-muted" aria-hidden="true"></i>
+                                        </label>
                                         <input type="text" name="fe_codice_fiscale" class="form-control"
                                                value="<?php echo $settings['fe_codice_fiscale']; ?>" maxlength="16">
                                     </div>
@@ -299,7 +343,11 @@
                             <div class="row">
                                 <div class="col-md-6">
                                     <div class="form-group">
-                                        <label><?php echo _l('fe_regime_fiscale'); ?> <span class="text-danger">*</span></label>
+                                        <label data-toggle="tooltip" title="<?php echo _l('fe_regime_fiscale_tooltip'); ?>">
+                                            <?php echo _l('fe_regime_fiscale'); ?>
+                                            <span class="text-danger" aria-label="campo obbligatorio">*</span>
+                                            <i class="fa fa-question-circle text-muted" aria-hidden="true"></i>
+                                        </label>
                                         <select name="fe_regime_fiscale" class="form-control selectpicker"
                                                 data-live-search="true" required>
                                             <?php foreach ($regimi_fiscali as $code => $label): ?>
@@ -313,14 +361,20 @@
                                 </div>
                                 <div class="col-md-3">
                                     <div class="form-group">
-                                        <label><?php echo _l('fe_codice_destinatario'); ?></label>
+                                        <label data-toggle="tooltip" title="<?php echo _l('fe_codice_destinatario_tooltip'); ?>">
+                                            <?php echo _l('fe_codice_destinatario'); ?>
+                                            <i class="fa fa-question-circle text-muted" aria-hidden="true"></i>
+                                        </label>
                                         <input type="text" name="fe_codice_destinatario" class="form-control"
                                                value="<?php echo $settings['fe_codice_destinatario']; ?>" maxlength="7">
                                     </div>
                                 </div>
                                 <div class="col-md-3">
                                     <div class="form-group">
-                                        <label><?php echo _l('fe_pec'); ?></label>
+                                        <label data-toggle="tooltip" title="<?php echo _l('fe_pec_tooltip'); ?>">
+                                            <?php echo _l('fe_pec'); ?>
+                                            <i class="fa fa-question-circle text-muted" aria-hidden="true"></i>
+                                        </label>
                                         <input type="email" name="fe_pec" class="form-control"
                                                value="<?php echo $settings['fe_pec']; ?>">
                                     </div>
@@ -333,21 +387,33 @@
                             <div class="row">
                                 <div class="col-md-6">
                                     <div class="form-group">
-                                        <label><?php echo _l('fe_indirizzo'); ?> <span class="text-danger">*</span></label>
+                                        <label data-toggle="tooltip" title="<?php echo _l('fe_indirizzo_tooltip'); ?>">
+                                            <?php echo _l('fe_indirizzo'); ?>
+                                            <span class="text-danger" aria-label="campo obbligatorio">*</span>
+                                            <i class="fa fa-question-circle text-muted" aria-hidden="true"></i>
+                                        </label>
                                         <input type="text" name="fe_indirizzo" class="form-control"
                                                value="<?php echo $settings['fe_indirizzo']; ?>" required>
                                     </div>
                                 </div>
                                 <div class="col-md-2">
                                     <div class="form-group">
-                                        <label><?php echo _l('fe_cap'); ?> <span class="text-danger">*</span></label>
+                                        <label data-toggle="tooltip" title="<?php echo _l('fe_cap_tooltip'); ?>">
+                                            <?php echo _l('fe_cap'); ?>
+                                            <span class="text-danger" aria-label="campo obbligatorio">*</span>
+                                            <i class="fa fa-question-circle text-muted" aria-hidden="true"></i>
+                                        </label>
                                         <input type="text" name="fe_cap" class="form-control"
                                                value="<?php echo $settings['fe_cap']; ?>" required maxlength="5">
                                     </div>
                                 </div>
                                 <div class="col-md-4">
                                     <div class="form-group">
-                                        <label><?php echo _l('fe_comune'); ?> <span class="text-danger">*</span></label>
+                                        <label data-toggle="tooltip" title="<?php echo _l('fe_comune_tooltip'); ?>">
+                                            <?php echo _l('fe_comune'); ?>
+                                            <span class="text-danger" aria-label="campo obbligatorio">*</span>
+                                            <i class="fa fa-question-circle text-muted" aria-hidden="true"></i>
+                                        </label>
                                         <input type="text" name="fe_comune" class="form-control"
                                                value="<?php echo $settings['fe_comune']; ?>" required>
                                     </div>
@@ -357,28 +423,40 @@
                             <div class="row">
                                 <div class="col-md-2">
                                     <div class="form-group">
-                                        <label><?php echo _l('fe_provincia'); ?></label>
+                                        <label data-toggle="tooltip" title="<?php echo _l('fe_provincia_tooltip'); ?>">
+                                            <?php echo _l('fe_provincia'); ?>
+                                            <i class="fa fa-question-circle text-muted" aria-hidden="true"></i>
+                                        </label>
                                         <input type="text" name="fe_provincia" class="form-control"
                                                value="<?php echo $settings['fe_provincia']; ?>" maxlength="2" placeholder="RM">
                                     </div>
                                 </div>
                                 <div class="col-md-2">
                                     <div class="form-group">
-                                        <label><?php echo _l('fe_nazione'); ?></label>
+                                        <label data-toggle="tooltip" title="<?php echo _l('fe_nazione_tooltip'); ?>">
+                                            <?php echo _l('fe_nazione'); ?>
+                                            <i class="fa fa-question-circle text-muted" aria-hidden="true"></i>
+                                        </label>
                                         <input type="text" name="fe_nazione" class="form-control"
                                                value="<?php echo $settings['fe_nazione'] ?: 'IT'; ?>" maxlength="2">
                                     </div>
                                 </div>
                                 <div class="col-md-4">
                                     <div class="form-group">
-                                        <label><?php echo _l('fe_telefono'); ?></label>
+                                        <label data-toggle="tooltip" title="<?php echo _l('fe_telefono_tooltip'); ?>">
+                                            <?php echo _l('fe_telefono'); ?>
+                                            <i class="fa fa-question-circle text-muted" aria-hidden="true"></i>
+                                        </label>
                                         <input type="text" name="fe_telefono" class="form-control"
                                                value="<?php echo $settings['fe_telefono']; ?>">
                                     </div>
                                 </div>
                                 <div class="col-md-4">
                                     <div class="form-group">
-                                        <label><?php echo _l('fe_email'); ?></label>
+                                        <label data-toggle="tooltip" title="<?php echo _l('fe_email_tooltip'); ?>">
+                                            <?php echo _l('fe_email'); ?>
+                                            <i class="fa fa-question-circle text-muted" aria-hidden="true"></i>
+                                        </label>
                                         <input type="email" name="fe_email" class="form-control"
                                                value="<?php echo $settings['fe_email']; ?>">
                                     </div>
@@ -386,12 +464,18 @@
                             </div>
 
                             <div class="tw-flex tw-justify-between tw-mt-4">
-                                <a href="<?php echo admin_url('fatturazione_elettronica/setup/2'); ?>" class="btn btn-default">
-                                    <i class="fa fa-arrow-left tw-mr-1"></i>
+                                <a href="<?php echo admin_url('fatturazione_elettronica/setup/2'); ?>"
+                                   class="btn btn-default"
+                                   data-toggle="tooltip"
+                                   title="<?php echo _l('fe_back_tooltip'); ?>">
+                                    <i class="fa fa-arrow-left tw-mr-1" aria-hidden="true"></i>
                                     <?php echo _l('fe_back'); ?>
                                 </a>
-                                <button type="submit" class="btn btn-success btn-lg">
-                                    <i class="fa fa-check tw-mr-1"></i>
+                                <button type="submit"
+                                        class="btn btn-success btn-lg"
+                                        data-toggle="tooltip"
+                                        title="<?php echo _l('fe_complete_setup_tooltip'); ?>">
+                                    <i class="fa fa-check tw-mr-1" aria-hidden="true"></i>
                                     <?php echo _l('fe_complete_setup'); ?>
                                 </button>
                             </div>
@@ -490,6 +574,9 @@
 <?php init_tail(); ?>
 <script>
 $(function() {
+    // Inizializza tooltip
+    $('[data-toggle="tooltip"]').tooltip();
+
     // Click sulla card seleziona il provider
     $('.provider-card').on('click', function() {
         var provider = $(this).data('provider');

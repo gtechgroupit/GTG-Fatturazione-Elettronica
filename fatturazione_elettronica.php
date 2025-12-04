@@ -330,6 +330,14 @@ function fatturazione_elettronica_register_menu()
                 'position' => 10,
             ]);
         }
+
+        // Sottomenu Documentazione
+        $CI->app_menu->add_sidebar_children_item('fatturazione-elettronica', [
+            'slug'     => 'fe-documentazione',
+            'name'     => _l('fe_documentazione'),
+            'href'     => admin_url('fatturazione_elettronica/documentazione'),
+            'position' => 20,
+        ]);
     }
 }
 

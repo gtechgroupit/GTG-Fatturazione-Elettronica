@@ -49,8 +49,11 @@ $chart_data = isset($chart_data) ? $chart_data : ['inviate' => array_fill(0, 12,
                         </h5>
                         <p class="tw-mb-0"><?php echo _l('fe_welcome_message'); ?></p>
                     </div>
-                    <a href="<?php echo admin_url('fatturazione_elettronica/setup/1'); ?>" class="btn btn-primary btn-lg">
-                        <i class="fa fa-play tw-mr-2"></i>
+                    <a href="<?php echo admin_url('fatturazione_elettronica/setup/1'); ?>"
+                       class="btn btn-primary btn-lg"
+                       data-toggle="tooltip"
+                       title="<?php echo _l('fe_vai_impostazioni_tooltip'); ?>">
+                        <i class="fa fa-play tw-mr-2" aria-hidden="true"></i>
                         <?php echo _l('fe_start_setup'); ?>
                     </a>
                 </div>
@@ -215,11 +218,17 @@ $chart_data = isset($chart_data) ? $chart_data : ['inviate' => array_fill(0, 12,
                         </div>
 
                         <div class="tw-mt-4">
-                            <a href="<?php echo admin_url('fatturazione_elettronica/fatture_passive'); ?>" class="btn btn-info btn-block">
+                            <a href="<?php echo admin_url('fatturazione_elettronica/fatture_passive'); ?>"
+                               class="btn btn-info btn-block"
+                               data-toggle="tooltip"
+                               title="<?php echo _l('fe_vedi_tutte_tooltip'); ?>">
                                 <?php echo _l('fe_vedi_tutte'); ?>
                             </a>
-                            <a href="<?php echo admin_url('fatturazione_elettronica/sync_passive'); ?>" class="btn btn-default btn-block">
-                                <i class="fa fa-sync tw-mr-1"></i>
+                            <a href="<?php echo admin_url('fatturazione_elettronica/sync_passive'); ?>"
+                               class="btn btn-default btn-block"
+                               data-toggle="tooltip"
+                               title="<?php echo _l('fe_sincronizza_passive_btn_tooltip'); ?>">
+                                <i class="fa fa-sync tw-mr-1" aria-hidden="true"></i>
                                 <?php echo _l('fe_sincronizza'); ?>
                             </a>
                         </div>
@@ -238,24 +247,36 @@ $chart_data = isset($chart_data) ? $chart_data : ['inviate' => array_fill(0, 12,
                             <?php echo _l('fe_azioni_rapide'); ?>
                         </h4>
                         <div class="tw-space-y-2">
-                            <a href="#" class="btn btn-primary btn-block" data-toggle="modal" data-target="#modal-genera-fattura">
-                                <i class="fa fa-plus tw-mr-2"></i>
+                            <a href="#"
+                               class="btn btn-primary btn-block"
+                               data-toggle="modal"
+                               data-target="#modal-genera-fattura"
+                               title="<?php echo _l('fe_genera_fattura_tooltip'); ?>">
+                                <i class="fa fa-plus tw-mr-2" aria-hidden="true"></i>
                                 <?php echo _l('fe_genera_fattura'); ?>
                             </a>
                             <?php if (!empty($fatture_da_inviare)): ?>
                             <a href="<?php echo admin_url('fatturazione_elettronica/invia_tutte_generate'); ?>"
                                class="btn btn-success btn-block"
+                               data-toggle="tooltip"
+                               title="<?php echo _l('fe_invia_tutte_tooltip'); ?>"
                                onclick="return confirm('<?php echo _l('fe_confirm_bulk_send'); ?>');">
-                                <i class="fa fa-paper-plane tw-mr-2"></i>
+                                <i class="fa fa-paper-plane tw-mr-2" aria-hidden="true"></i>
                                 <?php echo _l('fe_invia_tutte'); ?> (<?php echo count($fatture_da_inviare); ?>)
                             </a>
                             <?php endif; ?>
-                            <a href="<?php echo admin_url('fatturazione_elettronica/verifica_stati'); ?>" class="btn btn-default btn-block">
-                                <i class="fa fa-refresh tw-mr-2"></i>
+                            <a href="<?php echo admin_url('fatturazione_elettronica/verifica_stati'); ?>"
+                               class="btn btn-default btn-block"
+                               data-toggle="tooltip"
+                               title="<?php echo _l('fe_verifica_stati_tooltip'); ?>">
+                                <i class="fa fa-refresh tw-mr-2" aria-hidden="true"></i>
                                 <?php echo _l('fe_verifica_stati'); ?>
                             </a>
-                            <a href="<?php echo admin_url('fatturazione_elettronica/impostazioni'); ?>" class="btn btn-default btn-block">
-                                <i class="fa fa-cog tw-mr-2"></i>
+                            <a href="<?php echo admin_url('fatturazione_elettronica/impostazioni'); ?>"
+                               class="btn btn-default btn-block"
+                               data-toggle="tooltip"
+                               title="<?php echo _l('fe_vai_impostazioni_tooltip'); ?>">
+                                <i class="fa fa-cog tw-mr-2" aria-hidden="true"></i>
                                 <?php echo _l('fe_impostazioni'); ?>
                             </a>
                         </div>
@@ -267,8 +288,10 @@ $chart_data = isset($chart_data) ? $chart_data : ['inviate' => array_fill(0, 12,
             <div class="col-md-4">
                 <div class="panel_s">
                     <div class="panel-body">
-                        <h4 class="tw-font-semibold tw-mb-4">
-                            <i class="fa fa-paper-plane tw-mr-2 tw-text-warning"></i>
+                        <h4 class="tw-font-semibold tw-mb-4"
+                            data-toggle="tooltip"
+                            title="<?php echo _l('fe_da_inviare_tooltip'); ?>">
+                            <i class="fa fa-paper-plane tw-mr-2 tw-text-warning" aria-hidden="true"></i>
                             <?php echo _l('fe_da_inviare'); ?>
                             <?php if (!empty($fatture_da_inviare)): ?>
                             <span class="badge badge-warning"><?php echo count($fatture_da_inviare); ?></span>
@@ -288,8 +311,10 @@ $chart_data = isset($chart_data) ? $chart_data : ['inviate' => array_fill(0, 12,
                                         </div>
                                         <a href="<?php echo admin_url('fatturazione_elettronica/invia_fattura/' . $fattura->id); ?>"
                                            class="btn btn-primary btn-xs"
+                                           data-toggle="tooltip"
+                                           title="<?php echo _l('fe_invia_sdi_tooltip'); ?>"
                                            onclick="return confirm('<?php echo _l('fe_confirm_send'); ?>');">
-                                            <i class="fa fa-paper-plane"></i>
+                                            <i class="fa fa-paper-plane" aria-hidden="true"></i>
                                         </a>
                                     </li>
                                 <?php endforeach; ?>
@@ -313,8 +338,10 @@ $chart_data = isset($chart_data) ? $chart_data : ['inviate' => array_fill(0, 12,
             <div class="col-md-4">
                 <div class="panel_s">
                     <div class="panel-body">
-                        <h4 class="tw-font-semibold tw-mb-4">
-                            <i class="fa fa-history tw-mr-2"></i>
+                        <h4 class="tw-font-semibold tw-mb-4"
+                            data-toggle="tooltip"
+                            title="<?php echo _l('fe_log_recenti_tooltip'); ?>">
+                            <i class="fa fa-history tw-mr-2" aria-hidden="true"></i>
                             <?php echo _l('fe_log_recenti'); ?>
                         </h4>
                         <?php if (!empty($recent_logs)): ?>
@@ -348,8 +375,10 @@ $chart_data = isset($chart_data) ? $chart_data : ['inviate' => array_fill(0, 12,
             <div class="col-md-12">
                 <div class="panel_s">
                     <div class="panel-body">
-                        <h4 class="tw-font-semibold tw-mb-4">
-                            <i class="fa fa-envelope tw-mr-2 tw-text-info"></i>
+                        <h4 class="tw-font-semibold tw-mb-4"
+                            data-toggle="tooltip"
+                            title="<?php echo _l('fe_passive_non_lette_tooltip'); ?>">
+                            <i class="fa fa-envelope tw-mr-2 tw-text-info" aria-hidden="true"></i>
                             <?php echo _l('fe_passive_non_lette'); ?>
                         </h4>
                         <div class="table-responsive">
@@ -376,8 +405,10 @@ $chart_data = isset($chart_data) ? $chart_data : ['inviate' => array_fill(0, 12,
                                             <td><strong>&euro; <?php echo number_format($fattura->importo_totale, 2, ',', '.'); ?></strong></td>
                                             <td>
                                                 <a href="<?php echo admin_url('fatturazione_elettronica/fattura_passiva/' . $fattura->id); ?>"
-                                                   class="btn btn-info btn-xs">
-                                                    <i class="fa fa-eye"></i>
+                                                   class="btn btn-info btn-xs"
+                                                   data-toggle="tooltip"
+                                                   title="<?php echo _l('fe_visualizza_tooltip'); ?>">
+                                                    <i class="fa fa-eye" aria-hidden="true"></i>
                                                     <?php echo _l('fe_visualizza'); ?>
                                                 </a>
                                             </td>

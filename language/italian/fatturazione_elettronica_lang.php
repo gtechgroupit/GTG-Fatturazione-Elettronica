@@ -7,7 +7,7 @@ defined('BASEPATH') or exit('No direct script access allowed');
  */
 
 // Menu e titoli
-$lang['fe_menu_title'] = 'Fatturazione Elettronica';
+$lang['fe_menu_title'] = 'Fatt. Elettronica';
 $lang['fe_dashboard'] = 'Dashboard';
 $lang['fe_fatture_attive'] = 'Fatture Attive';
 $lang['fe_fatture_passive'] = 'Fatture Passive';
@@ -349,3 +349,230 @@ $lang['fe_change_provider_tooltip'] = 'Modifica il provider o le credenziali SDI
 $lang['fe_chart_not_available'] = 'Grafico non disponibile';
 $lang['fe_sincronizza_passive_tooltip'] = 'Scarica le nuove fatture passive dal provider SDI';
 $lang['fe_salva_impostazioni_tooltip'] = 'Salva tutte le impostazioni del modulo';
+
+// Tooltip Azioni Dashboard
+$lang['fe_genera_fattura_tooltip'] = 'Importa una fattura da Perfex e genera l\'XML per la fatturazione elettronica';
+$lang['fe_sincronizza_passive_btn_tooltip'] = 'Controlla e scarica le nuove fatture passive dal provider SDI';
+$lang['fe_vedi_tutte_tooltip'] = 'Visualizza l\'elenco completo delle fatture';
+$lang['fe_vedi_dettaglio_tooltip'] = 'Apri il dettaglio completo di questa fattura';
+$lang['fe_vai_impostazioni_tooltip'] = 'Configura i dati aziendali e il provider SDI';
+$lang['fe_log_recenti_tooltip'] = 'Ultimi eventi registrati dal sistema';
+$lang['fe_da_inviare_tooltip'] = 'Fatture generate ma non ancora inviate allo SDI';
+$lang['fe_invia_tutte_tooltip'] = 'Invia tutte le fatture in attesa allo SDI in un\'unica operazione';
+$lang['fe_verifica_stati_tooltip'] = 'Aggiorna lo stato di tutte le fatture inviate controllando gli esiti SDI';
+
+// Tooltip Fatture Passive
+$lang['fe_passive_non_lette_tooltip'] = 'Fatture ricevute dai fornitori non ancora visualizzate';
+$lang['fe_solo_non_lette_tooltip'] = 'Mostra solo le fatture che non hai ancora aperto';
+$lang['fe_collegata_tooltip'] = 'Questa fattura è stata collegata a una spesa in Perfex';
+$lang['fe_archiviata_tooltip'] = 'Fattura archiviata manualmente senza creare una spesa';
+$lang['fe_da_processare_tooltip'] = 'Fattura da elaborare: puoi crearci una spesa o archiviarla';
+$lang['fe_crea_spesa_tooltip'] = 'Crea automaticamente una spesa in Perfex basata su questa fattura';
+$lang['fe_archivia_tooltip'] = 'Archivia la fattura senza creare una spesa';
+
+// Tooltip Fatture Attive
+$lang['fe_nome_file_tooltip'] = 'Nome del file XML generato secondo il formato SDI';
+$lang['fe_tipo_tooltip'] = 'Tipo di documento: Fattura (TD01), Nota di Credito (TD04), ecc.';
+$lang['fe_id_sdi_tooltip'] = 'Identificativo univoco assegnato dallo SDI dopo l\'invio';
+$lang['fe_stato_tooltip'] = 'Stato attuale della fattura nel flusso SDI';
+$lang['fe_data_creazione_tooltip'] = 'Data in cui è stato generato l\'XML della fattura';
+$lang['fe_data_invio_tooltip'] = 'Data e ora dell\'ultimo tentativo di invio allo SDI';
+$lang['fe_importa_fattura_tooltip'] = 'Seleziona una fattura Perfex per generare l\'XML elettronico';
+$lang['fe_visualizza_tooltip'] = 'Apri il dettaglio completo della fattura elettronica';
+$lang['fe_download_xml_tooltip'] = 'Scarica il file XML della fattura elettronica';
+$lang['fe_invia_sdi_tooltip'] = 'Invia questa fattura al Sistema di Interscambio';
+$lang['fe_rigenera_xml_tooltip'] = 'Rigenera l\'XML con i dati aggiornati della fattura Perfex';
+$lang['fe_verifica_stato_tooltip'] = 'Controlla lo stato attuale della fattura presso lo SDI';
+$lang['fe_elimina_tooltip'] = 'Elimina questa fattura elettronica (solo se non ancora inviata)';
+$lang['fe_invia_selezionate_tooltip'] = 'Invia tutte le fatture selezionate allo SDI';
+
+// Tooltip Stati Fattura
+$lang['fe_stato_bozza_tooltip'] = 'XML non ancora generato';
+$lang['fe_stato_generata_tooltip'] = 'XML generato, pronto per l\'invio allo SDI';
+$lang['fe_stato_inviata_tooltip'] = 'Fattura inviata, in attesa di risposta dallo SDI';
+$lang['fe_stato_consegnata_tooltip'] = 'Fattura recapitata con successo al destinatario';
+$lang['fe_stato_non_consegnata_tooltip'] = 'SDI non è riuscito a consegnare al destinatario, disponibile nell\'area riservata';
+$lang['fe_stato_accettata_tooltip'] = 'Il destinatario ha accettato la fattura';
+$lang['fe_stato_rifiutata_tooltip'] = 'Il destinatario ha rifiutato la fattura';
+$lang['fe_stato_scartata_tooltip'] = 'SDI ha scartato la fattura per errori formali, da correggere e reinviare';
+$lang['fe_stato_decorrenza_termini_tooltip'] = 'Trascorsi 15 giorni senza risposta, fattura considerata accettata';
+$lang['fe_stato_mancata_consegna_tooltip'] = 'Impossibile recapitare al destinatario';
+
+// Tooltip Impostazioni - Dati Azienda
+$lang['fe_denominazione_tooltip'] = 'Ragione sociale o nome dell\'azienda come risulta alla Camera di Commercio';
+$lang['fe_partita_iva_tooltip'] = 'Partita IVA italiana a 11 cifre (senza prefisso IT)';
+$lang['fe_codice_fiscale_tooltip'] = 'Codice fiscale dell\'azienda (può coincidere con la P.IVA per le società)';
+$lang['fe_regime_fiscale_tooltip'] = 'Regime fiscale dell\'azienda secondo la normativa italiana';
+$lang['fe_codice_destinatario_tooltip'] = 'Codice SDI a 7 caratteri per ricevere le fatture passive';
+$lang['fe_pec_tooltip'] = 'PEC aziendale per la ricezione delle fatture se non si usa il codice destinatario';
+$lang['fe_indirizzo_tooltip'] = 'Indirizzo della sede legale (via/piazza e numero civico)';
+$lang['fe_cap_tooltip'] = 'Codice di Avviamento Postale a 5 cifre';
+$lang['fe_comune_tooltip'] = 'Comune della sede legale';
+$lang['fe_provincia_tooltip'] = 'Sigla provincia a 2 lettere (es: RM, MI, NA)';
+$lang['fe_nazione_tooltip'] = 'Codice nazione ISO a 2 lettere (IT per Italia)';
+$lang['fe_telefono_tooltip'] = 'Numero di telefono aziendale (opzionale)';
+$lang['fe_email_tooltip'] = 'Email aziendale di contatto (opzionale)';
+
+// Tooltip Impostazioni - Dati REA
+$lang['fe_dati_rea_tooltip'] = 'Dati del Registro delle Imprese (obbligatori per le società)';
+$lang['fe_rea_ufficio_tooltip'] = 'Sigla della provincia della Camera di Commercio';
+$lang['fe_rea_numero_tooltip'] = 'Numero di iscrizione al Registro delle Imprese';
+$lang['fe_capitale_sociale_tooltip'] = 'Capitale sociale in euro (es: 10000.00)';
+$lang['fe_socio_unico_tooltip'] = 'Indica se la società ha un socio unico o più soci';
+$lang['fe_stato_liquidazione_tooltip'] = 'Indica se la società è in stato di liquidazione';
+
+// Tooltip Impostazioni - Provider
+$lang['fe_provider_tooltip'] = 'Servizio esterno utilizzato per l\'invio e la ricezione delle fatture elettroniche';
+$lang['fe_ambiente_tooltip'] = 'Test per simulazioni senza invio reale, Produzione per invii effettivi';
+$lang['fe_api_endpoint_tooltip'] = 'URL dell\'API del provider per l\'invio delle fatture';
+$lang['fe_api_username_tooltip'] = 'Nome utente per l\'autenticazione al servizio';
+$lang['fe_api_password_tooltip'] = 'Password per l\'autenticazione al servizio';
+$lang['fe_api_key_tooltip'] = 'Chiave API fornita dal provider';
+$lang['fe_api_secret_tooltip'] = 'Secret API per la firma delle richieste';
+
+// Tooltip Impostazioni - Opzioni
+$lang['fe_auto_generate_xml_tooltip'] = 'Se attivo, l\'XML viene generato automaticamente quando crei una fattura in Perfex';
+$lang['fe_auto_send_tooltip'] = 'Se attivo, la fattura viene inviata automaticamente allo SDI dopo la generazione';
+$lang['fe_bollo_soglia_tooltip'] = 'Importo oltre il quale applicare il bollo virtuale di 2€ (default 77.47€)';
+$lang['fe_bollo_importo_tooltip'] = 'Importo del bollo virtuale (normalmente 2.00€)';
+$lang['fe_modalita_pagamento_tooltip'] = 'Modalità di pagamento predefinita per le nuove fatture';
+$lang['fe_condizioni_pagamento_tooltip'] = 'Condizioni di pagamento predefinite (pagamento completo, rate, ecc.)';
+$lang['fe_email_notifiche_tooltip'] = 'Ricevi un\'email quando cambia lo stato di una fattura (consegnata, scartata, ecc.)';
+
+// Tooltip Impostazioni - Webhook
+$lang['fe_webhook_enabled_tooltip'] = 'Abilita la ricezione automatica delle notifiche SDI tramite webhook';
+$lang['fe_webhook_url_tooltip'] = 'Copia questo URL nel pannello del tuo provider SDI per ricevere le notifiche';
+$lang['fe_webhook_secret_tooltip'] = 'Chiave segreta per validare l\'autenticità delle richieste webhook';
+$lang['fe_copy_tooltip'] = 'Copia negli appunti';
+
+// Tooltip Filtri
+$lang['fe_da_data_tooltip'] = 'Mostra solo le fatture dalla data selezionata in poi';
+$lang['fe_a_data_tooltip'] = 'Mostra solo le fatture fino alla data selezionata';
+$lang['fe_tutti_stati_tooltip'] = 'Seleziona uno stato per filtrare le fatture';
+
+// Tooltip Tabella
+$lang['fe_checkbox_seleziona_tooltip'] = 'Seleziona questa fattura per le azioni di gruppo';
+$lang['fe_checkbox_seleziona_tutti_tooltip'] = 'Seleziona/deseleziona tutte le fatture visibili';
+$lang['fe_ordina_tooltip'] = 'Clicca per ordinare per questa colonna';
+
+// Tooltip Dettaglio Fattura
+$lang['fe_progressivo_tooltip'] = 'Numero progressivo univoco della fattura elettronica';
+$lang['fe_data_esito_tooltip'] = 'Data in cui lo SDI ha comunicato l\'esito';
+$lang['fe_tentativi_invio_tooltip'] = 'Numero di tentativi di invio effettuati';
+$lang['fe_ultimo_errore_tooltip'] = 'Ultimo messaggio di errore ricevuto dallo SDI';
+$lang['fe_esito_sdi_tooltip'] = 'Codice esito restituito dal Sistema di Interscambio';
+$lang['fe_fattura_collegata_tooltip'] = 'Fattura Perfex da cui è stata generata questa fattura elettronica';
+$lang['fe_anteprima_xml_tooltip'] = 'Visualizza il contenuto del file XML formattato';
+$lang['fe_notifiche_sdi_tooltip'] = 'Storico delle notifiche ricevute dallo SDI';
+$lang['fe_storico_tooltip'] = 'Cronologia di tutti gli eventi relativi a questa fattura';
+$lang['fe_torna_lista_tooltip'] = 'Torna all\'elenco delle fatture';
+
+// Tooltip OAuth
+$lang['fe_oauth_status_tooltip'] = 'Stato della connessione OAuth con il provider';
+$lang['fe_connect_account_tooltip'] = 'Avvia il processo di autenticazione OAuth';
+$lang['fe_disconnect_account_tooltip'] = 'Scollega l\'account e rimuovi le credenziali salvate';
+
+// Tooltip Setup Wizard
+$lang['fe_setup_wizard_title_tooltip'] = 'Procedura guidata per configurare il modulo di fatturazione elettronica';
+$lang['fe_step_provider_tooltip'] = 'Scegli il servizio che gestirà l\'invio e la ricezione delle fatture';
+$lang['fe_step_credentials_tooltip'] = 'Inserisci le credenziali di accesso al servizio selezionato';
+$lang['fe_step_company_tooltip'] = 'Configura i dati della tua azienda per le fatture elettroniche';
+$lang['fe_select_provider_tooltip'] = 'Clicca su un provider per selezionarlo e proseguire';
+$lang['fe_skip_setup_tooltip'] = 'Salta la configurazione guidata e vai alla dashboard';
+$lang['fe_provider_card_tooltip'] = 'Clicca per selezionare questo provider';
+$lang['fe_back_tooltip'] = 'Torna al passaggio precedente';
+$lang['fe_continue_tooltip'] = 'Prosegui al passaggio successivo';
+$lang['fe_complete_setup_tooltip'] = 'Salva i dati e completa la configurazione';
+$lang['fe_client_id_tooltip'] = 'ID dell\'applicazione fornito dal provider nel portale sviluppatori';
+$lang['fe_client_secret_tooltip'] = 'Chiave segreta dell\'applicazione fornita dal provider';
+
+// Documentazione
+$lang['fe_documentazione'] = 'Documentazione';
+$lang['fe_doc_indice'] = 'Indice';
+$lang['fe_doc_introduzione'] = 'Introduzione';
+$lang['fe_doc_requisiti'] = 'Requisiti';
+$lang['fe_doc_configurazione'] = 'Configurazione';
+$lang['fe_doc_providers'] = 'Provider SDI';
+$lang['fe_doc_fatture_attive'] = 'Fatture Attive (Vendita)';
+$lang['fe_doc_fatture_passive'] = 'Fatture Passive (Acquisto)';
+$lang['fe_doc_webhook'] = 'Webhook';
+$lang['fe_doc_stati'] = 'Stati Fattura';
+$lang['fe_doc_faq'] = 'Domande Frequenti';
+
+// Introduzione
+$lang['fe_doc_intro_text'] = 'Il modulo Fatturazione Elettronica per Perfex CRM consente di gestire l\'intero ciclo di fatturazione elettronica italiana, dalla generazione degli XML FatturaPA all\'invio tramite SDI, fino alla ricezione delle fatture passive dai fornitori.';
+$lang['fe_doc_funzionalita'] = 'Funzionalita principali';
+$lang['fe_doc_func_1'] = 'Generazione automatica XML FatturaPA conformi alle specifiche tecniche';
+$lang['fe_doc_func_2'] = 'Invio fatture allo SDI tramite provider certificati';
+$lang['fe_doc_func_3'] = 'Ricezione e gestione delle notifiche SDI (consegna, scarto, accettazione)';
+$lang['fe_doc_func_4'] = 'Sincronizzazione delle fatture passive ricevute dai fornitori';
+$lang['fe_doc_func_5'] = 'Creazione automatica di spese dalle fatture passive';
+$lang['fe_doc_func_6'] = 'Webhook per notifiche in tempo reale';
+
+// Requisiti
+$lang['fe_doc_requisiti_text'] = 'Prima di poter utilizzare il modulo, assicurati di soddisfare i seguenti requisiti:';
+$lang['fe_doc_requisito'] = 'Requisito';
+$lang['fe_doc_valore'] = 'Valore';
+$lang['fe_doc_provider_account'] = 'Account Provider';
+$lang['fe_doc_provider_account_desc'] = 'Account attivo con uno dei provider supportati';
+
+// Configurazione
+$lang['fe_doc_config_text'] = 'La configurazione del modulo si articola in tre passaggi principali:';
+$lang['fe_doc_step_1'] = '1. Selezione del Provider';
+$lang['fe_doc_step_1_text'] = 'Seleziona il provider SDI che utilizzerai per l\'invio e la ricezione delle fatture elettroniche. Ogni provider ha caratteristiche e prezzi differenti.';
+$lang['fe_doc_step_2'] = '2. Configurazione Credenziali';
+$lang['fe_doc_step_2_text'] = 'Inserisci le credenziali di accesso fornite dal provider. A seconda del provider, potrebbero essere necessarie API Key, OAuth credentials o certificati.';
+$lang['fe_doc_step_3'] = '3. Dati Aziendali';
+$lang['fe_doc_step_3_text'] = 'Configura i dati della tua azienda che verranno utilizzati per la generazione delle fatture elettroniche: denominazione, partita IVA, indirizzo, regime fiscale, ecc.';
+$lang['fe_doc_importante'] = 'Importante';
+$lang['fe_doc_config_warning'] = 'Assicurati che i dati aziendali siano corretti e corrispondano a quelli registrati presso la Camera di Commercio. Errori nei dati possono causare lo scarto delle fatture da parte dello SDI.';
+
+// Provider
+$lang['fe_doc_providers_text'] = 'Il modulo supporta diversi provider per l\'invio delle fatture elettroniche. Ogni provider offre funzionalita e prezzi differenti:';
+$lang['fe_doc_attivo'] = 'Attivo';
+
+// Fatture Attive
+$lang['fe_doc_fatture_attive_text'] = 'Le fatture attive sono le fatture che emetti ai tuoi clienti. Il modulo consente di generare l\'XML FatturaPA a partire dalle fatture create in Perfex CRM e di inviarle allo SDI.';
+$lang['fe_doc_generazione_xml'] = 'Generazione XML';
+$lang['fe_doc_gen_step_1'] = 'Dalla dashboard, clicca su "Genera Fattura" e seleziona la fattura Perfex da importare';
+$lang['fe_doc_gen_step_2'] = 'Il sistema generer automaticamente l\'XML FatturaPA conforme alle specifiche tecniche';
+$lang['fe_doc_gen_step_3'] = 'La fattura appare nella lista "Fatture Attive" pronta per essere inviata';
+$lang['fe_doc_invio_sdi'] = 'Invio allo SDI';
+$lang['fe_doc_invio_sdi_text'] = 'Una volta generato l\'XML, puoi inviare la fattura allo SDI cliccando sul pulsante "Invia allo SDI". Il sistema trasmetter la fattura al provider selezionato che la inoltrer al Sistema di Interscambio.';
+$lang['fe_doc_automazione'] = 'Automazione';
+$lang['fe_doc_automazione_text'] = 'Puoi attivare la generazione e l\'invio automatico dalle impostazioni. In questo modo, ogni nuova fattura creata in Perfex verr automaticamente convertita in XML e inviata allo SDI.';
+
+// Fatture Passive
+$lang['fe_doc_fatture_passive_text'] = 'Le fatture passive sono le fatture che ricevi dai tuoi fornitori. Il modulo le scarica automaticamente dal provider SDI e le mette a disposizione per l\'elaborazione.';
+$lang['fe_doc_sincronizzazione'] = 'Sincronizzazione';
+$lang['fe_doc_sincronizzazione_text'] = 'Clicca su "Sincronizza Passive" per scaricare le nuove fatture ricevute. Se hai configurato il webhook, le fatture verranno ricevute automaticamente in tempo reale.';
+$lang['fe_doc_elaborazione'] = 'Elaborazione';
+$lang['fe_doc_crea_spesa_desc'] = 'Crea automaticamente una spesa in Perfex con i dati della fattura ricevuta';
+$lang['fe_doc_archivia_desc'] = 'Archivia la fattura senza creare una spesa (utile per fatture gi registrate manualmente)';
+
+// Webhook
+$lang['fe_doc_webhook_text'] = 'Il webhook consente di ricevere le notifiche SDI in tempo reale, senza dover effettuare la sincronizzazione manuale.';
+$lang['fe_doc_webhook_config'] = 'Configurazione Webhook';
+$lang['fe_doc_webhook_step_1'] = 'Copia l\'URL webhook mostrato qui sotto';
+$lang['fe_doc_webhook_step_2'] = 'Accedi al pannello del tuo provider SDI';
+$lang['fe_doc_webhook_step_3'] = 'Incolla l\'URL nella sezione configurazione webhook/notifiche del provider';
+
+// Stati
+$lang['fe_doc_stati_text'] = 'Ogni fattura elettronica passa attraverso diversi stati durante il suo ciclo di vita:';
+
+// FAQ
+$lang['fe_doc_faq_1_q'] = 'Quanto tempo impiega una fattura ad essere consegnata?';
+$lang['fe_doc_faq_1_a'] = 'Normalmente lo SDI elabora e consegna le fatture entro pochi minuti. In alcuni casi possono essere necessarie fino a 5 giorni lavorativi, specialmente per le fatture verso la Pubblica Amministrazione.';
+$lang['fe_doc_faq_2_q'] = 'Cosa fare se una fattura viene scartata?';
+$lang['fe_doc_faq_2_a'] = 'Verifica l\'errore riportato nei dettagli della fattura, correggi il problema nella fattura Perfex originale, poi usa "Rigenera XML" e invia nuovamente. Gli errori piu comuni riguardano partita IVA errata, codice destinatario non valido o dati mancanti.';
+$lang['fe_doc_faq_3_q'] = 'Posso modificare una fattura gi inviata?';
+$lang['fe_doc_faq_3_a'] = 'No, una volta inviata una fattura allo SDI non puo essere modificata. Se hai bisogno di correggere una fattura gi consegnata, devi emettere una nota di credito.';
+$lang['fe_doc_faq_4_q'] = 'Come posso testare il modulo prima di usarlo in produzione?';
+$lang['fe_doc_faq_4_a'] = 'Seleziona il provider "Modalita Test" nelle impostazioni. In questa modalita le fatture vengono salvate localmente senza essere realmente inviate allo SDI.';
+$lang['fe_doc_faq_5_q'] = 'Le fatture passive vengono scaricate automaticamente?';
+$lang['fe_doc_faq_5_a'] = 'Se hai configurato il webhook, le fatture passive vengono ricevute automaticamente quando arrivano. Altrimenti, devi cliccare su "Sincronizza Passive" per scaricarle manualmente.';
+
+// Supporto
+$lang['fe_doc_supporto'] = 'Hai bisogno di aiuto?';
+$lang['fe_doc_supporto_text'] = 'Se hai domande o problemi con il modulo, il nostro team di supporto e a tua disposizione.';
+$lang['fe_doc_contatta_supporto'] = 'Contatta il Supporto';

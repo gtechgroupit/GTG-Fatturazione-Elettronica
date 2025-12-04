@@ -6,11 +6,14 @@
             <div class="col-md-12">
                 <div class="tw-flex tw-justify-between tw-items-center tw-mb-4">
                     <h4 class="tw-font-bold tw-m-0">
-                        <i class="fa-solid fa-file-invoice tw-mr-2"></i>
+                        <i class="fa-solid fa-file-invoice tw-mr-2" aria-hidden="true"></i>
                         <?php echo _l('fe_fattura_dettaglio'); ?>
                     </h4>
-                    <a href="<?php echo admin_url('fatturazione_elettronica/fatture_attive'); ?>" class="btn btn-default">
-                        <i class="fa fa-arrow-left tw-mr-1"></i>
+                    <a href="<?php echo admin_url('fatturazione_elettronica/fatture_attive'); ?>"
+                       class="btn btn-default"
+                       data-toggle="tooltip"
+                       title="<?php echo _l('fe_torna_lista_tooltip'); ?>">
+                        <i class="fa fa-arrow-left tw-mr-1" aria-hidden="true"></i>
                         <?php echo _l('fe_torna_lista'); ?>
                     </a>
                 </div>
@@ -128,8 +131,10 @@
                 <!-- Anteprima XML -->
                 <div class="panel_s">
                     <div class="panel-body">
-                        <h5 class="tw-font-semibold tw-mb-3">
-                            <i class="fa fa-code tw-mr-2"></i>
+                        <h5 class="tw-font-semibold tw-mb-3"
+                            data-toggle="tooltip"
+                            title="<?php echo _l('fe_anteprima_xml_tooltip'); ?>">
+                            <i class="fa fa-code tw-mr-2" aria-hidden="true"></i>
                             <?php echo _l('fe_anteprima_xml'); ?>
                         </h5>
                         <pre class="tw-bg-gray-100 tw-p-4 tw-rounded tw-overflow-auto" style="max-height: 400px;"><code class="language-xml"><?php echo htmlspecialchars($fattura->xml_content); ?></code></pre>
@@ -176,16 +181,21 @@
                         <h5 class="tw-font-semibold tw-mb-3"><?php echo _l('fe_azioni'); ?></h5>
 
                         <div class="btn-group-vertical tw-w-full">
-                            <a href="<?php echo admin_url('fatturazione_elettronica/download_xml/' . $fattura->id); ?>" class="btn btn-default tw-mb-2">
-                                <i class="fa fa-download tw-mr-2"></i>
+                            <a href="<?php echo admin_url('fatturazione_elettronica/download_xml/' . $fattura->id); ?>"
+                               class="btn btn-default tw-mb-2"
+                               data-toggle="tooltip"
+                               title="<?php echo _l('fe_download_xml_tooltip'); ?>">
+                                <i class="fa fa-download tw-mr-2" aria-hidden="true"></i>
                                 <?php echo _l('fe_download_xml'); ?>
                             </a>
 
                             <?php if (in_array($fattura->stato, [FE_STATO_GENERATA, FE_STATO_SCARTATA])): ?>
                                 <a href="<?php echo admin_url('fatturazione_elettronica/invia_fattura/' . $fattura->id); ?>"
                                    class="btn btn-primary tw-mb-2"
+                                   data-toggle="tooltip"
+                                   title="<?php echo _l('fe_invia_sdi_tooltip'); ?>"
                                    onclick="return confirm('<?php echo _l('fe_confirm_send'); ?>');">
-                                    <i class="fa fa-paper-plane tw-mr-2"></i>
+                                    <i class="fa fa-paper-plane tw-mr-2" aria-hidden="true"></i>
                                     <?php echo _l('fe_invia_sdi'); ?>
                                 </a>
                             <?php endif; ?>
@@ -193,23 +203,31 @@
                             <?php if (in_array($fattura->stato, [FE_STATO_BOZZA, FE_STATO_GENERATA])): ?>
                                 <a href="<?php echo admin_url('fatturazione_elettronica/rigenera_xml/' . $fattura->id); ?>"
                                    class="btn btn-info tw-mb-2"
+                                   data-toggle="tooltip"
+                                   title="<?php echo _l('fe_rigenera_xml_tooltip'); ?>"
                                    onclick="return confirm('<?php echo _l('fe_confirm_regenerate'); ?>');">
-                                    <i class="fa fa-sync tw-mr-2"></i>
+                                    <i class="fa fa-sync tw-mr-2" aria-hidden="true"></i>
                                     <?php echo _l('fe_rigenera_xml'); ?>
                                 </a>
                             <?php endif; ?>
 
                             <?php if ($fattura->identificativo_sdi): ?>
-                                <button type="button" class="btn btn-default tw-mb-2" id="btn-check-status">
-                                    <i class="fa fa-refresh tw-mr-2"></i>
+                                <button type="button"
+                                        class="btn btn-default tw-mb-2"
+                                        id="btn-check-status"
+                                        data-toggle="tooltip"
+                                        title="<?php echo _l('fe_verifica_stato_tooltip'); ?>">
+                                    <i class="fa fa-refresh tw-mr-2" aria-hidden="true"></i>
                                     <?php echo _l('fe_verifica_stato'); ?>
                                 </button>
                             <?php endif; ?>
 
                             <?php if (in_array($fattura->stato, [FE_STATO_BOZZA, FE_STATO_GENERATA])): ?>
                                 <a href="<?php echo admin_url('fatturazione_elettronica/delete_fattura_attiva/' . $fattura->id); ?>"
-                                   class="btn btn-danger _delete tw-mb-2">
-                                    <i class="fa fa-trash tw-mr-2"></i>
+                                   class="btn btn-danger _delete tw-mb-2"
+                                   data-toggle="tooltip"
+                                   title="<?php echo _l('fe_elimina_tooltip'); ?>">
+                                    <i class="fa fa-trash tw-mr-2" aria-hidden="true"></i>
                                     <?php echo _l('fe_elimina'); ?>
                                 </a>
                             <?php endif; ?>
@@ -248,6 +266,9 @@
 
 <script>
 $(function() {
+    // Inizializza tooltip
+    $('[data-toggle="tooltip"]').tooltip();
+
     $('#btn-check-status').on('click', function() {
         var $btn = $(this);
         $btn.prop('disabled', true).html('<i class="fa fa-spinner fa-spin"></i> <?php echo _l("fe_verificando"); ?>');

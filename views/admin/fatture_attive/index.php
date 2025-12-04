@@ -17,8 +17,12 @@ $filters = isset($filters) ? $filters : [];
                                 <?php echo _l('fe_fatture_attive'); ?>
                             </h4>
                             <div>
-                                <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#modal-import">
-                                    <i class="fa fa-plus tw-mr-1"></i>
+                                <button type="button"
+                                        class="btn btn-primary"
+                                        data-toggle="modal"
+                                        data-target="#modal-import"
+                                        title="<?php echo _l('fe_importa_fattura_tooltip'); ?>">
+                                    <i class="fa fa-plus tw-mr-1" aria-hidden="true"></i>
                                     <?php echo _l('fe_importa_fattura'); ?>
                                 </button>
                             </div>
@@ -66,22 +70,42 @@ $filters = isset($filters) ? $filters : [];
                                 <thead>
                                     <tr>
                                         <th class="text-center" width="30">
-                                            <input type="checkbox" id="check-all">
+                                            <input type="checkbox"
+                                                   id="check-all"
+                                                   data-toggle="tooltip"
+                                                   title="<?php echo _l('fe_checkbox_seleziona_tutti_tooltip'); ?>">
                                         </th>
-                                        <th><?php echo _l('fe_nome_file'); ?></th>
-                                        <th><?php echo _l('fe_tipo'); ?></th>
-                                        <th><?php echo _l('fe_id_sdi'); ?></th>
-                                        <th><?php echo _l('fe_stato'); ?></th>
-                                        <th><?php echo _l('fe_data_creazione'); ?></th>
-                                        <th><?php echo _l('fe_data_invio'); ?></th>
-                                        <th width="150"></th>
+                                        <th data-toggle="tooltip" title="<?php echo _l('fe_nome_file_tooltip'); ?>">
+                                            <?php echo _l('fe_nome_file'); ?>
+                                        </th>
+                                        <th data-toggle="tooltip" title="<?php echo _l('fe_tipo_tooltip'); ?>">
+                                            <?php echo _l('fe_tipo'); ?>
+                                        </th>
+                                        <th data-toggle="tooltip" title="<?php echo _l('fe_id_sdi_tooltip'); ?>">
+                                            <?php echo _l('fe_id_sdi'); ?>
+                                        </th>
+                                        <th data-toggle="tooltip" title="<?php echo _l('fe_stato_tooltip'); ?>">
+                                            <?php echo _l('fe_stato'); ?>
+                                        </th>
+                                        <th data-toggle="tooltip" title="<?php echo _l('fe_data_creazione_tooltip'); ?>">
+                                            <?php echo _l('fe_data_creazione'); ?>
+                                        </th>
+                                        <th data-toggle="tooltip" title="<?php echo _l('fe_data_invio_tooltip'); ?>">
+                                            <?php echo _l('fe_data_invio'); ?>
+                                        </th>
+                                        <th width="150"><?php echo _l('fe_azioni'); ?></th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     <?php foreach ($fatture as $fattura): ?>
                                         <tr>
                                             <td class="text-center">
-                                                <input type="checkbox" name="ids[]" value="<?php echo $fattura->id; ?>" class="check-item">
+                                                <input type="checkbox"
+                                                       name="ids[]"
+                                                       value="<?php echo $fattura->id; ?>"
+                                                       class="check-item"
+                                                       data-toggle="tooltip"
+                                                       title="<?php echo _l('fe_checkbox_seleziona_tooltip'); ?>">
                                             </td>
                                             <td>
                                                 <a href="<?php echo admin_url('fatturazione_elettronica/fattura_attiva/' . $fattura->id); ?>">
@@ -165,8 +189,12 @@ $filters = isset($filters) ? $filters : [];
                             <form method="post" action="<?php echo admin_url('fatturazione_elettronica/invia_multiple'); ?>">
                                 <input type="hidden" name="<?php echo $this->security->get_csrf_token_name(); ?>" value="<?php echo $this->security->get_csrf_hash(); ?>">
                                 <div id="selected-ids"></div>
-                                <button type="submit" class="btn btn-primary" onclick="return confirm('<?php echo _l('fe_confirm_bulk_send'); ?>');">
-                                    <i class="fa fa-paper-plane"></i>
+                                <button type="submit"
+                                        class="btn btn-primary"
+                                        data-toggle="tooltip"
+                                        title="<?php echo _l('fe_invia_selezionate_tooltip'); ?>"
+                                        onclick="return confirm('<?php echo _l('fe_confirm_bulk_send'); ?>');">
+                                    <i class="fa fa-paper-plane" aria-hidden="true"></i>
                                     <?php echo _l('fe_invia_selezionate'); ?>
                                 </button>
                             </form>
