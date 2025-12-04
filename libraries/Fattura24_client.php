@@ -46,7 +46,7 @@ class Fattura24_client
     /**
      * API Endpoints
      */
-    const API_BASE_URL = 'https://www.fattura24.com/api/v0.3';
+    const API_BASE_URL = 'https://www.app.fattura24.com/api/v0.3';
 
     /**
      * Costruttore
@@ -359,17 +359,22 @@ class Fattura24_client
         $response = curl_exec($ch);
         $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
         $error = curl_error($ch);
+        $errno = curl_errno($ch);
 
         curl_close($ch);
 
-        if ($error) {
-            $this->last_error = 'Errore cURL: ' . $error;
-            fe_log('errore_fattura24', $this->last_error);
+        if ($errno) {
+            $this->last_error = 'Errore cURL (' . $errno . '): ' . $error;
+            fe_log('errore_fattura24', $this->last_error . ' - Endpoint: ' . $endpoint);
             return false;
         }
 
         if ($http_code < 200 || $http_code >= 300) {
-            $this->last_error = 'Errore HTTP ' . $http_code;
+            $this->last_error = 'Errore HTTP ' . $http_code . ' - Endpoint: ' . $endpoint;
+            if ($response) {
+                $this->last_error .= ' - Risposta: ' . substr($response, 0, 500);
+            }
+            fe_log('errore_fattura24', $this->last_error);
             return false;
         }
 
@@ -386,12 +391,21 @@ class Fattura24_client
     protected function parseResponse($response)
     {
         $doc = new DOMDocument();
-        if (!$doc->loadXML($response)) {
-            return ['success' => false, 'error' => 'Risposta XML non valida'];
+        @$doc->loadXML($response);
+
+        if (!$doc->documentElement) {
+            return ['success' => false, 'error' => 'Risposta XML non valida: ' . substr($response, 0, 200)];
         }
 
         $xpath = new DOMXPath($doc);
 
+        // Fattura24 usa returnCode (1 = successo, -1 o altri = errore) e description
+        $returnCode = $xpath->evaluate('string(//returnCode)');
+        $description = $xpath->evaluate('string(//description)');
+        $docId = $xpath->evaluate('string(//docId)');
+        $docNumber = $xpath->evaluate('string(//docNumber)');
+
+        // Campi legacy/alternativi
         $success = $xpath->evaluate('string(//success)');
         $error = $xpath->evaluate('string(//error)');
         $id = $xpath->evaluate('string(//id)');
@@ -399,12 +413,19 @@ class Fattura24_client
         $status = $xpath->evaluate('string(//status)');
         $statusDescription = $xpath->evaluate('string(//statusDescription)');
 
+        // Determina successo: returnCode=1 oppure success=true
+        $isSuccess = ($returnCode === '1' || $returnCode === '0') || ($success === 'true' || $success === '1');
+
         $result = [
-            'success' => ($success === 'true' || $success === '1'),
-            'error'   => $error ?: null,
-            'id'      => $id ?: null,
-            'idSdi'   => $idSdi ?: null,
-            'status'  => $status ?: null,
+            'success'           => $isSuccess,
+            'returnCode'        => $returnCode ?: null,
+            'description'       => $description ?: null,
+            'error'             => $error ?: ($returnCode === '-1' ? $description : null),
+            'id'                => $id ?: $docId ?: null,
+            'docId'             => $docId ?: null,
+            'docNumber'         => $docNumber ?: null,
+            'idSdi'             => $idSdi ?: null,
+            'status'            => $status ?: null,
             'statusDescription' => $statusDescription ?: null,
         ];
 
@@ -492,6 +513,17 @@ class Fattura24_client
         }
 
         $result = $this->parseResponse($response);
+
+        // Fattura24 usa returnCode: 1 = successo, -1 = errore
+        if (isset($result['returnCode'])) {
+            if ($result['returnCode'] == 1 || $result['returnCode'] == '1') {
+                return true;
+            } else {
+                $this->last_error = $result['description'] ?? 'Errore sconosciuto da Fattura24';
+                return false;
+            }
+        }
+
         return $result['success'] ?? false;
     }
 
