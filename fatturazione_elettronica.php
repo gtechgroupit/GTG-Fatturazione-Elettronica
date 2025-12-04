@@ -3,16 +3,13 @@
 defined('BASEPATH') or exit('No direct script access allowed');
 
 /*
- * Plugin Name: Fatturazione Elettronica SDI
- * Plugin URI: https://github.com/gtechgroupit/GTG-Fatturazione-Elettronica
- * Description: Modulo per la fatturazione elettronica italiana tramite SDI (Sistema di Interscambio)
- *              dell'Agenzia delle Entrate. Supporta invio e ricezione fatture B2B/B2C/PA.
+ * Module Name: Fatturazione Elettronica SDI
+ * URI: https://github.com/gtechgroupit/GTG-Fatturazione-Elettronica
+ * Description: Modulo per la fatturazione elettronica italiana tramite SDI (Sistema di Interscambio) dell'Agenzia delle Entrate. Supporta invio e ricezione fatture B2B/B2C/PA.
  * Version: 1.1.0
  * Author: GTech Group IT
  * Author URI: https://gtechgroup.it
  * Requires at least: 3.2
- * Tested up to: 3.4
- * Requires PHP: 8.3
  */
 
 // Definisci le costanti base del modulo
@@ -32,6 +29,9 @@ if (!defined('FATTURAZIONE_ELETTRONICA_MODULE_PATH')) {
  */
 if (function_exists('register_module')) {
     register_module([
+        // Chiave 'name' per compatibilità con versioni recenti di Perfex
+        'name'                 => FATTURAZIONE_ELETTRONICA_MODULE_NAME,
+        // Chiave 'module_name' per compatibilità con versioni precedenti
         'module_name'          => FATTURAZIONE_ELETTRONICA_MODULE_NAME,
         'description'          => 'Modulo per la fatturazione elettronica italiana tramite SDI (Sistema di Interscambio) dell\'Agenzia delle Entrate. Supporta invio e ricezione fatture B2B/B2C/PA.',
         'init_hook'            => 'fatturazione_elettronica_init_hook',
@@ -39,8 +39,6 @@ if (function_exists('register_module')) {
         'author_uri'           => 'https://gtechgroup.it',
         'version'              => FATTURAZIONE_ELETTRONICA_MODULE_VERSION,
         'requires_at_least'    => '3.2',
-        'tested_up_to'         => '3.4',
-        'requires_php'         => '8.3',
     ]);
 }
 
