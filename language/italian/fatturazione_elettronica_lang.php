@@ -335,3 +335,13 @@ $lang['fe_fatturazione_elettronica'] = 'Fatturazione Elettronica';
 $lang['fe_fattura_non_generata'] = 'La fattura elettronica non è ancora stata generata per questa fattura.';
 $lang['fe_genera_fattura_elettronica'] = 'Genera Fattura Elettronica';
 $lang['fe_vedi_dettagli'] = 'Vedi Dettagli';
+
+// Tooltip Dashboard
+$lang['fe_totale_fatture_attive_tooltip'] = 'Numero totale di fatture elettroniche generate';
+$lang['fe_consegnate_tooltip'] = 'Fatture consegnate con successo al destinatario';
+$lang['fe_in_attesa_tooltip'] = 'Fatture inviate in attesa di conferma SDI';
+$lang['fe_con_errori_tooltip'] = 'Fatture scartate o con errori da correggere';
+$lang['fe_ambiente_test_tooltip'] = 'Le fatture non vengono inviate realmente allo SDI';
+$lang['fe_test_connessione_tooltip'] = 'Verifica la connessione con il provider SDI';
+$lang['fe_change_provider_tooltip'] = 'Modifica il provider o le credenziali SDI';
+$lang['fe_chart_not_available'] = 'Grafico non disponibile';

@@ -1,4 +1,27 @@
 <?php defined('BASEPATH') or exit('No direct script access allowed'); ?>
+<?php
+// Helper per accesso sicuro alle statistiche
+$stats_attive = isset($statistics['attive']) ? $statistics['attive'] : [];
+$stats_passive = isset($statistics['passive']) ? $statistics['passive'] : [];
+
+// Valori di default per le statistiche
+$totale_attive = isset($stats_attive['totale']) ? $stats_attive['totale'] : 0;
+$consegnate = isset($stats_attive['consegnate']) ? $stats_attive['consegnate'] : 0;
+$inviate = isset($stats_attive['inviate']) ? $stats_attive['inviate'] : 0;
+$errori = isset($stats_attive['errori']) ? $stats_attive['errori'] : 0;
+
+$totale_passive = isset($stats_passive['totale']) ? $stats_passive['totale'] : 0;
+$non_lette = isset($stats_passive['non_lette']) ? $stats_passive['non_lette'] : 0;
+$da_processare = isset($stats_passive['da_processare']) ? $stats_passive['da_processare'] : 0;
+
+// Array sicuri
+$fatture_da_inviare = isset($fatture_da_inviare) ? $fatture_da_inviare : [];
+$recent_logs = isset($recent_logs) ? $recent_logs : [];
+$fatture_passive_recenti = isset($fatture_passive_recenti) ? $fatture_passive_recenti : [];
+$invoices_to_import = isset($invoices_to_import) ? $invoices_to_import : [];
+$chart_labels = isset($chart_labels) ? $chart_labels : ['Gen', 'Feb', 'Mar', 'Apr', 'Mag', 'Giu', 'Lug', 'Ago', 'Set', 'Ott', 'Nov', 'Dic'];
+$chart_data = isset($chart_data) ? $chart_data : ['inviate' => array_fill(0, 12, 0), 'ricevute' => array_fill(0, 12, 0)];
+?>
 <?php init_head(); ?>
 <div id="wrapper">
     <div class="content">
@@ -40,40 +63,46 @@
             <div class="col-md-12">
                 <div class="panel_s">
                     <div class="panel-body">
-                        <div class="tw-flex tw-items-center tw-justify-between">
-                            <div class="tw-flex tw-items-center">
-                                <div class="tw-p-4 tw-rounded-lg tw-mr-4" style="background-color: <?php echo $provider_info['color'] ?? '#6c757d'; ?>">
-                                    <i class="fa <?php echo $provider_info['icon'] ?? 'fa-plug'; ?> tw-text-3xl tw-text-white"></i>
-                                </div>
-                                <div>
-                                    <h4 class="tw-font-bold tw-mb-1"><?php echo $provider_info['name'] ?? 'Modalità Test'; ?></h4>
-                                    <p class="tw-text-gray-600 tw-mb-1"><?php echo $provider_info['description'] ?? ''; ?></p>
-                                    <span class="label label-<?php echo $provider_configured ? 'success' : 'warning'; ?>">
-                                        <i class="fa <?php echo $provider_configured ? 'fa-check' : 'fa-exclamation-triangle'; ?> tw-mr-1"></i>
-                                        <?php echo $provider_configured ? _l('fe_provider_configured') : _l('fe_provider_not_configured'); ?>
-                                    </span>
-                                    <?php if (get_option('fe_ambiente') == 'test'): ?>
-                                    <span class="label label-info tw-ml-2">
-                                        <i class="fa fa-flask tw-mr-1"></i>
-                                        <?php echo _l('fe_ambiente_test'); ?>
-                                    </span>
-                                    <?php else: ?>
-                                    <span class="label label-success tw-ml-2">
-                                        <i class="fa fa-check-circle tw-mr-1"></i>
-                                        <?php echo _l('fe_ambiente_produzione'); ?>
-                                    </span>
-                                    <?php endif; ?>
+                        <div class="row">
+                            <div class="col-md-8 col-sm-12">
+                                <div class="tw-flex tw-items-center">
+                                    <div class="tw-p-4 tw-rounded-lg tw-mr-4 hidden-xs" style="background-color: <?php echo isset($provider_info['color']) ? $provider_info['color'] : '#6c757d'; ?>">
+                                        <i class="fa <?php echo isset($provider_info['icon']) ? $provider_info['icon'] : 'fa-plug'; ?> tw-text-3xl tw-text-white" aria-hidden="true"></i>
+                                    </div>
+                                    <div>
+                                        <h4 class="tw-font-bold tw-mb-1"><?php echo isset($provider_info['name']) ? $provider_info['name'] : _l('fe_provider_test'); ?></h4>
+                                        <p class="tw-text-gray-600 tw-mb-1 hidden-xs"><?php echo isset($provider_info['description']) ? $provider_info['description'] : ''; ?></p>
+                                        <div class="tw-mt-2">
+                                            <span class="label label-<?php echo !empty($provider_configured) ? 'success' : 'warning'; ?>">
+                                                <i class="fa <?php echo !empty($provider_configured) ? 'fa-check' : 'fa-exclamation-triangle'; ?> tw-mr-1" aria-hidden="true"></i>
+                                                <?php echo !empty($provider_configured) ? _l('fe_provider_configured') : _l('fe_provider_not_configured'); ?>
+                                            </span>
+                                            <?php if (get_option('fe_ambiente') == 'test'): ?>
+                                            <span class="label label-info tw-ml-2" data-toggle="tooltip" title="<?php echo _l('fe_ambiente_test_tooltip'); ?>">
+                                                <i class="fa fa-flask tw-mr-1" aria-hidden="true"></i>
+                                                <?php echo _l('fe_ambiente_test'); ?>
+                                            </span>
+                                            <?php else: ?>
+                                            <span class="label label-success tw-ml-2">
+                                                <i class="fa fa-check-circle tw-mr-1" aria-hidden="true"></i>
+                                                <?php echo _l('fe_ambiente_produzione'); ?>
+                                            </span>
+                                            <?php endif; ?>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
-                            <div class="tw-flex tw-gap-2">
-                                <button type="button" class="btn btn-default" id="btn-test-connection">
-                                    <i class="fa fa-plug tw-mr-1"></i>
-                                    <?php echo _l('fe_test_connessione'); ?>
-                                </button>
-                                <a href="<?php echo admin_url('fatturazione_elettronica/setup/1'); ?>" class="btn btn-default">
-                                    <i class="fa fa-cog tw-mr-1"></i>
-                                    <?php echo _l('fe_change_provider'); ?>
-                                </a>
+                            <div class="col-md-4 col-sm-12 tw-mt-3 md:tw-mt-0">
+                                <div class="tw-flex tw-flex-wrap tw-gap-2 tw-justify-end">
+                                    <button type="button" class="btn btn-default" id="btn-test-connection" title="<?php echo _l('fe_test_connessione_tooltip'); ?>">
+                                        <i class="fa fa-plug tw-mr-1" aria-hidden="true"></i>
+                                        <span class="hidden-xs"><?php echo _l('fe_test_connessione'); ?></span>
+                                    </button>
+                                    <a href="<?php echo admin_url('fatturazione_elettronica/setup/1'); ?>" class="btn btn-default" title="<?php echo _l('fe_change_provider_tooltip'); ?>">
+                                        <i class="fa fa-cog tw-mr-1" aria-hidden="true"></i>
+                                        <span class="hidden-xs"><?php echo _l('fe_change_provider'); ?></span>
+                                    </a>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -84,58 +113,58 @@
         <!-- Statistiche Principali -->
         <div class="row">
             <!-- Fatture Attive -->
-            <div class="col-md-3 col-sm-6">
-                <div class="panel panel-primary">
+            <div class="col-md-3 col-sm-6 col-xs-6">
+                <div class="panel panel-primary" data-toggle="tooltip" data-placement="top" title="<?php echo _l('fe_totale_fatture_attive_tooltip'); ?>">
                     <div class="panel-body tw-text-center">
-                        <i class="fa fa-file-invoice tw-text-4xl tw-text-primary tw-mb-2"></i>
-                        <h3 class="tw-font-bold"><?php echo $statistics['attive']['totale']; ?></h3>
+                        <i class="fa fa-file-invoice tw-text-4xl tw-text-primary tw-mb-2" aria-hidden="true"></i>
+                        <h3 class="tw-font-bold"><?php echo $totale_attive; ?></h3>
                         <p class="text-muted tw-mb-0"><?php echo _l('fe_totale_fatture_attive'); ?></p>
                     </div>
-                    <a href="<?php echo admin_url('fatturazione_elettronica/fatture_attive'); ?>" class="panel-footer tw-text-center">
+                    <a href="<?php echo admin_url('fatturazione_elettronica/fatture_attive'); ?>" class="panel-footer tw-text-center" aria-label="<?php echo _l('fe_vedi_tutte'); ?> - <?php echo _l('fe_totale_fatture_attive'); ?>">
                         <?php echo _l('fe_vedi_tutte'); ?>
-                        <i class="fa fa-arrow-right tw-ml-1"></i>
+                        <i class="fa fa-arrow-right tw-ml-1" aria-hidden="true"></i>
                     </a>
                 </div>
             </div>
 
-            <div class="col-md-3 col-sm-6">
-                <div class="panel panel-success">
+            <div class="col-md-3 col-sm-6 col-xs-6">
+                <div class="panel panel-success" data-toggle="tooltip" data-placement="top" title="<?php echo _l('fe_consegnate_tooltip'); ?>">
                     <div class="panel-body tw-text-center">
-                        <i class="fa fa-check-circle tw-text-4xl tw-text-success tw-mb-2"></i>
-                        <h3 class="tw-font-bold"><?php echo $statistics['attive']['consegnate']; ?></h3>
+                        <i class="fa fa-check-circle tw-text-4xl tw-text-success tw-mb-2" aria-hidden="true"></i>
+                        <h3 class="tw-font-bold"><?php echo $consegnate; ?></h3>
                         <p class="text-muted tw-mb-0"><?php echo _l('fe_consegnate'); ?></p>
                     </div>
-                    <a href="<?php echo admin_url('fatturazione_elettronica/fatture_attive?stato=consegnata'); ?>" class="panel-footer tw-text-center">
+                    <a href="<?php echo admin_url('fatturazione_elettronica/fatture_attive?stato=consegnata'); ?>" class="panel-footer tw-text-center" aria-label="<?php echo _l('fe_vedi_dettaglio'); ?> - <?php echo _l('fe_consegnate'); ?>">
                         <?php echo _l('fe_vedi_dettaglio'); ?>
-                        <i class="fa fa-arrow-right tw-ml-1"></i>
+                        <i class="fa fa-arrow-right tw-ml-1" aria-hidden="true"></i>
                     </a>
                 </div>
             </div>
 
-            <div class="col-md-3 col-sm-6">
-                <div class="panel panel-warning">
+            <div class="col-md-3 col-sm-6 col-xs-6">
+                <div class="panel panel-warning" data-toggle="tooltip" data-placement="top" title="<?php echo _l('fe_in_attesa_tooltip'); ?>">
                     <div class="panel-body tw-text-center">
-                        <i class="fa fa-clock tw-text-4xl tw-text-warning tw-mb-2"></i>
-                        <h3 class="tw-font-bold"><?php echo $statistics['attive']['inviate']; ?></h3>
+                        <i class="fa fa-clock tw-text-4xl tw-text-warning tw-mb-2" aria-hidden="true"></i>
+                        <h3 class="tw-font-bold"><?php echo $inviate; ?></h3>
                         <p class="text-muted tw-mb-0"><?php echo _l('fe_in_attesa'); ?></p>
                     </div>
-                    <a href="<?php echo admin_url('fatturazione_elettronica/fatture_attive?stato=inviata'); ?>" class="panel-footer tw-text-center">
+                    <a href="<?php echo admin_url('fatturazione_elettronica/fatture_attive?stato=inviata'); ?>" class="panel-footer tw-text-center" aria-label="<?php echo _l('fe_vedi_dettaglio'); ?> - <?php echo _l('fe_in_attesa'); ?>">
                         <?php echo _l('fe_vedi_dettaglio'); ?>
-                        <i class="fa fa-arrow-right tw-ml-1"></i>
+                        <i class="fa fa-arrow-right tw-ml-1" aria-hidden="true"></i>
                     </a>
                 </div>
             </div>
 
-            <div class="col-md-3 col-sm-6">
-                <div class="panel panel-danger">
+            <div class="col-md-3 col-sm-6 col-xs-6">
+                <div class="panel panel-danger" data-toggle="tooltip" data-placement="top" title="<?php echo _l('fe_con_errori_tooltip'); ?>">
                     <div class="panel-body tw-text-center">
-                        <i class="fa fa-exclamation-circle tw-text-4xl tw-text-danger tw-mb-2"></i>
-                        <h3 class="tw-font-bold"><?php echo $statistics['attive']['errori']; ?></h3>
+                        <i class="fa fa-exclamation-circle tw-text-4xl tw-text-danger tw-mb-2" aria-hidden="true"></i>
+                        <h3 class="tw-font-bold"><?php echo $errori; ?></h3>
                         <p class="text-muted tw-mb-0"><?php echo _l('fe_con_errori'); ?></p>
                     </div>
-                    <a href="<?php echo admin_url('fatturazione_elettronica/fatture_attive?stato=scartata'); ?>" class="panel-footer tw-text-center">
+                    <a href="<?php echo admin_url('fatturazione_elettronica/fatture_attive?stato=scartata'); ?>" class="panel-footer tw-text-center" aria-label="<?php echo _l('fe_vedi_dettaglio'); ?> - <?php echo _l('fe_con_errori'); ?>">
                         <?php echo _l('fe_vedi_dettaglio'); ?>
-                        <i class="fa fa-arrow-right tw-ml-1"></i>
+                        <i class="fa fa-arrow-right tw-ml-1" aria-hidden="true"></i>
                     </a>
                 </div>
             </div>
@@ -166,23 +195,23 @@
 
                         <div class="tw-flex tw-justify-between tw-items-center tw-py-3 tw-border-b">
                             <span><?php echo _l('fe_totale'); ?></span>
-                            <span class="tw-font-bold tw-text-xl"><?php echo $statistics['passive']['totale']; ?></span>
+                            <span class="tw-font-bold tw-text-xl"><?php echo $totale_passive; ?></span>
                         </div>
 
                         <div class="tw-flex tw-justify-between tw-items-center tw-py-3 tw-border-b">
                             <span>
-                                <span class="tw-inline-block tw-w-3 tw-h-3 tw-rounded-full tw-bg-warning tw-mr-2"></span>
+                                <span class="tw-inline-block tw-w-3 tw-h-3 tw-rounded-full tw-bg-warning tw-mr-2" aria-hidden="true"></span>
                                 <?php echo _l('fe_non_lette'); ?>
                             </span>
-                            <span class="tw-font-bold"><?php echo $statistics['passive']['non_lette']; ?></span>
+                            <span class="tw-font-bold"><?php echo $non_lette; ?></span>
                         </div>
 
                         <div class="tw-flex tw-justify-between tw-items-center tw-py-3 tw-border-b">
                             <span>
-                                <span class="tw-inline-block tw-w-3 tw-h-3 tw-rounded-full tw-bg-info tw-mr-2"></span>
+                                <span class="tw-inline-block tw-w-3 tw-h-3 tw-rounded-full tw-bg-info tw-mr-2" aria-hidden="true"></span>
                                 <?php echo _l('fe_da_processare'); ?>
                             </span>
-                            <span class="tw-font-bold"><?php echo $statistics['passive']['da_processare']; ?></span>
+                            <span class="tw-font-bold"><?php echo $da_processare; ?></span>
                         </div>
 
                         <div class="tw-mt-4">
@@ -432,20 +461,30 @@
 
 <script>
 $(function() {
+    // Inizializza tooltip
+    $('[data-toggle="tooltip"]').tooltip();
+
     // Test connessione
     $('#btn-test-connection').on('click', function() {
         var $btn = $(this);
-        $btn.prop('disabled', true).html('<i class="fa fa-spinner fa-spin"></i> <?php echo _l("fe_testing"); ?>');
+        var originalHtml = $btn.html();
+        $btn.prop('disabled', true).html('<i class="fa fa-spinner fa-spin"></i> <span class="hidden-xs"><?php echo _l("fe_testing"); ?></span>');
 
         $.get('<?php echo admin_url("fatturazione_elettronica/test_connection"); ?>', function(response) {
-            var data = JSON.parse(response);
-            if (data.success) {
-                alert_float('success', data.message);
-            } else {
-                alert_float('danger', data.message + (data.error ? ': ' + data.error : ''));
+            try {
+                var data = typeof response === 'string' ? JSON.parse(response) : response;
+                if (data.success) {
+                    alert_float('success', data.message);
+                } else {
+                    alert_float('danger', data.message + (data.error ? ': ' + data.error : ''));
+                }
+            } catch(e) {
+                alert_float('danger', '<?php echo _l("fe_connection_failed"); ?>');
             }
+        }).fail(function() {
+            alert_float('danger', '<?php echo _l("fe_connection_failed"); ?>');
         }).always(function() {
-            $btn.prop('disabled', false).html('<i class="fa fa-plug"></i> <?php echo _l("fe_test_connessione"); ?>');
+            $btn.prop('disabled', false).html(originalHtml);
         });
     });
 
@@ -453,20 +492,24 @@ $(function() {
     var ctx = document.getElementById('chartAndamento');
     if (ctx && typeof Chart !== 'undefined') {
         try {
+            var chartLabels = <?php echo json_encode($chart_labels); ?>;
+            var chartDataInviate = <?php echo json_encode(isset($chart_data['inviate']) ? $chart_data['inviate'] : array_fill(0, 12, 0)); ?>;
+            var chartDataRicevute = <?php echo json_encode(isset($chart_data['ricevute']) ? $chart_data['ricevute'] : array_fill(0, 12, 0)); ?>;
+
             new Chart(ctx.getContext('2d'), {
                 type: 'line',
                 data: {
-                    labels: <?php echo json_encode($chart_labels ?? ['Gen', 'Feb', 'Mar', 'Apr', 'Mag', 'Giu', 'Lug', 'Ago', 'Set', 'Ott', 'Nov', 'Dic']); ?>,
+                    labels: chartLabels,
                     datasets: [{
                         label: '<?php echo _l("fe_fatture_inviate"); ?>',
-                        data: <?php echo json_encode($chart_data['inviate'] ?? [0,0,0,0,0,0,0,0,0,0,0,0]); ?>,
+                        data: chartDataInviate,
                         borderColor: 'rgb(132, 197, 41)',
                         backgroundColor: 'rgba(132, 197, 41, 0.1)',
                         lineTension: 0.3,
                         fill: true
                     }, {
                         label: '<?php echo _l("fe_fatture_ricevute"); ?>',
-                        data: <?php echo json_encode($chart_data['ricevute'] ?? [0,0,0,0,0,0,0,0,0,0,0,0]); ?>,
+                        data: chartDataRicevute,
                         borderColor: 'rgb(23, 162, 184)',
                         backgroundColor: 'rgba(23, 162, 184, 0.1)',
                         lineTension: 0.3,
@@ -491,6 +534,8 @@ $(function() {
             });
         } catch(e) {
             console.log('Chart error:', e);
+            // Mostra messaggio di fallback
+            $(ctx).parent().html('<p class="text-muted tw-text-center tw-py-4"><?php echo _l("fe_chart_not_available"); ?></p>');
         }
     }
 });
