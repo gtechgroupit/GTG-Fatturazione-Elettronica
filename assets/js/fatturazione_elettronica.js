@@ -576,24 +576,29 @@
         var btnHtml = '<div class="fe-btn-group btn-group btn-group-xs" style="margin-left:3px;display:inline-block;">';
 
         if (!data.exists) {
-            // FE non generata - pulsante per generare
-            btnHtml += '<a href="' + data.generate_url + '" class="btn btn-info btn-xs" data-toggle="tooltip" title="Genera Fattura Elettronica">';
-            btnHtml += '<i class="fa fa-file-invoice"></i>';
+            // FE non generata - pulsante ROSSO per generare (richiede attenzione)
+            btnHtml += '<a href="' + data.generate_url + '" class="btn btn-danger btn-xs" data-toggle="tooltip" title="Genera Fattura Elettronica" style="color:#fff !important;">';
+            btnHtml += '<i class="fa fa-file-invoice" style="color:#fff !important;"></i>';
             btnHtml += '</a>';
         } else if (data.can_send) {
-            // FE generata/scartata - pulsante per inviare
-            btnHtml += '<a href="' + data.send_url + '" class="btn btn-success btn-xs" data-toggle="tooltip" title="Invia al SDI (' + data.label + ')" onclick="return confirm(\'Inviare la fattura elettronica al SDI?\');">';
-            btnHtml += '<i class="fa fa-paper-plane"></i>';
+            // FE generata/scartata - pulsante VERDE per inviare
+            btnHtml += '<a href="' + data.send_url + '" class="btn btn-success btn-xs" data-toggle="tooltip" title="Invia al SDI (' + data.label + ')" onclick="return confirm(\'Inviare la fattura elettronica al SDI?\');" style="color:#fff !important;">';
+            btnHtml += '<i class="fa fa-paper-plane" style="color:#fff !important;"></i>';
             btnHtml += '</a>';
         } else {
-            // FE già inviata - mostra stato
+            // FE già inviata - mostra stato con colore appropriato
             var btnClass = 'btn-default';
+            var iconStyle = '';
+
             if (data.stato === 'consegnata' || data.stato === 'accettata') {
                 btnClass = 'btn-success';
+                iconStyle = 'color:#fff !important;';
             } else if (data.stato === 'scartata' || data.stato === 'rifiutata') {
                 btnClass = 'btn-danger';
+                iconStyle = 'color:#fff !important;';
             } else if (data.stato === 'inviata' || data.stato === 'pending') {
                 btnClass = 'btn-warning';
+                iconStyle = 'color:#fff !important;';
             }
 
             var tooltip = 'FE: ' + data.label;
@@ -601,8 +606,8 @@
                 tooltip += ' (SDI: ' + data.id_sdi + ')';
             }
 
-            btnHtml += '<a href="' + data.view_url + '" class="btn ' + btnClass + ' btn-xs" data-toggle="tooltip" title="' + tooltip + '">';
-            btnHtml += '<i class="fa fa-file-invoice"></i>';
+            btnHtml += '<a href="' + data.view_url + '" class="btn ' + btnClass + ' btn-xs" data-toggle="tooltip" title="' + tooltip + '"' + (iconStyle ? ' style="' + iconStyle + '"' : '') + '>';
+            btnHtml += '<i class="fa fa-file-invoice"' + (iconStyle ? ' style="' + iconStyle + '"' : '') + '></i>';
             btnHtml += '</a>';
         }
 
