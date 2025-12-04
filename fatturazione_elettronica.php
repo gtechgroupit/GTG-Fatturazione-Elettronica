@@ -250,6 +250,8 @@ function fatturazione_elettronica_admin_init()
         hooks()->add_action('after_customer_billing_and_shipping_fields', 'fatturazione_elettronica_customer_fields');
         hooks()->add_filter('before_client_added', 'fatturazione_elettronica_before_client_added');
         hooks()->add_filter('before_client_updated', 'fatturazione_elettronica_before_client_updated');
+        hooks()->add_action('after_client_added', 'fatturazione_elettronica_after_client_added');
+        hooks()->add_action('after_client_updated', 'fatturazione_elettronica_after_client_updated');
     }
 }
 
@@ -431,6 +433,63 @@ function fatturazione_elettronica_process_client_data($data)
     }
 
     return $data;
+}
+
+/**
+ * Salva i meta dati FE dopo che un cliente è stato creato
+ */
+function fatturazione_elettronica_after_client_added($client_id)
+{
+    fatturazione_elettronica_save_client_meta($client_id);
+}
+
+/**
+ * Salva i meta dati FE dopo che un cliente è stato aggiornato
+ */
+function fatturazione_elettronica_after_client_updated($client_id)
+{
+    fatturazione_elettronica_save_client_meta($client_id);
+}
+
+/**
+ * Salva i meta dati FE del cliente dalla sessione al database
+ */
+function fatturazione_elettronica_save_client_meta($client_id)
+{
+    $CI = &get_instance();
+
+    // Carica l'helper se non già caricato
+    if (!function_exists('set_client_meta')) {
+        $CI->load->helper(FATTURAZIONE_ELETTRONICA_MODULE_NAME . '/fatturazione_elettronica');
+    }
+
+    // Salva codice destinatario
+    $codice_destinatario = $CI->session->userdata('fe_codice_destinatario');
+    if ($codice_destinatario !== null) {
+        set_client_meta($client_id, 'fe_codice_destinatario', strtoupper(trim($codice_destinatario)));
+        $CI->session->unset_userdata('fe_codice_destinatario');
+    }
+
+    // Salva PEC
+    $pec = $CI->session->userdata('fe_pec');
+    if ($pec !== null) {
+        set_client_meta($client_id, 'fe_pec', strtolower(trim($pec)));
+        $CI->session->unset_userdata('fe_pec');
+    }
+
+    // Salva codice fiscale
+    $codice_fiscale = $CI->session->userdata('fe_codice_fiscale');
+    if ($codice_fiscale !== null) {
+        set_client_meta($client_id, 'fe_codice_fiscale', strtoupper(trim($codice_fiscale)));
+        $CI->session->unset_userdata('fe_codice_fiscale');
+    }
+
+    // Salva split payment
+    $split_payment = $CI->session->userdata('fe_split_payment');
+    if ($split_payment !== null) {
+        set_client_meta($client_id, 'fe_split_payment', $split_payment);
+        $CI->session->unset_userdata('fe_split_payment');
+    }
 }
 
 /**
