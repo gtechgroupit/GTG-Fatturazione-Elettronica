@@ -171,11 +171,9 @@ $filters = isset($filters) ? $filters : [];
                                                             <i class="fa fa-paper-plane" aria-hidden="true"></i>
                                                         </a>
                                                     <?php endif; ?>
-                                                    <?php if ((defined('FE_STATO_BOZZA') && defined('FE_STATO_GENERATA') && in_array($fattura->stato, [FE_STATO_BOZZA, FE_STATO_GENERATA])) || in_array($fattura->stato, ['bozza', 'generata'])): ?>
-                                                        <a href="<?php echo admin_url('fatturazione_elettronica/delete_fattura_attiva/' . $fattura->id); ?>" class="btn btn-danger btn-xs _delete" data-toggle="tooltip" title="<?php echo _l('fe_elimina'); ?>" aria-label="<?php echo _l('fe_elimina'); ?>">
-                                                            <i class="fa fa-trash" aria-hidden="true"></i>
-                                                        </a>
-                                                    <?php endif; ?>
+                                                    <a href="<?php echo admin_url('fatturazione_elettronica/delete_fattura_attiva/' . $fattura->id); ?>" class="btn btn-danger btn-xs _delete" data-toggle="tooltip" title="<?php echo _l('fe_elimina'); ?>" aria-label="<?php echo _l('fe_elimina'); ?>">
+                                                        <i class="fa fa-trash" aria-hidden="true"></i>
+                                                    </a>
                                                 </div>
                                             </td>
                                         </tr>
