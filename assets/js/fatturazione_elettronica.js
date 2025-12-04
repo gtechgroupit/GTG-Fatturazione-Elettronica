@@ -272,20 +272,35 @@
     };
 
     // =========================================================================
-    // INTEGRAZIONE PAGINE FATTURE E PAGAMENTI
+    // INTEGRAZIONE PAGINE FATTURE E PAGAMENTI PERFEX CRM
     // =========================================================================
 
     /**
-     * Rileva la pagina corrente
+     * Rileva la pagina corrente di Perfex CRM
      */
     FE.getCurrentPage = function() {
         var url = window.location.href;
-        if (url.indexOf('admin/invoices') !== -1 && url.indexOf('list_invoices') === -1) {
+        var path = window.location.pathname;
+
+        // Debug
+        console.log('FE: URL corrente:', url);
+        console.log('FE: Path corrente:', path);
+
+        // Pagina lista fatture: admin/invoices (ma non la vista singola admin/invoices/list_invoices/ID)
+        if ((path.indexOf('/invoices') !== -1 || url.indexOf('admin/invoices') !== -1) &&
+            url.indexOf('list_invoices/') === -1 &&
+            url.indexOf('invoice/') === -1) {
+            console.log('FE: Rilevata pagina INVOICES');
             return 'invoices';
         }
-        if (url.indexOf('admin/payments') !== -1) {
+
+        // Pagina pagamenti
+        if (path.indexOf('/payments') !== -1 || url.indexOf('admin/payments') !== -1) {
+            console.log('FE: Rilevata pagina PAYMENTS');
             return 'payments';
         }
+
+        console.log('FE: Pagina non rilevata per integrazione');
         return null;
     };
 
@@ -300,127 +315,172 @@
 
         console.log('FE: Inizializzazione integrazione per pagina:', page);
 
-        // Attendi che DataTables sia pronto
-        FE.waitForDataTable(page);
+        // Attendi che la tabella sia pronta
+        FE.waitForTable(page);
     };
 
     /**
-     * Attende che DataTables sia inizializzato
+     * Attende che la tabella sia caricata
      */
-    FE.waitForDataTable = function(page) {
-        var checkInterval = setInterval(function() {
-            var $tables = $('table.dataTable, .table-invoices, .table-payments, table.dt-table');
+    FE.waitForTable = function(page, attempts) {
+        attempts = attempts || 0;
+        var maxAttempts = 30; // 15 secondi max
 
-            if ($tables.length > 0 && $tables.find('tbody tr').length > 0) {
-                clearInterval(checkInterval);
-                console.log('FE: Tabella trovata, aggiungo pulsanti FE');
+        // Cerca le tabelle in vari modi
+        var $table = $('table.dataTable').first();
+        if ($table.length === 0) {
+            $table = $('.table-invoices, .table-payments, .dt-table, table[id*="DataTables"]').first();
+        }
+        if ($table.length === 0) {
+            $table = $('table').filter(function() {
+                return $(this).find('tbody tr').length > 0;
+            }).first();
+        }
 
-                // Prima esecuzione
-                FE.addFEButtons(page);
+        var hasRows = $table.length > 0 && $table.find('tbody tr').length > 0;
 
-                // Ascolta eventi DataTables per paginazione/filtri
-                $(document).on('draw.dt', function() {
-                    setTimeout(function() {
-                        FE.addFEButtons(page);
-                    }, 100);
-                });
+        console.log('FE: Tentativo', attempts + 1, '- Tabella trovata:', $table.length > 0, '- Righe:', $table.find('tbody tr').length);
 
-                // Ascolta anche MutationObserver per tabelle dinamiche
-                FE.observeTableChanges(page);
-            }
-        }, 500);
+        if (hasRows) {
+            console.log('FE: Tabella pronta, aggiungo pulsanti FE');
+            FE.processTable($table, page);
+            return;
+        }
 
-        // Timeout dopo 10 secondi
-        setTimeout(function() {
-            clearInterval(checkInterval);
-        }, 10000);
+        if (attempts < maxAttempts) {
+            setTimeout(function() {
+                FE.waitForTable(page, attempts + 1);
+            }, 500);
+        } else {
+            console.log('FE: Timeout - tabella non trovata');
+        }
     };
 
     /**
-     * Osserva cambiamenti nella tabella (per AJAX loading)
+     * Processa la tabella e aggiunge i listener
      */
-    FE.observeTableChanges = function(page) {
-        var $tbody = $('table.dataTable tbody, .table-invoices tbody, .table-payments tbody');
-        if ($tbody.length === 0) return;
+    FE.processTable = function($table, page) {
+        // Prima esecuzione
+        FE.addFEButtonsToTable($table, page);
 
-        var observer = new MutationObserver(function(mutations) {
-            FE.addFEButtons(page);
+        // Listener per DataTables (paginazione, ordinamento, filtri)
+        $table.on('draw.dt', function() {
+            console.log('FE: Evento draw.dt rilevato');
+            setTimeout(function() {
+                FE.addFEButtonsToTable($table, page);
+            }, 200);
         });
 
-        observer.observe($tbody[0], {
-            childList: true,
-            subtree: true
+        // Listener globale per DataTables
+        $(document).on('draw.dt', function(e, settings) {
+            console.log('FE: Evento draw.dt globale rilevato');
+            setTimeout(function() {
+                FE.addFEButtonsToTable($table, page);
+            }, 200);
         });
+
+        // MutationObserver come fallback
+        var $tbody = $table.find('tbody');
+        if ($tbody.length > 0) {
+            var observer = new MutationObserver(function(mutations) {
+                console.log('FE: Mutation observer triggered');
+                FE.addFEButtonsToTable($table, page);
+            });
+
+            observer.observe($tbody[0], {
+                childList: true,
+                subtree: false
+            });
+        }
     };
 
     /**
      * Aggiunge i pulsanti FE alle righe della tabella
      */
-    FE.addFEButtons = function(page) {
-        var $rows = $('table.dataTable tbody tr, .table-invoices tbody tr, .table-payments tbody tr');
+    FE.addFEButtonsToTable = function($table, page) {
+        var $rows = $table.find('tbody tr');
         var invoiceIds = [];
         var rowsToProcess = [];
+
+        console.log('FE: Analisi', $rows.length, 'righe');
 
         $rows.each(function() {
             var $row = $(this);
 
-            // Salta se già processata
-            if ($row.data('fe-processed')) {
-                return;
-            }
+            // Salta righe vuote o già processate
+            if ($row.find('td').length === 0) return;
+            if ($row.hasClass('fe-processed')) return;
+            if ($row.find('.fe-btn-group').length > 0) return;
 
             // Estrai invoice_id
-            var invoiceId = FE.extractInvoiceId($row, page);
-            if (!invoiceId) {
-                return;
+            var invoiceId = FE.extractInvoiceIdFromRow($row, page);
+
+            if (invoiceId) {
+                invoiceIds.push(invoiceId);
+                rowsToProcess.push({
+                    $row: $row,
+                    invoiceId: invoiceId
+                });
+                $row.addClass('fe-processed');
             }
-
-            invoiceIds.push(invoiceId);
-            rowsToProcess.push({
-                $row: $row,
-                invoiceId: invoiceId
-            });
-
-            // Marca come in elaborazione
-            $row.data('fe-processed', true);
         });
 
         if (invoiceIds.length === 0) {
+            console.log('FE: Nessuna nuova fattura da processare');
             return;
         }
 
-        console.log('FE: Carico stato per', invoiceIds.length, 'fatture');
+        console.log('FE: Caricamento stato per', invoiceIds.length, 'fatture:', invoiceIds);
 
-        // Chiamata AJAX bulk
+        // Prepara dati AJAX con CSRF token per Perfex CRM
+        var ajaxData = {
+            invoice_ids: invoiceIds
+        };
+
+        // Aggiungi CSRF token se disponibile
+        if (typeof csrfData !== 'undefined' && csrfData.token_name && csrfData.token) {
+            ajaxData[csrfData.token_name] = csrfData.token;
+        }
+
+        // Chiamata AJAX
         $.ajax({
             url: admin_url + 'fatturazione_elettronica/ajax_get_fe_status_bulk',
             type: 'POST',
-            data: {
-                invoice_ids: invoiceIds
-            },
+            data: ajaxData,
             dataType: 'json',
             success: function(response) {
+                console.log('FE: Risposta AJAX:', response);
+
                 if (response.error) {
-                    console.error('FE Error:', response.error);
+                    console.error('FE: Errore API:', response.error);
                     return;
                 }
 
-                // Aggiorna ogni riga
+                if (!response.results) {
+                    console.error('FE: Risposta senza results');
+                    return;
+                }
+
+                // Inserisci pulsanti per ogni riga
                 $.each(rowsToProcess, function(i, item) {
                     var data = response.results[item.invoiceId];
                     if (data) {
-                        FE.insertFEButton(item.$row, data, item.invoiceId, page);
+                        FE.insertFEButtonInRow(item.$row, data, item.invoiceId);
                     }
                 });
 
-                // Reinizializza tooltip
-                $('[data-toggle="tooltip"]').tooltip();
+                // Reinizializza tooltip Bootstrap
+                if (typeof $.fn.tooltip !== 'undefined') {
+                    $('[data-toggle="tooltip"]').tooltip();
+                }
             },
             error: function(xhr, status, error) {
-                console.error('FE AJAX Error:', error);
+                console.error('FE: Errore AJAX:', status, error);
+                console.error('FE: Response:', xhr.responseText);
+
                 // Rimuovi flag per permettere retry
                 $.each(rowsToProcess, function(i, item) {
-                    item.$row.data('fe-processed', false);
+                    item.$row.removeClass('fe-processed');
                 });
             }
         });
@@ -429,124 +489,140 @@
     /**
      * Estrae l'invoice_id da una riga della tabella
      */
-    FE.extractInvoiceId = function($row, page) {
+    FE.extractInvoiceIdFromRow = function($row, page) {
         var invoiceId = null;
 
-        // Metodo 1: Cerca data attribute
-        invoiceId = $row.data('invoice-id') || $row.data('id');
-        if (invoiceId) return invoiceId;
+        // Metodo 1: Data attribute sulla riga
+        invoiceId = $row.attr('data-id') || $row.data('id') || $row.data('invoice-id');
+        if (invoiceId) {
+            console.log('FE: ID trovato da data attribute:', invoiceId);
+            return invoiceId;
+        }
 
-        // Metodo 2: Cerca nel link alla fattura
-        var $links = $row.find('a[href*="invoices"]');
-        $links.each(function() {
-            var href = $(this).attr('href');
+        // Metodo 2: Checkbox di selezione (comune in Perfex)
+        var $checkbox = $row.find('input[type="checkbox"]').first();
+        if ($checkbox.length) {
+            invoiceId = $checkbox.val();
+            if (invoiceId && parseInt(invoiceId) > 0) {
+                console.log('FE: ID trovato da checkbox:', invoiceId);
+                return invoiceId;
+            }
+        }
 
-            // Pattern: invoices/list_invoices/ID o invoice/ID
-            var match = href.match(/invoices?\/(?:list_invoices\/)?(\d+)/);
+        // Metodo 3: Link alla fattura
+        $row.find('a').each(function() {
+            var href = $(this).attr('href') || '';
+
+            // Pattern Perfex: invoices/list_invoices/ID
+            var match = href.match(/invoices\/list_invoices\/(\d+)/);
             if (match) {
                 invoiceId = match[1];
-                return false; // break
+                console.log('FE: ID trovato da link list_invoices:', invoiceId);
+                return false;
+            }
+
+            // Pattern alternativo: invoice/ID
+            match = href.match(/invoice\/(\d+)/);
+            if (match) {
+                invoiceId = match[1];
+                console.log('FE: ID trovato da link invoice:', invoiceId);
+                return false;
             }
         });
 
         if (invoiceId) return invoiceId;
 
-        // Metodo 3: Per pagina fatture, cerca nella prima colonna (checkbox o ID)
-        if (page === 'invoices') {
-            var $checkbox = $row.find('input[type="checkbox"][name*="ids"]');
-            if ($checkbox.length) {
-                invoiceId = $checkbox.val();
-            }
+        // Metodo 4: Prima cella con numero
+        var firstCellText = $row.find('td').first().text().trim();
+        if (/^\d+$/.test(firstCellText)) {
+            invoiceId = firstCellText;
+            console.log('FE: ID trovato da prima cella:', invoiceId);
+            return invoiceId;
         }
 
-        // Metodo 4: Cerca qualsiasi link con numero
-        if (!invoiceId) {
-            $row.find('a').each(function() {
-                var href = $(this).attr('href') || '';
-                var match = href.match(/\/(\d+)(?:\?|$|#)/);
-                if (match && parseInt(match[1]) > 0) {
-                    // Verifica che sia un link a fattura
-                    if (href.indexOf('invoice') !== -1) {
-                        invoiceId = match[1];
-                        return false;
-                    }
-                }
-            });
-        }
-
-        return invoiceId;
+        return null;
     };
 
     /**
      * Inserisce il pulsante FE nella riga
      */
-    FE.insertFEButton = function($row, data, invoiceId, page) {
-        // Trova la cella delle azioni (di solito l'ultima con pulsanti)
-        var $actionsCell = $row.find('td').filter(function() {
-            return $(this).find('.btn, a.btn').length > 0;
-        }).last();
+    FE.insertFEButtonInRow = function($row, data, invoiceId) {
+        // Trova la cella delle azioni (ultima con pulsanti o ultima cella)
+        var $actionsCell = null;
 
-        // Se non trova una cella con azioni, usa l'ultima
-        if ($actionsCell.length === 0) {
+        // Cerca cella con pulsanti
+        $row.find('td').each(function() {
+            if ($(this).find('a.btn, button.btn, .btn-group').length > 0) {
+                $actionsCell = $(this);
+            }
+        });
+
+        // Fallback: ultima cella
+        if (!$actionsCell || $actionsCell.length === 0) {
             $actionsCell = $row.find('td').last();
         }
 
-        // Verifica che non sia già stato aggiunto
+        if ($actionsCell.length === 0) {
+            console.log('FE: Nessuna cella azioni trovata per invoice', invoiceId);
+            return;
+        }
+
+        // Verifica che non sia già presente
         if ($actionsCell.find('.fe-btn-group').length > 0) {
             return;
         }
 
-        // Costruisci il pulsante
-        var $btnGroup = $('<div class="fe-btn-group btn-group btn-group-xs" style="margin-left: 5px; display: inline-block;"></div>');
+        // Costruisci HTML del pulsante
+        var btnHtml = '<div class="fe-btn-group btn-group btn-group-xs" style="margin-left:3px;display:inline-block;">';
 
         if (!data.exists) {
-            // FE non generata - pulsante genera
-            $btnGroup.append(
-                '<a href="' + data.generate_url + '" class="btn btn-info" data-toggle="tooltip" title="Genera Fattura Elettronica">' +
-                '<i class="fa fa-file-invoice"></i>' +
-                '</a>'
-            );
+            // FE non generata - pulsante per generare
+            btnHtml += '<a href="' + data.generate_url + '" class="btn btn-info btn-xs" data-toggle="tooltip" title="Genera Fattura Elettronica">';
+            btnHtml += '<i class="fa fa-file-invoice"></i>';
+            btnHtml += '</a>';
+        } else if (data.can_send) {
+            // FE generata/scartata - pulsante per inviare
+            btnHtml += '<a href="' + data.send_url + '" class="btn btn-success btn-xs" data-toggle="tooltip" title="Invia al SDI (' + data.label + ')" onclick="return confirm(\'Inviare la fattura elettronica al SDI?\');">';
+            btnHtml += '<i class="fa fa-paper-plane"></i>';
+            btnHtml += '</a>';
         } else {
-            // FE esiste - mostra stato e azioni
-            if (data.can_send) {
-                // Può essere inviata
-                $btnGroup.append(
-                    '<a href="' + data.send_url + '" class="btn btn-success" data-toggle="tooltip" title="Invia al SDI - Stato: ' + data.label + '" onclick="return confirm(\'Inviare la fattura elettronica al SDI?\');">' +
-                    '<i class="fa fa-paper-plane"></i>' +
-                    '</a>'
-                );
-            } else {
-                // Già inviata - mostra solo visualizza
-                var btnClass = 'btn-default';
-                if (data.stato === 'consegnata' || data.stato === 'accettata') {
-                    btnClass = 'btn-success';
-                } else if (data.stato === 'scartata' || data.stato === 'rifiutata') {
-                    btnClass = 'btn-danger';
-                } else if (data.stato === 'inviata') {
-                    btnClass = 'btn-warning';
-                }
-
-                $btnGroup.append(
-                    '<a href="' + data.view_url + '" class="btn ' + btnClass + '" data-toggle="tooltip" title="FE: ' + data.label + (data.id_sdi ? ' (SDI: ' + data.id_sdi + ')' : '') + '">' +
-                    '<i class="fa fa-file-invoice"></i>' +
-                    '</a>'
-                );
+            // FE già inviata - mostra stato
+            var btnClass = 'btn-default';
+            if (data.stato === 'consegnata' || data.stato === 'accettata') {
+                btnClass = 'btn-success';
+            } else if (data.stato === 'scartata' || data.stato === 'rifiutata') {
+                btnClass = 'btn-danger';
+            } else if (data.stato === 'inviata' || data.stato === 'pending') {
+                btnClass = 'btn-warning';
             }
+
+            var tooltip = 'FE: ' + data.label;
+            if (data.id_sdi) {
+                tooltip += ' (SDI: ' + data.id_sdi + ')';
+            }
+
+            btnHtml += '<a href="' + data.view_url + '" class="btn ' + btnClass + ' btn-xs" data-toggle="tooltip" title="' + tooltip + '">';
+            btnHtml += '<i class="fa fa-file-invoice"></i>';
+            btnHtml += '</a>';
         }
+
+        btnHtml += '</div>';
 
         // Inserisci il pulsante
-        var $existingBtnGroup = $actionsCell.find('.btn-group').last();
-        if ($existingBtnGroup.length > 0) {
-            $existingBtnGroup.after($btnGroup);
-        } else {
-            $actionsCell.append($btnGroup);
-        }
+        $actionsCell.append(btnHtml);
+
+        console.log('FE: Pulsante aggiunto per invoice', invoiceId, '- Stato:', data.exists ? data.stato : 'non generata');
     };
 
     // Inizializza quando il documento è pronto
     $(document).ready(function() {
         FE.init();
-        FE.initTableIntegration();
+
+        // Inizializza integrazione tabelle dopo un breve delay
+        // per assicurarsi che Perfex CRM abbia caricato tutto
+        setTimeout(function() {
+            FE.initTableIntegration();
+        }, 1000);
     });
 
 })(jQuery);
