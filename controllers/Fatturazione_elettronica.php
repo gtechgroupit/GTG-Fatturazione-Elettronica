@@ -799,7 +799,7 @@ class Fatturazione_elettronica extends AdminController
             'fe_ade_codice_accreditamento' => '',
 
             // Fattura24
-            'fe_f24_api_key'          => '',
+            'fe_fattura24_api_key'    => '',
 
             // FattureInCloud
             'fe_fic_client_id'        => '',
