@@ -348,3 +348,4 @@ $lang['fe_test_connessione_tooltip'] = 'Verifica la connessione con il provider 
 $lang['fe_change_provider_tooltip'] = 'Modifica il provider o le credenziali SDI';
 $lang['fe_chart_not_available'] = 'Grafico non disponibile';
 $lang['fe_sincronizza_passive_tooltip'] = 'Scarica le nuove fatture passive dal provider SDI';
+$lang['fe_salva_impostazioni_tooltip'] = 'Salva tutte le impostazioni del modulo';
