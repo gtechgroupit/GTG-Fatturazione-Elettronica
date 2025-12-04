@@ -347,3 +347,4 @@ $lang['fe_ambiente_test_tooltip'] = 'Le fatture non vengono inviate realmente al
 $lang['fe_test_connessione_tooltip'] = 'Verifica la connessione con il provider SDI';
 $lang['fe_change_provider_tooltip'] = 'Modifica il provider o le credenziali SDI';
 $lang['fe_chart_not_available'] = 'Grafico non disponibile';
+$lang['fe_sincronizza_passive_tooltip'] = 'Scarica le nuove fatture passive dal provider SDI';

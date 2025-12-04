@@ -1,4 +1,9 @@
 <?php defined('BASEPATH') or exit('No direct script access allowed'); ?>
+<?php
+// Inizializzazione sicura variabili
+$fatture = isset($fatture) ? $fatture : [];
+$filters = isset($filters) ? $filters : [];
+?>
 <?php init_head(); ?>
 <div id="wrapper">
     <div class="content">
@@ -12,35 +17,64 @@
                                 <?php echo _l('fe_fatture_passive'); ?>
                             </h4>
                             <div>
-                                <a href="<?php echo admin_url('fatturazione_elettronica/sync_passive'); ?>" class="btn btn-info">
-                                    <i class="fa fa-sync tw-mr-1"></i>
-                                    <?php echo _l('fe_sincronizza'); ?>
+                                <a href="<?php echo admin_url('fatturazione_elettronica/sync_passive'); ?>"
+                                   class="btn btn-info"
+                                   data-toggle="tooltip"
+                                   title="<?php echo _l('fe_sincronizza_passive_tooltip'); ?>"
+                                   aria-label="<?php echo _l('fe_sincronizza'); ?>">
+                                    <i class="fa fa-sync tw-mr-1" aria-hidden="true"></i>
+                                    <span class="hidden-xs"><?php echo _l('fe_sincronizza'); ?></span>
                                 </a>
                             </div>
                         </div>
 
                         <!-- Filtri -->
-                        <form method="get" class="tw-mb-4">
+                        <form method="get" class="tw-mb-4" role="search" aria-label="<?php echo _l('fe_filtra'); ?>">
                             <div class="row">
-                                <div class="col-md-2">
-                                    <input type="date" name="from_date" class="form-control" placeholder="<?php echo _l('fe_da_data'); ?>" value="<?php echo $filters['from_date'] ?? ''; ?>">
+                                <div class="col-md-2 col-sm-3 col-xs-6 mbot10">
+                                    <label for="filter_from_date" class="sr-only"><?php echo _l('fe_da_data'); ?></label>
+                                    <input type="date"
+                                           id="filter_from_date"
+                                           name="from_date"
+                                           class="form-control"
+                                           placeholder="<?php echo _l('fe_da_data'); ?>"
+                                           title="<?php echo _l('fe_da_data'); ?>"
+                                           value="<?php echo isset($filters['from_date']) ? $filters['from_date'] : ''; ?>">
                                 </div>
-                                <div class="col-md-2">
-                                    <input type="date" name="to_date" class="form-control" placeholder="<?php echo _l('fe_a_data'); ?>" value="<?php echo $filters['to_date'] ?? ''; ?>">
+                                <div class="col-md-2 col-sm-3 col-xs-6 mbot10">
+                                    <label for="filter_to_date" class="sr-only"><?php echo _l('fe_a_data'); ?></label>
+                                    <input type="date"
+                                           id="filter_to_date"
+                                           name="to_date"
+                                           class="form-control"
+                                           placeholder="<?php echo _l('fe_a_data'); ?>"
+                                           title="<?php echo _l('fe_a_data'); ?>"
+                                           value="<?php echo isset($filters['to_date']) ? $filters['to_date'] : ''; ?>">
                                 </div>
-                                <div class="col-md-2">
-                                    <label class="checkbox-inline">
-                                        <input type="checkbox" name="non_lette" value="1" <?php echo isset($filters['letto']) && $filters['letto'] == 0 ? 'checked' : ''; ?>>
-                                        <?php echo _l('fe_solo_non_lette'); ?>
-                                    </label>
+                                <div class="col-md-3 col-sm-3 col-xs-6 mbot10">
+                                    <div class="checkbox" style="margin-top: 8px;">
+                                        <input type="checkbox"
+                                               id="filter_non_lette"
+                                               name="non_lette"
+                                               value="1"
+                                               <?php echo isset($filters['letto']) && $filters['letto'] == 0 ? 'checked' : ''; ?>>
+                                        <label for="filter_non_lette"><?php echo _l('fe_solo_non_lette'); ?></label>
+                                    </div>
                                 </div>
-                                <div class="col-md-2">
-                                    <button type="submit" class="btn btn-default">
-                                        <i class="fa fa-filter"></i>
-                                        <?php echo _l('fe_filtra'); ?>
+                                <div class="col-md-3 col-sm-3 col-xs-6 mbot10">
+                                    <button type="submit"
+                                            class="btn btn-default"
+                                            data-toggle="tooltip"
+                                            title="<?php echo _l('fe_applica_filtri'); ?>">
+                                        <i class="fa fa-filter" aria-hidden="true"></i>
+                                        <span class="hidden-xs"><?php echo _l('fe_filtra'); ?></span>
                                     </button>
-                                    <a href="<?php echo admin_url('fatturazione_elettronica/fatture_passive'); ?>" class="btn btn-default">
-                                        <i class="fa fa-times"></i>
+                                    <a href="<?php echo admin_url('fatturazione_elettronica/fatture_passive'); ?>"
+                                       class="btn btn-default"
+                                       data-toggle="tooltip"
+                                       title="<?php echo _l('fe_reset_filtri'); ?>"
+                                       aria-label="<?php echo _l('fe_reset_filtri'); ?>">
+                                        <i class="fa fa-times" aria-hidden="true"></i>
                                     </a>
                                 </div>
                             </div>
@@ -62,11 +96,19 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <?php foreach ($fatture as $fattura): ?>
-                                        <tr class="<?php echo $fattura->letto == 0 ? 'tw-font-bold' : ''; ?>">
+                                    <?php foreach ($fatture as $fattura):
+                                        $is_non_letta = isset($fattura->letto) && $fattura->letto == 0;
+                                        $has_expense = isset($fattura->expense_id) && $fattura->expense_id;
+                                        $is_archived = isset($fattura->archiviato) && $fattura->archiviato;
+                                    ?>
+                                        <tr class="<?php echo $is_non_letta ? 'tw-font-bold' : ''; ?>">
                                             <td>
-                                                <?php if ($fattura->letto == 0): ?>
-                                                    <i class="fa fa-circle text-info" title="<?php echo _l('fe_non_letta'); ?>"></i>
+                                                <?php if ($is_non_letta): ?>
+                                                    <i class="fa fa-circle text-info"
+                                                       data-toggle="tooltip"
+                                                       title="<?php echo _l('fe_non_letta'); ?>"
+                                                       aria-hidden="true"></i>
+                                                    <span class="sr-only"><?php echo _l('fe_non_letta'); ?></span>
                                                 <?php endif; ?>
                                             </td>
                                             <td>
@@ -95,12 +137,12 @@
                                                 <?php echo _dt($fattura->data_ricezione); ?>
                                             </td>
                                             <td>
-                                                <?php if ($fattura->expense_id): ?>
+                                                <?php if ($has_expense): ?>
                                                     <span class="label label-success">
-                                                        <i class="fa fa-check"></i>
+                                                        <i class="fa fa-check" aria-hidden="true"></i>
                                                         <?php echo _l('fe_collegata'); ?>
                                                     </span>
-                                                <?php elseif ($fattura->archiviato): ?>
+                                                <?php elseif ($is_archived): ?>
                                                     <span class="label label-default">
                                                         <?php echo _l('fe_archiviata'); ?>
                                                     </span>
@@ -111,19 +153,35 @@
                                                 <?php endif; ?>
                                             </td>
                                             <td>
-                                                <div class="btn-group">
-                                                    <a href="<?php echo admin_url('fatturazione_elettronica/fattura_passiva/' . $fattura->id); ?>" class="btn btn-default btn-xs" data-toggle="tooltip" title="<?php echo _l('fe_visualizza'); ?>">
-                                                        <i class="fa fa-eye"></i>
+                                                <div class="btn-group" role="group" aria-label="<?php echo _l('fe_azioni'); ?>">
+                                                    <a href="<?php echo admin_url('fatturazione_elettronica/fattura_passiva/' . $fattura->id); ?>"
+                                                       class="btn btn-default btn-xs"
+                                                       data-toggle="tooltip"
+                                                       title="<?php echo _l('fe_visualizza'); ?>"
+                                                       aria-label="<?php echo _l('fe_visualizza'); ?>">
+                                                        <i class="fa fa-eye" aria-hidden="true"></i>
                                                     </a>
-                                                    <a href="<?php echo admin_url('fatturazione_elettronica/download_xml_passiva/' . $fattura->id); ?>" class="btn btn-default btn-xs" data-toggle="tooltip" title="<?php echo _l('fe_download'); ?>">
-                                                        <i class="fa fa-download"></i>
+                                                    <a href="<?php echo admin_url('fatturazione_elettronica/download_xml_passiva/' . $fattura->id); ?>"
+                                                       class="btn btn-default btn-xs"
+                                                       data-toggle="tooltip"
+                                                       title="<?php echo _l('fe_download_xml'); ?>"
+                                                       aria-label="<?php echo _l('fe_download_xml'); ?>">
+                                                        <i class="fa fa-download" aria-hidden="true"></i>
                                                     </a>
-                                                    <?php if (!$fattura->expense_id && !$fattura->archiviato): ?>
-                                                        <a href="<?php echo admin_url('fatturazione_elettronica/crea_spesa/' . $fattura->id); ?>" class="btn btn-info btn-xs" data-toggle="tooltip" title="<?php echo _l('fe_crea_spesa'); ?>">
-                                                            <i class="fa fa-receipt"></i>
+                                                    <?php if (!$has_expense && !$is_archived): ?>
+                                                        <a href="<?php echo admin_url('fatturazione_elettronica/crea_spesa/' . $fattura->id); ?>"
+                                                           class="btn btn-info btn-xs"
+                                                           data-toggle="tooltip"
+                                                           title="<?php echo _l('fe_crea_spesa'); ?>"
+                                                           aria-label="<?php echo _l('fe_crea_spesa'); ?>">
+                                                            <i class="fa fa-receipt" aria-hidden="true"></i>
                                                         </a>
-                                                        <a href="<?php echo admin_url('fatturazione_elettronica/archivia_passiva/' . $fattura->id); ?>" class="btn btn-default btn-xs" data-toggle="tooltip" title="<?php echo _l('fe_archivia'); ?>">
-                                                            <i class="fa fa-archive"></i>
+                                                        <a href="<?php echo admin_url('fatturazione_elettronica/archivia_passiva/' . $fattura->id); ?>"
+                                                           class="btn btn-default btn-xs"
+                                                           data-toggle="tooltip"
+                                                           title="<?php echo _l('fe_archivia'); ?>"
+                                                           aria-label="<?php echo _l('fe_archivia'); ?>">
+                                                            <i class="fa fa-archive" aria-hidden="true"></i>
                                                         </a>
                                                     <?php endif; ?>
                                                 </div>
@@ -140,5 +198,12 @@
     </div>
 </div>
 <?php init_tail(); ?>
+
+<script>
+$(function() {
+    // Inizializza tooltip
+    $('[data-toggle="tooltip"]').tooltip();
+});
+</script>
 </body>
 </html>
