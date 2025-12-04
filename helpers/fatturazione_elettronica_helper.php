@@ -8,6 +8,7 @@ defined('BASEPATH') or exit('No direct script access allowed');
 
 /**
  * Ottiene il meta di un cliente
+ * Usa la tabella options di Perfex con un pattern specifico
  *
  * @param int $client_id ID del cliente
  * @param string $meta_key Chiave del meta
@@ -16,20 +17,15 @@ defined('BASEPATH') or exit('No direct script access allowed');
 if (!function_exists('get_client_meta')) {
     function get_client_meta($client_id, $meta_key)
     {
-        $CI = &get_instance();
-
-        $CI->db->select('value');
-        $CI->db->where('rel_id', $client_id);
-        $CI->db->where('rel_type', 'clients');
-        $CI->db->where('fieldname', $meta_key);
-        $row = $CI->db->get(db_prefix() . 'customfieldsvalues')->row();
-
-        return $row ? $row->value : null;
+        // Usa la tabella options con pattern fe_client_{id}_{key}
+        $option_name = 'fe_client_' . $client_id . '_' . $meta_key;
+        return get_option($option_name);
     }
 }
 
 /**
  * Imposta il meta di un cliente
+ * Usa la tabella options di Perfex con un pattern specifico
  *
  * @param int $client_id ID del cliente
  * @param string $meta_key Chiave del meta
@@ -39,24 +35,9 @@ if (!function_exists('get_client_meta')) {
 if (!function_exists('set_client_meta')) {
     function set_client_meta($client_id, $meta_key, $value)
     {
-        $CI = &get_instance();
-
-        // Controlla se esiste già
-        $existing = get_client_meta($client_id, $meta_key);
-
-        if ($existing !== null) {
-            $CI->db->where('rel_id', $client_id);
-            $CI->db->where('rel_type', 'clients');
-            $CI->db->where('fieldname', $meta_key);
-            return $CI->db->update(db_prefix() . 'customfieldsvalues', ['value' => $value]);
-        } else {
-            return $CI->db->insert(db_prefix() . 'customfieldsvalues', [
-                'rel_id'    => $client_id,
-                'rel_type'  => 'clients',
-                'fieldname' => $meta_key,
-                'value'     => $value,
-            ]);
-        }
+        // Usa la tabella options con pattern fe_client_{id}_{key}
+        $option_name = 'fe_client_' . $client_id . '_' . $meta_key;
+        return update_option($option_name, $value);
     }
 }
 
